@@ -2,7 +2,7 @@ import {Message} from "../chat/Message";
 
 // Request
 export interface ChatRequestPayload {
-    message?: Message;
+    message?: string;
 }
 
 // Response

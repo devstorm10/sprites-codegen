@@ -14,12 +14,8 @@ export const getLLMCompletion = async (req: Request, res: Response) => {
         // Cast the incoming JSON body to the ChatRequestPayload type
         const chatRequestPayload: ChatRequestPayload = req.body;
 
-        if (chatRequestPayload.message == null)
-        {
-            // TODO handle null case of no message provided
-        }
         const userMessage = chatRequestPayload.message != null ?
-            chatRequestPayload.message.content! : "Open the chat with a ice breaker";
+            chatRequestPayload.message! : "Open the chat with a ice breaker";
 
         const llmCompletion = await OpenAIService.getInstance().chat.completions.create({
             model: "gpt-4o-mini",
