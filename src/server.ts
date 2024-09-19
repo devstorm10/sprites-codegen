@@ -7,6 +7,6 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Where are you now that I need you most?');
 });
 
-app.listen(port, () => {
+app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
