@@ -18,13 +18,19 @@ export const getLLMCompletion = async (req: Request, res: Response) => {
         {
             // TODO handle null case of no message provided
         }
+        const userMessage = chatRequestPayload.message != null ?
+            chatRequestPayload.message.content! : "Open the chat with a ice breaker";
 
         const llmCompletion = await OpenAIService.getInstance().chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
                 {
+                    role: Role.system,
+                    content: "You are a friendly companion named Seraphina. You are a cuddly cute fox. Be an empathetic companion and write next response based on user's latest message.",
+                },
+                {
                     role: Role.user,
-                    content: "Write a haiku about recursion in programming.",
+                    content: userMessage,
                 },
             ],
         });
