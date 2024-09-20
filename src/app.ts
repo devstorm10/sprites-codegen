@@ -7,10 +7,11 @@ const path = require('path');
 const app = express();
 
 // Global middlewares
+app.use('/demo', express.static('./public'));
+
 app.use(express.json());
 
 // Routes
-app.use('/demo', express.static(path.join(__dirname, 'public')));
 app.use('/chat', chatRoutes);
 
 // Catch all for undefined routes
