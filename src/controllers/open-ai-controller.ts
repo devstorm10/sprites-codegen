@@ -61,6 +61,7 @@ export const getLLMCompletion = async (req: Request, res: Response) => {
         messageList.push(userMessage as ChatCompletionMessage);
 
         // get completion
+        console.log(messageList);
         const llmCompletion = await OpenAIService.getInstance().chat.completions.create({
             model: "gpt-4o-mini",
             messages: messageList
@@ -79,6 +80,7 @@ export const getLLMCompletion = async (req: Request, res: Response) => {
 
         // Build the ChatResponsePayload
         const chatResponsePayload: ChatResponsePayload = {
+            conversationId: conversation.id,
             message: responseMessage,
         };
 

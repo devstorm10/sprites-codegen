@@ -8,5 +8,6 @@ export interface ChatRequestPayload {
 
 // Response
 export interface ChatResponsePayload {
+    conversationId?: string;
     message: Message;
 }

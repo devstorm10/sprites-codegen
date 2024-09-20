@@ -15,7 +15,8 @@ export const createConversation = async (): Promise<Conversation> => {
 export const getConversation = async (id: string): Promise<Conversation | null> => {
     const conversationData = await redis.get(`conversation:${id}`);
     if (conversationData) {
-        return JSON.parse(conversationData);
+        const parsedConversation: Conversation = JSON.parse(conversationData);
+        return Object.assign(new Conversation(parsedConversation.id), parsedConversation);
     }
     return null;
 };
