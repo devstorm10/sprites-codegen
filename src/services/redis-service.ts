@@ -11,11 +11,7 @@ class RedisService {
         console.log("Redis Port:", process.env.REDIS_PORT);
 
         if (!RedisService.instance) {
-            RedisService.instance = new Redis({
-                host: process.env.REDIS_HOST,
-                port: Number(process.env.REDIS_PORT),
-                password: process.env.REDIS_PASSWORD,
-            });
+            RedisService.instance = new Redis(process.env.REDIS_URL as string);
 
             // Handle Redis connection errors
             RedisService.instance.on('error', (err) => {
