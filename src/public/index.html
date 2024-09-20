@@ -147,7 +147,7 @@
     });
 
     async function sendMessage(message) {
-        const url = 'https://spritesai-f311ab831a51.herokuapp.com/chat/123';
+        const url = 'http://localhost:3000/chat/123';
 
         // Define the payload
         const payload = {
@@ -173,10 +173,11 @@
             const data = await response.json();
 
             // Extract message and role from the response
-            const { message: responseMessage, role } = data;
+            const { message: responseMessage } = data;
 
             // Log or handle the response data
-            return responseMessage;
+            console.log(responseMessage);
+            return responseMessage.content;
 
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
