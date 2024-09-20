@@ -1,4 +1,4 @@
-// src/services/openAIService.ts
+// src/services/open-aI-service.ts
 import OpenAI from 'openai';
 
 class OpenAIService {

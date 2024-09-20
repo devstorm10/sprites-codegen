@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getLLMCompletion } from '../controllers/openAIController';
+import { getLLMCompletion } from '../controllers/open-ai-controller';
 
 // Initialize the Express Router
 const router = Router();

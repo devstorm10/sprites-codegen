@@ -2,6 +2,7 @@ import {Message} from "../chat/Message";
 
 // Request
 export interface ChatRequestPayload {
+    conversationId?: string;
     message?: string;
 }
 
