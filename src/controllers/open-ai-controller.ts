@@ -9,6 +9,7 @@ import {createConversation, getConversation, updateConversation} from "../reposi
 import {Conversation} from "../models/cache/conversation";
 import OpenAI from "openai";
 import ChatCompletionMessage = OpenAI.ChatCompletionMessage;
+import {v4 as uuidv4} from "uuid";
 
 // Controller to handle OpenAI API requests for text completion
 export const getLLMCompletion = async (req: Request, res: Response) => {
@@ -19,14 +20,14 @@ export const getLLMCompletion = async (req: Request, res: Response) => {
         const chatRequestPayload: ChatRequestPayload = req.body;
 
         let conversation: Conversation | null = null;
+        const conversationId = chatRequestPayload.conversationId;
         if (chatRequestPayload.conversationId != null) {
             // try to grab existing convo
             conversation = await getConversation(chatRequestPayload.conversationId);
         }
-        if (chatRequestPayload.conversationId == null || conversation === null)
-        {
-            // either no ID was given, or get failed, so create convo
-            conversation = await createConversation();
+        if (conversation == null) {
+            // no convo with the provided convo ID, so we use their key
+            conversation = await createConversation(conversationId != null ? id : uuidv4());
         }
 
         const userMessageContent = chatRequestPayload.message != null ?
@@ -61,6 +62,7 @@ export const getLLMCompletion = async (req: Request, res: Response) => {
         messageList.push(userMessage as ChatCompletionMessage);
 
         // get completion
+        // TODO move this to a service that routes based on model
         console.log(messageList);
         const llmCompletion = await OpenAIService.getInstance().chat.completions.create({
             model: "gpt-4o-mini",
