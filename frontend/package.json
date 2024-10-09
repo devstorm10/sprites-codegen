@@ -1,5 +1,5 @@
 {
-  "name": "sprites_frontend",
+  "name": "frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -41,8 +41,6 @@
     "eslint-plugin-react-refresh": "^0.4.12",
     "eslint-plugin-storybook": "^0.9.0",
     "globals": "^15.9.0",
-    "husky": "^8.0.0",
-    "lint-staged": "^15.2.10",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "storybook": "^8.3.5",
@@ -50,12 +48,6 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.7.0",
     "vite": "^5.4.8"
-  },
-  "lint-staged": {
-    "*.{js,css,ts,tsx,jsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
-    ]
   },
   "eslintConfig": {
     "extends": [

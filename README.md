@@ -21,10 +21,10 @@ To get started with the project, follow these steps:
    cd sprites
    ```
 
-2. **Install dependencies**:
+2. **Install dependencies for both frontend and backend**:
 
    ```bash
-   npm install
+   npm install --workspaces
    ```
 
 3. **Run the development servers**:
