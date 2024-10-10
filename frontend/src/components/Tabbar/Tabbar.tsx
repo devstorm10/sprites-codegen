@@ -20,7 +20,7 @@ const Tabbar = () => {
   const [tabs, setTabs] = useState<Tab[]>(mockTabs)
 
   return (
-    <div className="bg-background-200 flex">
+    <div className="bg-muted flex">
       <Reorder.Group
         axis="x"
         className="flex"

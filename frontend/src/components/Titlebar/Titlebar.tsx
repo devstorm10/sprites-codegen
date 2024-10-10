@@ -6,7 +6,7 @@ const Titlebar = () => {
       <span></span>
       <Breadcrumb routes={['Agent name', 'Default Context']} />
       <div>
-        <button className="bg-secondary-100 text-text-100 px-3 py-1 rounded-full hover:bg-secondary-100/90">
+        <button className="bg-secondary-100 text-text-100 px-3 py-1 rounded-full hover:bg-secondary">
           Publish
         </button>
       </div>

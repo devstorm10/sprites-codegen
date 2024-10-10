@@ -4,7 +4,7 @@ import { Tabbar } from '@/components/Tabbar'
 
 const AppLayout = () => {
   return (
-    <div className="w-screen h-screen overflow-clip">
+    <div className="w-screen h-screen overflow-clip flex flex-col">
       <Tabbar />
       <Outlet />
     </div>
