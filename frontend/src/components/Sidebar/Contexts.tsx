@@ -1,23 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 
 import EditableText from '@/common/EditableText'
+import { useAppDispatch, useAppSelector } from '@/store/store'
+import { updateContext } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
-
-const dummyContexts: ContextNode[] = [
-  {
-    id: 'default_context',
-    type: 'group',
-    title: 'Default Context',
-    contexts: [
-      {
-        id: 'text_prompt',
-        type: 'input',
-        title: 'Text prompt',
-      },
-    ],
-  },
-]
 
 interface ContextGroupProps {
   context: ContextNode
@@ -57,16 +44,13 @@ const ContextGroup: React.FC<ContextGroupProps> = ({ context, onUpdate }) => {
   )
 }
 
-const Contexts = () => {
-  const [contexts, setContexts] = useState(dummyContexts)
+const Contexts: React.FC = () => {
+  const dispatch = useAppDispatch()
+  const contexts = useAppSelector((state) => state.context.contexts)
 
   const handleUpdateContext = useCallback(
     (id: string, newContext: Partial<ContextNode>) => {
-      setContexts((prevContexts) =>
-        prevContexts.map((context) =>
-          context.id === id ? { ...context, ...newContext } : context
-        )
-      )
+      dispatch(updateContext({ id, newContext }))
     },
     []
   )

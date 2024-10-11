@@ -8,16 +8,19 @@ export default {
         background: 'hsl(var(--background))',
         primary: {
           100: '#0B99FF',
+          200: '#E2EDFB',
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
           100: '#37352F',
+          200: '#F5F5F5',
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
         },
         text: {
           100: '#FFFFFF',
+          200: '#9A9A97',
         },
         foreground: 'hsl(var(--foreground))',
         card: {
