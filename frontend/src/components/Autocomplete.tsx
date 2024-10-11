@@ -13,25 +13,24 @@ import { Input } from '@/components/ui/input'
 import { Tag } from '@/lib/types'
 
 const renderItem: RenderItem<Tag> = (item) => (
-  <div className="flex items-center justify-between cursor-pointer">
-    <div className="flex items-center gap-x-2">
+  <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1">
+    <div className="flex items-center gap-x-1">
       <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
-      <span className="rounded-sm">{item.title}</span>
+      <span
+        className="rounded-sm px-1 text-sm"
+        style={{
+          backgroundColor: item.color,
+        }}
+      >
+        {item.title}
+      </span>
     </div>
     <Icon icon="ph:dots-three-bold" fontSize={16} />
   </div>
 )
 
-const renderInput: RenderInput = (props) => (
-  <Input
-    placeholder="Search or create new tag"
-    className="w-[200px] py-1 px-4 border-none focus-visible:ring-0 outline-none rounded-full bg-secondary-200 text-medium mb-2"
-    {...props}
-  />
-)
-
 const renderContainer: RenderContainer = ({ list }) => (
-  <Card className="py-2 px-1 relative">{list}</Card>
+  <Card className="py-1 absolute min-w-[200px] rounded-lg mt-2">{list}</Card>
 )
 
 const getSuggestionValue = (item: Tag) => item.title
@@ -48,6 +47,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState<string>('')
   const [suggestions, setSuggestions] = useState<Tag[]>([])
+  const [selected, setSelected] = useState<Tag>()
 
   const handleChange: AutocompletePureProps<Tag>['onChange'] = useCallback(
     (_event, { value, reason }) => {
@@ -71,6 +71,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       setValue(value)
       setIsOpen(false)
       onComplete(item)
+      setSelected(item)
     },
     []
   )
@@ -78,6 +79,23 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   const handleClickOutside = (_event: Event) => {
     setIsOpen(false)
   }
+
+  const renderInput: () => RenderInput = useCallback(
+    () => (props) => {
+      return (
+        <Input
+          placeholder="Search or create new tag"
+          className="w-[200px] py-2 px-4 border-none focus-visible:ring-0 outline-none rounded-full text-medium text-sm h-auto leading-none"
+          style={{
+            backgroundColor:
+              selected && selected.title === value ? selected.color : '#f5f5f5',
+          }}
+          {...props}
+        />
+      )
+    },
+    [selected, value]
+  )
 
   return (
     <AutocompletePure
@@ -88,7 +106,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       onSelect={handleSelect}
       onClickOutside={handleClickOutside}
       renderItem={renderItem}
-      renderInput={renderInput}
+      renderInput={renderInput()}
       renderContainer={renderContainer}
       getSuggestionValue={getSuggestionValue}
     />

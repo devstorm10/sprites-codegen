@@ -22,14 +22,17 @@ const dummyTags: Tag[] = [
   {
     id: 'core_memory',
     title: 'Core memory',
+    color: '#0b99ff4d',
   },
   {
     id: 'basic_knowledge',
     title: 'Basic knowledge',
+    color: '#0bff6f4d',
   },
   {
     id: 'character_trait',
     title: 'Character trait',
+    color: '#ff7b0b4d',
   },
 ]
 

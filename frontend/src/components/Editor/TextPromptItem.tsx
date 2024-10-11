@@ -37,7 +37,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const dispatch = useAppDispatch()
 
   const { id, content } = textPrompt
-  const editorRef = useRef<HTMLTextAreaElement>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
   const [isEditing, setEditing] = useState<boolean>(false)
 
   const handleItemClick = (name: string) => () => {
@@ -49,18 +49,30 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   }
 
   useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.style.height = 'auto'
-      editorRef.current.style.height = `${content ? editorRef.current.scrollHeight : 24}px`
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        editorRef.current &&
+        !editorRef.current.contains(event.target as Node)
+      ) {
+        setEditing(false)
+      }
     }
-  }, [isEditing, content])
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [editorRef])
 
   return (
     <div className="flex gap-x-1">
-      <div className="pt-0.5">
+      <div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-4 w-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-[24px] w-[15px] rounded-sm"
+            >
               <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
             </Button>
           </DropdownMenuTrigger>
@@ -71,28 +83,31 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
                 className="flex items-center gap-x-2.5"
                 onClick={handleItemClick(item.name)}
               >
-                <Icon icon="mage:stars-b" fontSize={18} />
-                <span>{item.title}</span>
+                <Icon icon="mage:stars-b" fontSize={16} />
+                <span className="text-sm">{item.title}</span>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <div className="pb-2 px-1 text-xs text-card-foreground">
+            <div className="px-2 text-xs text-card-foreground/50">
               <p>Last edited by you</p>
               <p>Todat at 2:23 AM</p>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <pre
-        className={cn(
-          'grow px-1 py-0.5 whitespace-pre-wrap font-inter text-sm outline-none rounded',
-          { 'bg-primary-200': isEditing }
-        )}
-        contentEditable={isEditing}
-        onClick={() => setEditing(true)}
-      >
-        {content || 'Write something here'}
-      </pre>
+      <div className="grow">
+        <div
+          ref={editorRef}
+          className={cn(
+            'grow px-1 py-0.5 whitespace-pre-wrap font-inter text-sm outline-none rounded my-auto',
+            { 'bg-primary-200': isEditing }
+          )}
+          contentEditable={isEditing}
+          onClick={() => setEditing(true)}
+        >
+          {content || 'Write something here'}
+        </div>
+      </div>
     </div>
   )
 }
