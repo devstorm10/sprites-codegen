@@ -36,15 +36,6 @@ const dummyTags: Tag[] = [
   },
 ]
 
-const dummyTextPrompts: TextPrompt[] = [
-  {
-    id: 'text_prompt',
-    contextId: dummyContexts[0].id,
-    tagId: null,
-    content: '',
-  },
-]
-
 export function findContextNodeById(
   nodes: ContextNode[],
   id: string
@@ -68,15 +59,15 @@ export function findContextNodeById(
 interface ContextState {
   contexts: ContextNode[]
   activeId: string | null
+  selectedId: string | null
   tags: Tag[]
-  textPrompts: TextPrompt[]
 }
 
 const initialState: ContextState = {
   contexts: dummyContexts,
   activeId: dummyContexts[0].id,
+  selectedId: null,
   tags: dummyTags,
-  textPrompts: dummyTextPrompts,
 }
 
 const contextSlice = createSlice({
@@ -89,33 +80,23 @@ const contextSlice = createSlice({
         type: 'input',
         title: 'Text prompt',
       }
-      const textPrompt: TextPrompt = {
-        id: newContext.id,
-        contextId: state.activeId,
-        tagId: null,
-        content: '',
-      }
       const contextGroup = state.contexts.find(
         (context) => context.id === state.activeId
       )
       if (contextGroup) {
         contextGroup.contexts?.push(newContext)
-        state.textPrompts = [...state.textPrompts, textPrompt]
       }
     },
     createNewTag: (state: ContextState, action: PayloadAction<string>) => {
       const targetContext = findContextNodeById(state.contexts, action.payload)
-      const targetPrompt = state.textPrompts.find(
-        (prompt) => prompt.id === action.payload
-      )
-      if (targetContext && targetPrompt) {
+      if (targetContext) {
         const newTagContext: ContextNode = {
           id: uuid(),
           type: 'tag',
           title: 'Tag',
+          data: {},
           contexts: [{ ...targetContext }],
         }
-        targetPrompt.tagId = newTagContext.id
         Object.assign(targetContext, newTagContext)
       }
     },
@@ -134,10 +115,16 @@ const contextSlice = createSlice({
         })
       }
     },
+    selectContext: (
+      state: ContextState,
+      action: PayloadAction<string | null>
+    ) => {
+      state.selectedId = action.payload
+    },
   },
 })
 
-export const { createTextPrompt, createNewTag, updateContext } =
+export const { createTextPrompt, createNewTag, updateContext, selectContext } =
   contextSlice.actions
 
 export default contextSlice.reducer

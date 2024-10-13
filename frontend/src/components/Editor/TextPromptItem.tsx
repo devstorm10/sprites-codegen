@@ -9,10 +9,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useAppDispatch } from '@/store/store'
-import { CreateNode, TextPrompt } from '@/lib/types'
+import { useAppDispatch, useAppSelector } from '@/store/store'
+import { createNewTag, selectContext, updateContext } from '@/store/slices'
+import { ContextNode, CreateNode } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { createNewTag } from '@/store/slices'
 
 const functionItems: CreateNode[] = [
   {
@@ -30,14 +30,15 @@ const functionItems: CreateNode[] = [
 ]
 
 type TextPromptProps = {
-  textPrompt: TextPrompt
+  textPrompt: ContextNode
 }
 
 const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const dispatch = useAppDispatch()
+  const selectedContextId = useAppSelector((state) => state.context.selectedId)
 
-  const { id, content } = textPrompt
-  const editorRef = useRef<HTMLDivElement>(null)
+  const { id, data } = textPrompt
+  const editorRef = useRef<HTMLPreElement>(null)
   const [isEditing, setEditing] = useState<boolean>(false)
 
   const handleItemClick = (name: string) => () => {
@@ -48,20 +49,48 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
     }
   }
 
+  const handleTextEdit = () => {
+    setEditing(true)
+    dispatch(selectContext(id))
+  }
+
+  useEffect(() => {
+    if (id === selectedContextId) {
+      setEditing(true)
+      console.log(editorRef.current)
+      setTimeout(() => {
+        editorRef.current?.focus()
+      }, 0)
+    } else {
+      setEditing(false)
+    }
+  }, [id, selectedContextId])
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         editorRef.current &&
         !editorRef.current.contains(event.target as Node)
       ) {
-        setEditing(false)
+        if (isEditing) {
+          setEditing(false)
+          dispatch(selectContext(null))
+          dispatch(
+            updateContext({
+              id,
+              newContext: {
+                data: { content: editorRef.current.innerText },
+              },
+            })
+          )
+        }
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [editorRef])
+  }, [editorRef, isEditing])
 
   return (
     <div className="flex gap-x-1">
@@ -96,17 +125,18 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
         </DropdownMenu>
       </div>
       <div className="grow">
-        <div
+        <pre
           ref={editorRef}
           className={cn(
             'grow px-1 py-0.5 whitespace-pre-wrap font-inter text-sm outline-none rounded my-auto',
             { 'bg-primary-200': isEditing }
           )}
           contentEditable={isEditing}
-          onClick={() => setEditing(true)}
+          suppressContentEditableWarning={true}
+          onClick={handleTextEdit}
         >
-          {content || 'Write something here'}
-        </div>
+          {(data && data.content) || (isEditing ? '' : 'Write something here')}
+        </pre>
       </div>
     </div>
   )

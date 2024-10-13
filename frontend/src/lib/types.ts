@@ -7,6 +7,7 @@ export interface ContextNode {
   id: string
   type: 'group' | 'tag' | 'input'
   title?: string
+  data?: Record<string, any>
   contexts?: ContextNode[]
 }
 

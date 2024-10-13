@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, forwardRef, useMemo } from 'react'
 import {
   AutocompletePure,
   AutocompletePureProps,
@@ -9,7 +9,7 @@ import {
 import { Icon } from '@iconify/react'
 
 import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Input, InputProps } from '@/components/ui/input'
 import { Tag } from '@/lib/types'
 
 const renderItem: RenderItem<Tag> = (item) => (
@@ -35,19 +35,63 @@ const renderContainer: RenderContainer = ({ list }) => (
 
 const getSuggestionValue = (item: Tag) => item.title
 
+const AutoCompleteInput = forwardRef<
+  HTMLInputElement,
+  InputProps & {
+    selected: Tag | undefined
+    title: string
+    onInputBlur: (e: any) => void
+    onInputFocus: (e: any) => void
+  }
+>((props, ref) => {
+  const { selected, title, onInputBlur, onInputFocus, ...rest } = props
+  return (
+    <Input
+      ref={ref}
+      placeholder="Search or create new tag"
+      className="w-[200px] py-2 px-4 border-none focus-visible:ring-0 outline-none rounded-full text-medium text-sm h-auto leading-none"
+      style={{
+        backgroundColor:
+          selected && selected.title === title ? selected.color : '#f5f5f5',
+      }}
+      autoFocus
+      onClick={onInputFocus}
+      onBlur={onInputBlur}
+      {...rest}
+    />
+  )
+})
+
 interface AutoCompleteProps {
+  tagContextId: string
   suggestions: Tag[]
+  hasFocus: boolean
+  onBlur: (e: any) => void
+  onFocus: (e: any) => void
   onComplete: (item: Tag) => void
 }
 
 const AutoComplete: React.FC<AutoCompleteProps> = ({
-  onComplete,
+  tagContextId,
   suggestions: initialSuggestions,
+  hasFocus,
+  onBlur,
+  onFocus,
+  onComplete,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [value, setValue] = useState<string>('')
   const [suggestions, setSuggestions] = useState<Tag[]>([])
   const [selected, setSelected] = useState<Tag>()
+
+  useEffect(() => {
+    if (hasFocus && tagContextId) {
+      const inputElement = document.getElementById(`tag_${tagContextId}`)
+      if (inputElement) {
+        inputElement.focus()
+      }
+    }
+  }, [hasFocus, tagContextId])
 
   const handleChange: AutocompletePureProps<Tag>['onChange'] = useCallback(
     (_event, { value, reason }) => {
@@ -80,20 +124,17 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
     setIsOpen(false)
   }
 
-  const renderInput: () => RenderInput = useCallback(
-    () => (props) => {
-      return (
-        <Input
-          placeholder="Search or create new tag"
-          className="w-[200px] py-2 px-4 border-none focus-visible:ring-0 outline-none rounded-full text-medium text-sm h-auto leading-none"
-          style={{
-            backgroundColor:
-              selected && selected.title === value ? selected.color : '#f5f5f5',
-          }}
-          {...props}
-        />
-      )
-    },
+  const renderInput: RenderInput = useMemo(
+    () => (props) => (
+      <AutoCompleteInput
+        id={`tag_${tagContextId}`}
+        selected={selected}
+        title={value}
+        onInputFocus={onFocus}
+        onInputBlur={onBlur}
+        {...props}
+      />
+    ),
     [selected, value]
   )
 
@@ -106,7 +147,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       onSelect={handleSelect}
       onClickOutside={handleClickOutside}
       renderItem={renderItem}
-      renderInput={renderInput()}
+      renderInput={renderInput}
       renderContainer={renderContainer}
       getSuggestionValue={getSuggestionValue}
     />
