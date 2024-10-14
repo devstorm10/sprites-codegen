@@ -40,11 +40,10 @@ const AutoCompleteInput = forwardRef<
   InputProps & {
     selected: Tag | undefined
     title: string
-    onInputBlur: (e: any) => void
     onInputFocus: (e: any) => void
   }
 >((props, ref) => {
-  const { selected, title, onInputBlur, onInputFocus, ...rest } = props
+  const { selected, title, onInputFocus, ...rest } = props
   return (
     <Input
       ref={ref}
@@ -56,7 +55,6 @@ const AutoCompleteInput = forwardRef<
       }}
       autoFocus
       onClick={onInputFocus}
-      onBlur={onInputBlur}
       {...rest}
     />
   )
@@ -64,25 +62,24 @@ const AutoCompleteInput = forwardRef<
 
 interface AutoCompleteProps {
   tagContextId: string
+  tagTitle: string
   suggestions: Tag[]
   hasFocus: boolean
-  onBlur: (e: any) => void
   onFocus: (e: any) => void
-  onComplete: (item: Tag) => void
+  onTitleChange: (tilte: string) => void
 }
 
 const AutoComplete: React.FC<AutoCompleteProps> = ({
   tagContextId,
+  tagTitle,
   suggestions: initialSuggestions,
   hasFocus,
-  onBlur,
   onFocus,
-  onComplete,
+  onTitleChange,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [value, setValue] = useState<string>('')
   const [suggestions, setSuggestions] = useState<Tag[]>([])
-  const [selected, setSelected] = useState<Tag>()
+  const [selected, setSelected] = useState<Tag | undefined>()
 
   useEffect(() => {
     if (hasFocus && tagContextId) {
@@ -93,9 +90,14 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
     }
   }, [hasFocus, tagContextId])
 
+  useEffect(() => {
+    setSelected(initialSuggestions.find((item) => item.title === tagTitle))
+  }, [tagTitle])
+
   const handleChange: AutocompletePureProps<Tag>['onChange'] = useCallback(
     (_event, { value, reason }) => {
-      setValue(value)
+      onTitleChange(value)
+
       if (reason === 'INPUT') {
         const filteredTags = initialSuggestions.filter((tag) =>
           tag.title.toLowerCase().includes(value.toLowerCase())
@@ -106,18 +108,16 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
         setIsOpen(false)
       }
     },
-    [initialSuggestions]
+    [initialSuggestions, onTitleChange]
   )
 
   const handleSelect: AutocompletePureProps<Tag>['onSelect'] = useCallback(
     (_event, { item }) => {
       const value = getSuggestionValue(item)
-      setValue(value)
+      onTitleChange(value)
       setIsOpen(false)
-      onComplete(item)
-      setSelected(item)
     },
-    []
+    [onTitleChange]
   )
 
   const handleClickOutside = (_event: Event) => {
@@ -129,19 +129,18 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       <AutoCompleteInput
         id={`tag_${tagContextId}`}
         selected={selected}
-        title={value}
+        title={tagTitle}
         onInputFocus={onFocus}
-        onInputBlur={onBlur}
         {...props}
       />
     ),
-    [selected, value]
+    [selected, tagTitle]
   )
 
   return (
     <AutocompletePure
       open={isOpen}
-      value={value}
+      value={tagTitle}
       items={suggestions}
       onChange={handleChange}
       onSelect={handleSelect}

@@ -1,40 +1,31 @@
-import { useCallback, useState } from 'react'
+import { useState, MouseEvent } from 'react'
 import {
   DndContext,
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
   DropAnimation,
-  closestCenter,
+  closestCorners,
   defaultDropAnimation,
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
-import { CSS } from '@dnd-kit/utilities'
 
-import EditableText from '@/common/EditableText'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import {
-  updateContext,
-  selectContext,
-  moveContext,
-  findContextNodeById,
-} from '@/store/slices'
+import { selectContext, moveContext, findContextNodeById } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
 import clsx from 'clsx'
 
 interface ContextItemProps {
   context: ContextNode
-  onUpdate: (id: string, newContext: Partial<ContextNode>) => void
 }
 
 interface ContextGroupProps {
   context: ContextNode
-  onUpdate: (id: string, newContext: Partial<ContextNode>) => void
 }
 
-const ContextGroup: React.FC<ContextGroupProps> = ({ context, onUpdate }) => {
+const ContextGroup: React.FC<ContextGroupProps> = ({ context }) => {
   const { id, contexts } = context
   const { setNodeRef } = useDroppable({
     id,
@@ -42,37 +33,25 @@ const ContextGroup: React.FC<ContextGroupProps> = ({ context, onUpdate }) => {
 
   return (
     <div ref={setNodeRef}>
-      <ContextItem context={context} onUpdate={onUpdate} />
+      <ContextItem context={context} />
       <div className="ml-5">
         {contexts &&
           contexts.map((subContext, idx) => (
-            <ContextGroup key={idx} context={subContext} onUpdate={onUpdate} />
+            <ContextGroup key={idx} context={subContext} />
           ))}
       </div>
     </div>
   )
 }
 
-const ContextItem: React.FC<ContextItemProps> = ({ context, onUpdate }) => {
+const ContextItem: React.FC<ContextItemProps> = ({ context }) => {
   const dispatch = useAppDispatch()
   const { id, type, title, data } = context
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id })
+  const { attributes, listeners, setNodeRef } = useDraggable({ id })
 
-  const itemStyle = {
-    transform: CSS.Transform.toString(transform),
-    opacity: isDragging ? 0 : 1,
-  }
-
-  const handleUpdateTitle = useCallback(
-    (newTitle: string) => {
-      onUpdate(id, { title: newTitle })
-    },
-    [onUpdate]
-  )
-
-  const handleContextSelect = () => {
+  const handleContextSelect = (e: MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation()
     dispatch(selectContext(id))
   }
 
@@ -81,23 +60,20 @@ const ContextItem: React.FC<ContextItemProps> = ({ context, onUpdate }) => {
       ref={setNodeRef}
       id={id}
       key={id}
-      style={itemStyle}
       className={clsx(
         'cursor-pointer flex items-center gap-2 py-2 hover:bg-muted rounded-lg mb-1 px-2 transition-all line-clamp-1',
         {
           'bg-primary-200': selectedContextId === id,
         }
       )}
-      onClick={handleContextSelect}
+      onMouseDown={handleContextSelect}
       {...attributes}
       {...listeners}
     >
       <span className="shrink-0">{CONTEXT_ICONS[type]} </span>
-      <EditableText
-        className="grow text-sm"
-        text={type === 'input' ? (data && data.content) || title || '' : title}
-        onChange={handleUpdateTitle}
-      />
+      <p className="grow text-sm">
+        {type === 'input' ? (data && data.content) || title || '' : title}
+      </p>
     </div>
   )
 }
@@ -113,13 +89,6 @@ const Contexts: React.FC = () => {
   const dropAnimation: DropAnimation = {
     ...defaultDropAnimation,
   }
-
-  const handleUpdateContext = useCallback(
-    (id: string, newContext: Partial<ContextNode>) => {
-      dispatch(updateContext({ id, newContext }))
-    },
-    []
-  )
 
   const handleDragStart = ({ active }: DragStartEvent) => {
     setActiveDndId(active.id as string)
@@ -137,25 +106,16 @@ const Contexts: React.FC = () => {
   return (
     <div className="px-3">
       <DndContext
-        collisionDetection={closestCenter}
+        collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         {contexts.map((context, idx) => (
-          <ContextGroup
-            key={idx}
-            context={context}
-            onUpdate={handleUpdateContext}
-          />
+          <ContextGroup key={idx} context={context} />
         ))}
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeContext ? (
-            <ContextGroup
-              context={activeContext}
-              onUpdate={handleUpdateContext}
-            />
-          ) : null}
+          {activeContext ? <ContextGroup context={activeContext} /> : null}
         </DragOverlay>
       </DndContext>
     </div>

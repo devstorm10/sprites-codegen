@@ -3,8 +3,9 @@ import { IoCaretDown } from 'react-icons/io5'
 import AutoComplete from '@/common/Autocomplete'
 import TextPromptItem from './TextPromptItem'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { ContextNode, Tag } from '@/lib/types'
+import { ContextNode } from '@/lib/types'
 import { selectContext, updateContext } from '@/store/slices'
+import { useCallback } from 'react'
 
 interface GroupContainerProps {
   tagContext: ContextNode
@@ -19,23 +20,22 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ tagContext }) => {
     (context) => context.type === 'input'
   )
 
-  const handleTagComplete = (item: Tag) => {
-    dispatch(
-      updateContext({
-        id: tagContext.id,
-        newContext: {
-          title: item.title,
-        },
-      })
-    )
-  }
+  const handleTagTitle = useCallback(
+    (title: string) => {
+      dispatch(
+        updateContext({
+          id: tagContext.id,
+          newContext: {
+            title,
+          },
+        })
+      )
+    },
+    [dispatch, tagContext.id]
+  )
 
   const handleCompleteFocus = () => {
     dispatch(selectContext(tagContext.id))
-  }
-
-  const handleCompleteBlur = () => {
-    dispatch(selectContext(null))
   }
 
   if (!prompts?.length) return <></>
@@ -46,11 +46,11 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ tagContext }) => {
         <IoCaretDown className="mt-2.5 opacity-60" />
         <AutoComplete
           tagContextId={tagContext.id}
+          tagTitle={tagContext.title || ''}
           hasFocus={selectedContextId === tagContext.id}
           suggestions={tags}
-          onComplete={handleTagComplete}
+          onTitleChange={handleTagTitle}
           onFocus={handleCompleteFocus}
-          onBlur={handleCompleteBlur}
         />
       </div>
       <div className="pl-2 flex flex-col gap-y-1">
