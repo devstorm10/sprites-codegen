@@ -1,4 +1,4 @@
-import { useState, MouseEvent, useEffect } from 'react'
+import { useState, MouseEvent, useEffect, useMemo } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -18,6 +18,7 @@ import {
   findContextNodeById,
   createActiveTab,
   setActiveTab,
+  searchContextsByKeyword,
 } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
@@ -25,10 +26,16 @@ import clsx from 'clsx'
 
 interface ContextItemProps {
   context: ContextNode
+  onItemClick?: () => void
 }
 
 interface ContextGroupProps {
   context: ContextNode
+}
+
+interface FilteredContextsProps {
+  filter: string
+  onFilterClear: () => void
 }
 
 const ContextGroup: React.FC<ContextGroupProps> = ({ context }) => {
@@ -50,7 +57,10 @@ const ContextGroup: React.FC<ContextGroupProps> = ({ context }) => {
   )
 }
 
-const ContextItem: React.FC<ContextItemProps> = ({ context }) => {
+const ContextItem: React.FC<ContextItemProps> = ({
+  context,
+  onItemClick = () => {},
+}) => {
   const dispatch = useAppDispatch()
   const { id, type, title, data } = context
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
@@ -59,6 +69,7 @@ const ContextItem: React.FC<ContextItemProps> = ({ context }) => {
   const handleContextSelect = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
     dispatch(selectContext(id))
+    onItemClick()
   }
 
   return (
@@ -142,4 +153,35 @@ const Contexts: React.FC = () => {
   )
 }
 
+const FilteredContexts: React.FC<FilteredContextsProps> = ({
+  filter,
+  onFilterClear,
+}) => {
+  const defaultContextId = useAppSelector((state) => state.context.activeId)
+  const defaultContext = useAppSelector((state) =>
+    findContextNodeById(state.context.contexts, defaultContextId || '')
+  )
+  const filteredContexts = useMemo(() => {
+    if (!defaultContext || !defaultContext.contexts) return []
+    return searchContextsByKeyword(defaultContext.contexts, filter)
+  }, [defaultContext, filter])
+
+  if (!defaultContext) return null
+  return (
+    <div className="px-3">
+      <ContextItem context={defaultContext} />
+      <div className="ml-5">
+        {filteredContexts.map((context) => (
+          <ContextItem
+            key={context.id}
+            context={context}
+            onItemClick={onFilterClear}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export { FilteredContexts }
 export default Contexts

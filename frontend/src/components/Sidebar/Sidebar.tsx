@@ -6,12 +6,13 @@ import IconButton from '@/common/IconButton'
 import Input from '@/common/Input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import Contexts from './Contexts'
+import Contexts, { FilteredContexts } from './Contexts'
 import Menu from './Menu'
 import SidebarWrapper from './SidebarWrapper'
 
 const Sidebar: React.FC = () => {
   const [projectName, setProjectName] = useState<string>('Project Name')
+  const [searchTerm, setSearchTerm] = useState<string>('')
 
   return (
     <SidebarWrapper>
@@ -40,7 +41,12 @@ const Sidebar: React.FC = () => {
         <span className="w-[36px] h-[36px] flex justify-center items-center">
           <HiOutlineSearch size={21} />
         </span>
-        <Input className="w-full" placeholder="Search something..." />
+        <Input
+          className="w-full"
+          placeholder="Search something..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
       <div className="flex-1">
         <Tabs defaultValue="contexts" className="w-full">
@@ -59,7 +65,14 @@ const Sidebar: React.FC = () => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="contexts">
-            <Contexts />
+            {searchTerm ? (
+              <FilteredContexts
+                filter={searchTerm}
+                onFilterClear={() => setSearchTerm('')}
+              />
+            ) : (
+              <Contexts />
+            )}
           </TabsContent>
           <TabsContent value="components">
             <div className="px-3 text-sm">Your components here.</div>

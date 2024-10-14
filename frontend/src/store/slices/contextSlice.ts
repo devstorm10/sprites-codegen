@@ -75,6 +75,32 @@ export function findParentContextNodeById(
   return null
 }
 
+export function searchContextsByKeyword(
+  nodes: ContextNode[],
+  keyword: string
+): ContextNode[] {
+  const result: ContextNode[] = []
+  for (const node of nodes) {
+    if (
+      node.title?.includes(keyword) ||
+      (node.data && node.data.content && node.data.content.includes(keyword))
+    ) {
+      result.push({
+        id: node.id,
+        type: node.type,
+        title: node.title,
+        data: node.data,
+      })
+    }
+
+    if (node.contexts) {
+      result.push(...searchContextsByKeyword(node.contexts, keyword))
+    }
+  }
+
+  return result
+}
+
 interface ContextState {
   contexts: ContextNode[]
   activeId: string | null
