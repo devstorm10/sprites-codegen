@@ -1,23 +1,30 @@
+import { useEffect } from 'react'
 import { Reorder } from 'framer-motion'
-import { useState } from 'react'
-
-import { Tab } from '@/lib/types'
 
 import TabItem from './TabItem'
 import AddTabButton from './AddTabButton'
-
-const mockTabs: Tab[] = [
-  {
-    title: 'Default Context',
-    active: true,
-  },
-  {
-    title: 'Another Context',
-  },
-]
+import { useAppDispatch, useAppSelector } from '@/store/store'
+import { selectContext, setActiveTab, updateTabs } from '@/store/slices'
+import { Tab } from '@/lib/types'
 
 const Tabbar = () => {
-  const [tabs, setTabs] = useState<Tab[]>(mockTabs)
+  const dispatch = useAppDispatch()
+  const tabs = useAppSelector((state) => state.context.tabs)
+  const activeTab = tabs.find((item) => item.active)
+
+  useEffect(() => {
+    if (activeTab?.id) {
+      dispatch(selectContext(activeTab.id))
+    }
+  }, [activeTab?.id])
+
+  const handleTabsUpdate = (tabs: Tab[]) => {
+    dispatch(updateTabs(tabs))
+  }
+
+  const handleTabItemClick = (id: string) => () => {
+    dispatch(setActiveTab(id))
+  }
 
   return (
     <div className="bg-muted flex">
@@ -25,11 +32,15 @@ const Tabbar = () => {
         axis="x"
         className="flex"
         values={tabs}
-        onReorder={setTabs}
+        onReorder={handleTabsUpdate}
       >
         {tabs.map((tab) => (
           <Reorder.Item key={tab.title} value={tab}>
-            <TabItem active={tab.active} title={tab.title} />
+            <TabItem
+              active={tab.active}
+              title={tab.title}
+              onClick={handleTabItemClick(tab.id)}
+            />
           </Reorder.Item>
         ))}
       </Reorder.Group>

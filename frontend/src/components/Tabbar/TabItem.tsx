@@ -6,8 +6,9 @@ import IconButton from '@/common/IconButton'
 interface TabProps {
   active?: boolean
   title: string
+  onClick: () => void
 }
-const TabItem: React.FC<TabProps> = ({ active, title }) => {
+const TabItem: React.FC<TabProps> = ({ active, title, onClick }) => {
   return (
     <div
       className={clsx(
@@ -15,6 +16,7 @@ const TabItem: React.FC<TabProps> = ({ active, title }) => {
         active ? 'bg-background' : ''
       )}
       title={title}
+      onClick={onClick}
     >
       <span className="text-nowrap overflow-hidden text-ellipsis text-sm">
         {title}

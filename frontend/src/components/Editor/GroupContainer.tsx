@@ -1,11 +1,12 @@
+import { useCallback } from 'react'
 import { IoCaretDown } from 'react-icons/io5'
 
 import AutoComplete from '@/common/Autocomplete'
 import TextPromptItem from './TextPromptItem'
+import FlowItem from './FlowItem'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { ContextNode } from '@/lib/types'
 import { selectContext, updateContext } from '@/store/slices'
-import { useCallback } from 'react'
+import { ContextNode } from '@/lib/types'
 
 interface GroupContainerProps {
   tagContext: ContextNode
@@ -16,9 +17,7 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ tagContext }) => {
   const tags = useAppSelector((state) => state.context.tags)
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
 
-  const prompts = tagContext.contexts?.filter(
-    (context) => context.type === 'input'
-  )
+  const contexts = tagContext.contexts || []
 
   const handleTagTitle = useCallback(
     (title: string) => {
@@ -38,7 +37,7 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ tagContext }) => {
     dispatch(selectContext(tagContext.id))
   }
 
-  if (!prompts?.length) return <></>
+  if (contexts.length === 0) return null
 
   return (
     <div className="flex flex-col gap-y-2">
@@ -54,9 +53,15 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ tagContext }) => {
         />
       </div>
       <div className="pl-2 flex flex-col gap-y-1">
-        {prompts.map((prompt, idx) => (
-          <TextPromptItem key={idx} textPrompt={prompt} />
-        ))}
+        {contexts.map((context) =>
+          context.type === 'input' ? (
+            <TextPromptItem key={context.id} textPrompt={context} />
+          ) : context.type === 'flow' ? (
+            <FlowItem key={context.id} context={context} />
+          ) : (
+            <></>
+          )
+        )}
       </div>
     </div>
   )

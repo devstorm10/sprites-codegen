@@ -1,20 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import uuid from 'react-uuid'
 
-import { ContextNode, Tag } from '@/lib/types'
+import { ContextNode, Tab, Tag } from '@/lib/types'
 
 const dummyContexts: ContextNode[] = [
   {
     id: 'default_context',
     type: 'group',
     title: 'Default Context',
-    contexts: [
-      {
-        id: 'text_prompt',
-        type: 'input',
-        title: 'Text prompt',
-      },
-    ],
+    contexts: [],
   },
 ]
 
@@ -33,6 +27,14 @@ const dummyTags: Tag[] = [
     id: 'character_trait',
     title: 'Character trait',
     color: '#ff7b0b4d',
+  },
+]
+
+const dummyTabs: Tab[] = [
+  {
+    id: dummyContexts[0].id,
+    title: 'Default Context',
+    active: true,
   },
 ]
 
@@ -78,6 +80,7 @@ interface ContextState {
   activeId: string | null
   selectedId: string | null
   tags: Tag[]
+  tabs: Tab[]
 }
 
 const initialState: ContextState = {
@@ -85,6 +88,7 @@ const initialState: ContextState = {
   activeId: dummyContexts[0].id,
   selectedId: null,
   tags: dummyTags,
+  tabs: dummyTabs,
 }
 
 const contextSlice = createSlice({
@@ -96,6 +100,19 @@ const contextSlice = createSlice({
         id: uuid(),
         type: 'input',
         title: 'Text prompt',
+      }
+      const contextGroup = state.contexts.find(
+        (context) => context.id === state.activeId
+      )
+      if (contextGroup) {
+        contextGroup.contexts?.push(newContext)
+      }
+    },
+    createFlow: (state: ContextState) => {
+      const newContext: ContextNode = {
+        id: uuid(),
+        type: 'flow',
+        title: 'Flow',
       }
       const contextGroup = state.contexts.find(
         (context) => context.id === state.activeId
@@ -152,6 +169,7 @@ const contextSlice = createSlice({
         group: 1,
         tag: 2,
         input: 3,
+        flow: 3,
       }
       if (priority[sourceItem.type] > priority[targetItem.type]) {
         if (sourceParent && targetParent) {
@@ -180,15 +198,44 @@ const contextSlice = createSlice({
         }
       }
     },
+    updateTabs: (state: ContextState, action: PayloadAction<Tab[]>) => {
+      state.tabs = action.payload
+    },
+    createActiveTab: (state: ContextState, action: PayloadAction<string>) => {
+      const flowId = action.payload
+      const flowContext = findContextNodeById(state.contexts, flowId)
+      const flowTab = state.tabs.find((item) => item.id === flowId)
+      if (!flowTab) {
+        state.tabs.push({
+          id: flowId,
+          title: flowContext?.title || 'New flow',
+          active: true,
+        })
+      }
+      state.tabs = state.tabs.map((item) => ({
+        ...item,
+        active: item.id === flowId,
+      }))
+    },
+    setActiveTab: (state: ContextState, action: PayloadAction<string>) => {
+      state.tabs = state.tabs.map((item) => ({
+        ...item,
+        active: item.id === action.payload,
+      }))
+    },
   },
 })
 
 export const {
   createTextPrompt,
+  createFlow,
   createNewTag,
   updateContext,
   selectContext,
   moveContext,
+  updateTabs,
+  createActiveTab,
+  setActiveTab,
 } = contextSlice.actions
 
 export default contextSlice.reducer

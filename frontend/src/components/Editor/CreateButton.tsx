@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { useAppDispatch } from '@/store/store'
-import { createTextPrompt } from '@/store/slices'
+import { createFlow, createTextPrompt } from '@/store/slices'
 import { CreateNode } from '@/lib/types'
 
 const createItems: CreateNode[] = [
@@ -54,6 +54,9 @@ const CreateButton: React.FC = () => {
     switch (name) {
       case 'text-prompt':
         dispatch(createTextPrompt())
+        break
+      case 'flow':
+        dispatch(createFlow())
         break
     }
   }

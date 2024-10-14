@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import TextPromptItem from '@/components/Editor/TextPromptItem'
+import FlowItem from './FlowItem'
 import GroupContainer from '@/components/Editor/GroupContainer'
 import { useAppSelector } from '@/store/store'
 
@@ -9,23 +10,22 @@ const ContextViewer: React.FC = () => {
   const activeContext = useAppSelector((state) =>
     state.context.contexts.find((context) => context.id === activeContextId)
   )
-  const tagContexts = useMemo(() => {
-    if (!activeContext?.contexts) return []
-    return activeContext.contexts?.filter((context) => context.type === 'tag')
-  }, [activeContext])
-  const noTagPrompts = useMemo(() => {
-    if (!activeContext?.contexts) return []
-    return activeContext.contexts?.filter((context) => context.type === 'input')
+  const totalContexts = useMemo(() => {
+    if (!activeContext || !activeContext.contexts) return []
+    return activeContext.contexts
   }, [activeContext])
 
   return (
     <div className="flex flex-col gap-y-4">
-      {tagContexts.map((context, idx) => (
-        <GroupContainer key={idx} tagContext={context} />
-      ))}
-      {noTagPrompts.map((prompt, idx) => (
-        <TextPromptItem key={idx} textPrompt={prompt} />
-      ))}
+      {totalContexts.map((context) =>
+        context.type === 'input' ? (
+          <TextPromptItem key={context.id} textPrompt={context} />
+        ) : context.type === 'flow' ? (
+          <FlowItem key={context.id} context={context} />
+        ) : (
+          <GroupContainer key={context.id} tagContext={context} />
+        )
+      )}
     </div>
   )
 }

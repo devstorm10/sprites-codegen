@@ -1,11 +1,12 @@
 export interface Tab {
+  id: string
   title: string
   active?: boolean
 }
 
 export interface ContextNode {
   id: string
-  type: 'group' | 'tag' | 'input'
+  type: 'group' | 'tag' | 'input' | 'flow'
   title?: string
   data?: Record<string, any>
   contexts?: ContextNode[]

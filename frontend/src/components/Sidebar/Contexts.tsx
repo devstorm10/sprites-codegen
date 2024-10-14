@@ -1,4 +1,4 @@
-import { useState, MouseEvent } from 'react'
+import { useState, MouseEvent, useEffect } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -12,7 +12,13 @@ import {
 } from '@dnd-kit/core'
 
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { selectContext, moveContext, findContextNodeById } from '@/store/slices'
+import {
+  selectContext,
+  moveContext,
+  findContextNodeById,
+  createActiveTab,
+  setActiveTab,
+} from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
 import clsx from 'clsx'
@@ -81,6 +87,9 @@ const ContextItem: React.FC<ContextItemProps> = ({ context }) => {
 const Contexts: React.FC = () => {
   const dispatch = useAppDispatch()
   const contexts = useAppSelector((state) => state.context.contexts)
+  const selectedContextId = useAppSelector((state) => state.context.selectedId)
+  const defaultContextId = useAppSelector((state) => state.context.activeId)
+
   const [activeDndId, setActiveDndId] = useState<string>('')
   const activeContext = activeDndId
     ? findContextNodeById(contexts, activeDndId)
@@ -102,6 +111,17 @@ const Contexts: React.FC = () => {
     if (!activeItem || !overItem || activeItem === overItem) return
     dispatch(moveContext({ source: activeItem.id, target: overItem.id }))
   }
+
+  useEffect(() => {
+    if (selectedContextId) {
+      const selectedContext = findContextNodeById(contexts, selectedContextId)
+      if (selectedContext && selectedContext.type === 'flow') {
+        dispatch(createActiveTab(selectedContextId))
+      } else {
+        dispatch(setActiveTab(defaultContextId || ''))
+      }
+    }
+  }, [dispatch, selectedContextId, defaultContextId])
 
   return (
     <div className="px-3">
