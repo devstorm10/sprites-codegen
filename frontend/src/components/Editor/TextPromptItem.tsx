@@ -57,7 +57,6 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   useEffect(() => {
     if (id === selectedContextId) {
       setEditing(true)
-      console.log(editorRef.current)
       setTimeout(() => {
         editorRef.current?.focus()
       }, 0)

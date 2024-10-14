@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import uuid from 'react-uuid'
 
-import { ContextNode, Tag, TextPrompt } from '@/lib/types'
+import { ContextNode, Tag } from '@/lib/types'
 
 const dummyContexts: ContextNode[] = [
   {
@@ -50,6 +50,23 @@ export function findContextNodeById(
       if (result) {
         return result
       }
+    }
+  }
+
+  return null
+}
+
+export function findParentContextNodeById(
+  nodes: ContextNode[],
+  id: string
+): ContextNode | null {
+  for (const node of nodes) {
+    if (node.contexts) {
+      const result = node.contexts.find((context) => context.id === id)
+      if (result) return node
+
+      const recResult = findParentContextNodeById(node.contexts, id)
+      if (recResult) return recResult
     }
   }
 
@@ -121,10 +138,57 @@ const contextSlice = createSlice({
     ) => {
       state.selectedId = action.payload
     },
+    moveContext: (
+      state: ContextState,
+      action: PayloadAction<{ source: string; target: string }>
+    ) => {
+      const { source, target } = action.payload
+      const sourceItem = findContextNodeById(state.contexts, source)
+      const targetItem = findContextNodeById(state.contexts, target)
+      const sourceParent = findParentContextNodeById(state.contexts, source)
+      const targetParent = findParentContextNodeById(state.contexts, target)
+      if (!sourceItem || !targetItem) return
+      const priority = {
+        group: 1,
+        tag: 2,
+        input: 3,
+      }
+      if (priority[sourceItem.type] > priority[targetItem.type]) {
+        if (sourceParent && targetParent) {
+          targetItem.contexts = [...(targetItem.contexts || []), sourceItem]
+          sourceParent.contexts = sourceParent.contexts?.filter(
+            (context) => context.id !== source
+          )
+        }
+      } else if (priority[sourceItem.type] === priority[targetItem.type]) {
+        if (
+          sourceParent &&
+          targetParent &&
+          sourceParent.contexts &&
+          targetParent.contexts
+        ) {
+          const sourceIndex = sourceParent.contexts.findIndex(
+            (context) => context.id === sourceItem.id
+          )
+          const targetIndex = targetParent.contexts.findIndex(
+            (context) => context.id === targetItem.id
+          )
+          if (sourceIndex !== -1 && targetIndex !== -1) {
+            const [movedItem] = sourceParent.contexts.splice(sourceIndex, 1)
+            targetParent.contexts.splice(targetIndex, 0, movedItem)
+          }
+        }
+      }
+    },
   },
 })
 
-export const { createTextPrompt, createNewTag, updateContext, selectContext } =
-  contextSlice.actions
+export const {
+  createTextPrompt,
+  createNewTag,
+  updateContext,
+  selectContext,
+  moveContext,
+} = contextSlice.actions
 
 export default contextSlice.reducer
