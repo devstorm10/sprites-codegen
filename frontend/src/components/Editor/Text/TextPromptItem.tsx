@@ -56,11 +56,11 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
 
   const renderVarSuggestion = useCallback(
     (
-      suggestion: SuggestionDataItem,
-      search: string,
-      highlightedDisplay: React.ReactNode,
+      _suggestion: SuggestionDataItem,
+      _search: string,
+      _highlightedDisplay: React.ReactNode,
       index: number,
-      focused: boolean
+      _focused: boolean
     ) => {
       const variable = variables[index]
       return (
