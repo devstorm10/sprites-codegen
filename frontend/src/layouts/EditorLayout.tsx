@@ -2,18 +2,25 @@ import { Outlet } from 'react-router-dom'
 
 import { Titlebar } from '@/components/Titlebar'
 import { Sidebar } from '@/components/Sidebar'
-// import ChatPanel from '@/components/ChatPanel/ChatPanel'
+import ChatPanel from '@/components/ChatPanel/ChatPanel'
+import { useState } from 'react'
 
 const EditorLayout = () => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const toggleChatPanel = () => {
+    setIsOpen((prv) => !prv)
+  }
+
   return (
     <div className="flex flex-col flex-1 overflow-clip">
-      <Titlebar />
+      <Titlebar toggleChatPanel={toggleChatPanel} isOpen={isOpen} />
       <div className="flex-1 flex h-full">
         <Sidebar />
         <div className="flex-1">
           <Outlet />
         </div>
-        {/* <ChatPanel /> */}
+        {isOpen && <ChatPanel />}
       </div>
     </div>
   )
