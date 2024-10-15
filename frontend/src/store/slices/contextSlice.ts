@@ -41,6 +41,11 @@ const dummyTags: Tag[] = [
     title: 'Character trait',
     color: '#ff7b0b4d',
   },
+  {
+    id: 'activities',
+    title: 'Activities',
+    color: '#FFD4F3',
+  },
 ]
 
 const dummyTabs: Tab[] = [

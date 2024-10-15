@@ -15,12 +15,14 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ routes }) => {
           <EditableText
             text={route}
             className={clsx(
-              'w-fit',
-              index === routes.length - 1 ? 'font-bold' : ''
+              'w-fit font-medium',
+              index === routes.length - 1 ? '' : 'text-secondary-100/50'
             )}
             onChange={handleChange}
           />
-          {index < routes.length - 1 && <span>/</span>}
+          {index < routes.length - 1 && (
+            <span className="text-secondary-100/50 font-medium">/</span>
+          )}
         </React.Fragment>
       ))}
     </div>

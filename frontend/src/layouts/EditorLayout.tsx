@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom'
 
 import { Titlebar } from '@/components/Titlebar'
 import { Sidebar } from '@/components/Sidebar'
-import ChatPanel from '@/components/ChatPanel/ChatPanel'
+// import ChatPanel from '@/components/ChatPanel/ChatPanel'
 
 const EditorLayout = () => {
   return (
@@ -13,7 +13,7 @@ const EditorLayout = () => {
         <div className="flex-1">
           <Outlet />
         </div>
-        <ChatPanel />
+        {/* <ChatPanel /> */}
       </div>
     </div>
   )

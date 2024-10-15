@@ -17,7 +17,7 @@ const renderItem: RenderItem<Tag> = (item) => (
     <div className="flex items-center gap-x-1">
       <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
       <span
-        className="rounded-sm px-1 text-sm"
+        className="rounded-sm px-1 font-medium"
         style={{
           backgroundColor: item.color,
         }}
@@ -30,7 +30,7 @@ const renderItem: RenderItem<Tag> = (item) => (
 )
 
 const renderContainer: RenderContainer = ({ list }) => (
-  <Card className="py-1 absolute z-50 min-w-[200px] rounded-lg mt-2">
+  <Card className="py-1 absolute z-50 min-w-[200px] rounded-[12px] mt-2 shadow-[0_0_16px_rgba(0,0,0,0.04)]">
     {list}
   </Card>
 )
@@ -50,7 +50,7 @@ const AutoCompleteInput = forwardRef<
     <Input
       ref={ref}
       placeholder="Search or create new tag"
-      className="w-[200px] py-2 px-4 border-none focus-visible:ring-0 outline-none rounded-full text-medium text-sm h-auto leading-none"
+      className="w-[200px] py-2 px-4 border-none focus-visible:ring-0 outline-none rounded-full text-[16px] font-medium h-auto leading-none"
       style={{
         backgroundColor:
           selected && selected.title === title ? selected.color : '#f5f5f5',

@@ -16,18 +16,18 @@ const Sidebar: React.FC = () => {
 
   return (
     <SidebarWrapper>
-      <div className="flex items-center gap-2 p-2 px-3 border-b border-background-300 w-full">
+      <div className="flex items-center gap-2 px-[16px] py-[8px] border-b border-background-300 w-full">
         <div className="flex items-center gap-2 overflow-clip w-[calc(100%_-_20px)]">
-          <span className="w-[36px] h-[36px] bg-[#643A46] rounded flex items-center justify-center text-[#FCB0C4] shrink-0">
+          <span className="w-[22px] h-[22px] bg-[#643A46] rounded flex items-center justify-center text-[#FCB0C4] shrink-0 text-[10px]">
             {projectName
               .split(' ')
               .map((word) => word[0])
               .join('')
               .toUpperCase()}
           </span>
-          <div className="w-[calc(100%_-_36px)]">
+          <div className="w-[calc(100%_-_22px)]">
             <EditableText
-              className="p-1 w-full overflow-clip text-nowrap text-ellipsis"
+              className="p-1 w-full overflow-clip text-nowrap text-ellipsis text-[14px] font-medium"
               text={projectName}
               onChange={setProjectName}
             />
@@ -48,17 +48,17 @@ const Sidebar: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className="flex-1">
+      <div className="flex-1 px-[5px]">
         <Tabs defaultValue="contexts" className="w-full">
           <TabsList className="w-full bg-background border-b rounded-none pb-0 justify-start">
             <TabsTrigger
-              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:focus:shadow-black"
+              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:focus:shadow-black text-[16px]"
               value="contexts"
             >
               Contexts
             </TabsTrigger>
             <TabsTrigger
-              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:focus:shadow-black"
+              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:focus:shadow-black text-[16px]"
               value="components"
             >
               Components
@@ -75,7 +75,7 @@ const Sidebar: React.FC = () => {
             )}
           </TabsContent>
           <TabsContent value="components">
-            <div className="px-3 text-sm">Your components here.</div>
+            <div className="px-3">Your components here.</div>
           </TabsContent>
         </Tabs>
       </div>

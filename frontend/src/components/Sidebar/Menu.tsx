@@ -5,7 +5,7 @@ import { LuLifeBuoy } from 'react-icons/lu'
 
 const MenuItem: React.FC<PropsWithChildren> = ({ children }) => {
   return (
-    <button className="flex items-center gap-2 p-3 border-t w-full hover:bg-muted transition-all">
+    <button className="flex items-center gap-2 p-3 border-t w-full hover:bg-muted transition-all font-medium">
       {children}
     </button>
   )

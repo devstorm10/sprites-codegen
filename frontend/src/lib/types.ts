@@ -1,3 +1,5 @@
+import { ReactNode } from 'react'
+
 export interface Tab {
   id: string
   title: string
@@ -32,6 +34,7 @@ export interface TextPrompt {
 }
 
 export interface CreateNode {
+  icon?: ReactNode
   title: string
   name: string
 }

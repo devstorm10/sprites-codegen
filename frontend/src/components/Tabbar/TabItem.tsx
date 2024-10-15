@@ -18,7 +18,7 @@ const TabItem: React.FC<TabProps> = ({ active, title, onClick }) => {
       title={title}
       onClick={onClick}
     >
-      <span className="text-nowrap overflow-hidden text-ellipsis text-sm">
+      <span className="text-nowrap overflow-hidden text-ellipsis text-[14px]">
         {title}
       </span>
       <IconButton>

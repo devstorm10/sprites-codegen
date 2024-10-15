@@ -17,17 +17,22 @@ import {
 import { useAppDispatch } from '@/store/store'
 import { createNewTag } from '@/store/slices'
 import { ContextNode, CreateNode } from '@/lib/types'
+import { SparkleIcon } from '../icons/SparkleIcon'
+import { LuTag } from 'react-icons/lu'
 
 const functionItems: CreateNode[] = [
   {
+    icon: <SparkleIcon />,
     title: 'Autofill with AI',
     name: 'autofill-with-ai',
   },
   {
+    icon: <LuTag />,
     title: 'Add new tag',
     name: 'add-new-tag',
   },
   {
+    icon: <SparkleIcon />,
     title: 'Create component',
     name: 'create-component',
   },
@@ -82,10 +87,12 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
   }
 
   return (
-    <div ref={setNodeRef} className="flex gap-x-1">
+    <div ref={setNodeRef} className="flex items-start gap-x-1">
       {context.type !== 'tag' && (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            className={context.type === 'input' ? 'mt-[6px]' : 'mt-[14px]'}
+          >
             <span
               className="h-[24px] w-[15px] rounded-sm hover:bg-accent hover:text-accent-foreground"
               {...attributes}
@@ -102,19 +109,23 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
             </span>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent side="left" align="center" className="w-60">
+          <DropdownMenuContent
+            side="left"
+            align="center"
+            className="w-60 rounded-[12px] shadow-[0_0_16px_rgba(0,0,0,0.04)]"
+          >
             {functionItems.map((item: CreateNode) => (
               <DropdownMenuItem
                 key={item.name}
-                className="flex items-center gap-x-2.5"
+                className="flex items-center gap-x-2.5 rounded-[12px] cursor-pointer"
                 onClick={handleItemClick(item.name)}
               >
-                <Icon icon="mage:stars-b" fontSize={16} />
-                <span className="text-sm">{item.title}</span>
+                {item.icon}
+                <span className="">{item.title}</span>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <div className="px-2 text-xs text-card-foreground/50">
+            <div className="px-2 text-[12px] text-card-foreground/50">
               <p>Last edited by you</p>
               <p>Todat at 2:23 AM</p>
             </div>

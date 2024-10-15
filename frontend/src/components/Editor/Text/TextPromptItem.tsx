@@ -64,10 +64,12 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
     ) => {
       const variable = variables[index]
       return (
-        <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1">
+        <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1 rounded-[12px]">
           <div className="flex items-center gap-x-1">
             <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
-            <span className="rounded-sm px-1 text-sm">{variable.name}</span>
+            <span className="rounded-sm px-1 text-[#319CFF] font-medium">
+              {variable.name}
+            </span>
           </div>
           <Icon icon="ph:dots-three-bold" fontSize={16} />
         </div>
@@ -118,14 +120,16 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
     <div className="grow">
       <MentionsInput
         inputRef={editorRef}
-        style={defaultStyle(isEditing)}
+        style={defaultStyle(isEditing, !!data?.content)}
         customSuggestionsContainer={renderSuggestionContainer}
         value={
-          (data && data.content) || (isEditing ? '' : 'Write something here')
+          (data && data.content) ||
+          (isEditing ? '' : 'Write something or press ‘/’ for commands')
         }
         allowSuggestionsAboveCursor={true}
         onChange={handleTextUpdate}
         onFocus={handleTextEdit}
+        spellCheck={false}
       >
         <Mention
           markup="{{__display__}}"

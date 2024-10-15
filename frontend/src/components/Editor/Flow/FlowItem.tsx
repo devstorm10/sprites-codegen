@@ -1,12 +1,11 @@
-import { Icon } from '@iconify/react'
-import { BsCopy } from 'react-icons/bs'
-import { FaRegTrashCan } from 'react-icons/fa6'
-
 import { Card } from '@/components/ui/card'
 import { useAppDispatch } from '@/store/store'
 import { selectContext, updateContext } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
 import EditableText from '@/common/EditableText'
+import { CopyIcon } from '@/components/icons/CopyIcon'
+import { TrashIcon } from '@/components/icons/TrashIcon'
+import { SparkleIcon } from '@/components/icons/SparkleIcon'
 
 type FlowProps = {
   context: ContextNode
@@ -33,16 +32,16 @@ const FlowItem: React.FC<FlowProps> = ({ context }) => {
   }
 
   return (
-    <Card className="flex items-center gap-x-3 px-3 py-2 rounded-full">
-      <Icon icon="mage:stars-b" fontSize={16} onClick={handleNewFlowClick} />
+    <Card className="flex items-center gap-x-3 px-5 py-2 rounded-full shadow-[0_0_16px_rgba(0,0,0,0.04)]">
+      <SparkleIcon fontSize={20} onClick={handleNewFlowClick} />
       <EditableText
         text={title || ''}
         onChange={handleTitleUpdate}
-        className="font-bold text-sm"
+        className="font-bold"
       />
-      <div className="flex items-center gap-x-2 text-black/30 text-sm">
-        <BsCopy />
-        <FaRegTrashCan />
+      <div className="flex items-center gap-x-2 text-secondary-100/50">
+        <CopyIcon />
+        <TrashIcon />
       </div>
     </Card>
   )

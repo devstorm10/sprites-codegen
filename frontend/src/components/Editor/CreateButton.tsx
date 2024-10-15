@@ -1,5 +1,4 @@
 import { FaPlus } from 'react-icons/fa6'
-import { Icon } from '@iconify/react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -11,6 +10,7 @@ import {
 import { useAppDispatch } from '@/store/store'
 import { createFlow, createTextPrompt } from '@/store/slices'
 import { CreateNode } from '@/lib/types'
+import { SparkleIcon } from '../icons/SparkleIcon'
 
 const createItems: CreateNode[] = [
   {
@@ -64,19 +64,26 @@ const CreateButton: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary" size="icon" className="h-8 w-8 rounded-lg">
+        <Button
+          variant="secondary"
+          size="icon"
+          className="h-8 w-8 rounded-lg text-secondary-100/50"
+        >
           <FaPlus size={14} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-60">
+      <DropdownMenuContent
+        align="start"
+        className="w-60 shadow-[0_0_16px_rgba(0,0,0,0.04)] rounded-[12px]"
+      >
         {createItems.map((item: CreateNode) => (
           <DropdownMenuItem
             key={item.name}
             className="flex items-center gap-x-2.5"
             onClick={handleItemClick(item.name)}
           >
-            <Icon icon="mage:stars-b" fontSize={18} />
-            <span>{item.title}</span>
+            <SparkleIcon fontSize={18} />
+            <span className="text-[14px] font-medium">{item.title}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
