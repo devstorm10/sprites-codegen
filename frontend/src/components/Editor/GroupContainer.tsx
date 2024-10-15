@@ -1,68 +1,164 @@
-import { useCallback } from 'react'
-import { IoCaretDown } from 'react-icons/io5'
+import { useCallback, useRef, useState } from 'react'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
+import { Icon } from '@iconify/react'
 
-import AutoComplete from '@/common/Autocomplete'
-import TextPromptItem from './TextPromptItem'
-import FlowItem from './FlowItem'
-import { useAppDispatch, useAppSelector } from '@/store/store'
-import { selectContext, updateContext } from '@/store/slices'
-import { ContextNode } from '@/lib/types'
+import TextPromptItem from './Text/TextPromptItem'
+import FlowItem from './Flow/FlowItem'
+import TagItem from './TagItem'
 
-interface GroupContainerProps {
-  tagContext: ContextNode
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+import { useAppDispatch } from '@/store/store'
+import { createNewTag } from '@/store/slices'
+import { ContextNode, CreateNode } from '@/lib/types'
+
+const functionItems: CreateNode[] = [
+  {
+    title: 'Autofill with AI',
+    name: 'autofill-with-ai',
+  },
+  {
+    title: 'Add new tag',
+    name: 'add-new-tag',
+  },
+  {
+    title: 'Create component',
+    name: 'create-component',
+  },
+]
+
+interface GroupItemProps {
+  context: ContextNode
 }
 
-const GroupContainer: React.FC<GroupContainerProps> = ({ tagContext }) => {
+interface GroupContainerProps {
+  context: ContextNode
+}
+
+const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
   const dispatch = useAppDispatch()
-  const tags = useAppSelector((state) => state.context.tags)
-  const selectedContextId = useAppSelector((state) => state.context.selectedId)
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: context.id,
+  })
+  const isDragRef = useRef(false)
+  const [isOpen, setIsOpen] = useState(false)
 
-  const contexts = tagContext.contexts || []
-
-  const handleTagTitle = useCallback(
-    (title: string) => {
-      dispatch(
-        updateContext({
-          id: tagContext.id,
-          newContext: {
-            title,
-          },
-        })
-      )
+  const handleItemClick = useCallback(
+    (name: string) => () => {
+      switch (name) {
+        case 'add-new-tag':
+          dispatch(createNewTag(context.id))
+          break
+      }
     },
-    [dispatch, tagContext.id]
+    [context.id]
   )
 
-  const handleCompleteFocus = () => {
-    dispatch(selectContext(tagContext.id))
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    listeners?.onKeyDown(event)
   }
 
-  if (contexts.length === 0) return null
+  const handlePointerDown = (event: React.PointerEvent) => {
+    event.stopPropagation()
+    setTimeout(() => {
+      isDragRef.current && listeners?.onPointerDown(event)
+    }, 200)
+  }
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (event.buttons === 1) {
+      isDragRef.current = true
+    }
+  }
+
+  const handlePointerUp = () => {
+    isDragRef.current = false
+  }
 
   return (
-    <div className="flex flex-col gap-y-2">
-      <div className="flex gap-x-1">
-        <IoCaretDown className="mt-2.5 opacity-60" />
-        <AutoComplete
-          tagContextId={tagContext.id}
-          tagTitle={tagContext.title || ''}
-          hasFocus={selectedContextId === tagContext.id}
-          suggestions={tags}
-          onTitleChange={handleTagTitle}
-          onFocus={handleCompleteFocus}
+    <div ref={setNodeRef} className="flex gap-x-1">
+      {context.type !== 'tag' && (
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+          <DropdownMenuTrigger>
+            <span
+              className="h-[24px] w-[15px] rounded-sm hover:bg-accent hover:text-accent-foreground"
+              {...attributes}
+              onKeyDown={handleKeyDown}
+              onPointerDown={handlePointerDown}
+              onMouseMove={handleMouseMove}
+              onPointerUp={handlePointerUp}
+              onClick={(event) => {
+                event.stopPropagation()
+                setIsOpen(true)
+              }}
+            >
+              <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
+            </span>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent side="left" align="center" className="w-60">
+            {functionItems.map((item: CreateNode) => (
+              <DropdownMenuItem
+                key={item.name}
+                className="flex items-center gap-x-2.5"
+                onClick={handleItemClick(item.name)}
+              >
+                <Icon icon="mage:stars-b" fontSize={16} />
+                <span className="text-sm">{item.title}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <div className="px-2 text-xs text-card-foreground/50">
+              <p>Last edited by you</p>
+              <p>Todat at 2:23 AM</p>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+      {context.type === 'input' ? (
+        <TextPromptItem textPrompt={context} {...attributes} {...listeners} />
+      ) : context.type === 'flow' ? (
+        <FlowItem
+          key={context.id}
+          context={context}
+          {...attributes}
+          {...listeners}
         />
-      </div>
-      <div className="pl-2 flex flex-col gap-y-1">
-        {contexts.map((context) =>
-          context.type === 'input' ? (
-            <TextPromptItem key={context.id} textPrompt={context} />
-          ) : context.type === 'flow' ? (
-            <FlowItem key={context.id} context={context} />
-          ) : (
-            <></>
-          )
-        )}
-      </div>
+      ) : context.type === 'tag' ? (
+        <TagItem
+          key={context.id}
+          context={context}
+          {...attributes}
+          {...listeners}
+        />
+      ) : (
+        <></>
+      )}
+    </div>
+  )
+}
+
+const GroupContainer: React.FC<GroupContainerProps> = ({ context }) => {
+  const { setNodeRef } = useDroppable({
+    id: context.id,
+  })
+
+  return (
+    <div ref={setNodeRef} className="flex flex-col gap-y-2">
+      <GroupItem context={context} />
+      {context.contexts && (
+        <div className="pl-2 flex flex-col gap-y-1">
+          {context.contexts.map((context) => (
+            <GroupContainer key={context.id} context={context} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

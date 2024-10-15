@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import uuid from 'react-uuid'
 
-import { ContextNode, Tab, Tag } from '@/lib/types'
+import { ContextNode, Tab, Tag, Variable } from '@/lib/types'
 
 const dummyContexts: ContextNode[] = [
   {
@@ -9,6 +9,19 @@ const dummyContexts: ContextNode[] = [
     type: 'group',
     title: 'Default Context',
     contexts: [],
+  },
+]
+
+const dummyVariables: Variable[] = [
+  {
+    id: 'default_variable',
+    name: 'relationshipStatus',
+    value: '',
+  },
+  {
+    id: 'secondary_variable',
+    name: 'commercialStatus',
+    value: '',
   },
 ]
 
@@ -105,6 +118,7 @@ interface ContextState {
   contexts: ContextNode[]
   activeId: string | null
   selectedId: string | null
+  variables: Variable[]
   tags: Tag[]
   tabs: Tab[]
 }
@@ -113,6 +127,7 @@ const initialState: ContextState = {
   contexts: dummyContexts,
   activeId: dummyContexts[0].id,
   selectedId: null,
+  variables: dummyVariables,
   tags: dummyTags,
   tabs: dummyTabs,
 }

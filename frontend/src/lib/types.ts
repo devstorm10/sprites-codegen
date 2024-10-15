@@ -12,6 +12,12 @@ export interface ContextNode {
   contexts?: ContextNode[]
 }
 
+export interface Variable {
+  id: string
+  name: string
+  value: string
+}
+
 export interface Tag {
   id: string
   title: string

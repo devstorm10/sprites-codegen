@@ -1,11 +1,20 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
+import {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+  ReactNode,
+} from 'react'
 import { Mention, MentionsInput, SuggestionDataItem } from 'react-mentions'
+import { Icon } from '@iconify/react'
 
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { selectContext, updateContext } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
+
 import defaultStyle from './defaultStyle'
-import defaultMentionStyle from './Text/defaultMentionStyle'
+import defaultMentionStyle from './defaultMentionStyle'
 
 interface TextPromptProps {
   textPrompt: ContextNode
@@ -41,7 +50,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const varsToDisplay = useMemo(() => {
     return variables.map((variable) => ({
       id: variable.id,
-      display: `{{${variable.name}}}`,
+      display: variable.name,
     }))
   }, [variables])
 
@@ -54,12 +63,21 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
       focused: boolean
     ) => {
       const variable = variables[index]
-      // if (!variable) {
-      //   return suggestion.display
-      // }
-      return <div>{variable.name}</div>
+      return (
+        <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1">
+          <div className="flex items-center gap-x-1">
+            <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
+            <span className="rounded-sm px-1 text-sm">{variable.name}</span>
+          </div>
+          <Icon icon="ph:dots-three-bold" fontSize={16} />
+        </div>
+      )
     },
     [variables]
+  )
+
+  const renderSuggestionContainer = (children: ReactNode) => (
+    <div>{children}</div>
   )
 
   const displayTransformHandler = useCallback(
@@ -98,29 +116,26 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
 
   return (
     <div className="grow">
-      {isEditing ? (
-        <MentionsInput
-          inputRef={editorRef}
-          value={(data && data.content) || ''}
-          onChange={handleTextUpdate}
-          style={defaultStyle}
-        >
-          <Mention
-            trigger="{{"
-            data={varsToDisplay}
-            renderSuggestion={renderVarSuggestion}
-            style={defaultMentionStyle}
-            displayTransform={displayTransformHandler}
-          />
-        </MentionsInput>
-      ) : (
-        <pre
-          className="grow px-1 py-0.5 whitespace-pre-wrap font-inter text-sm outline-none rounded my-auto"
-          onClick={handleTextEdit}
-        >
-          {(data && data.content) || 'Write something here'}
-        </pre>
-      )}
+      <MentionsInput
+        inputRef={editorRef}
+        style={defaultStyle(isEditing)}
+        customSuggestionsContainer={renderSuggestionContainer}
+        value={
+          (data && data.content) || (isEditing ? '' : 'Write something here')
+        }
+        allowSuggestionsAboveCursor={true}
+        onChange={handleTextUpdate}
+        onFocus={handleTextEdit}
+      >
+        <Mention
+          markup="{{__display__}}"
+          trigger="{{"
+          data={varsToDisplay}
+          renderSuggestion={renderVarSuggestion}
+          displayTransform={displayTransformHandler}
+          style={defaultMentionStyle}
+        />
+      </MentionsInput>
     </div>
   )
 }

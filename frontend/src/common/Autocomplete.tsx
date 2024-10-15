@@ -30,7 +30,9 @@ const renderItem: RenderItem<Tag> = (item) => (
 )
 
 const renderContainer: RenderContainer = ({ list }) => (
-  <Card className="py-1 absolute min-w-[200px] rounded-lg mt-2">{list}</Card>
+  <Card className="py-1 absolute z-50 min-w-[200px] rounded-lg mt-2">
+    {list}
+  </Card>
 )
 
 const getSuggestionValue = (item: Tag) => item.title

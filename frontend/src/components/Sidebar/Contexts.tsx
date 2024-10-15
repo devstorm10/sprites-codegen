@@ -88,7 +88,7 @@ const ContextItem: React.FC<ContextItemProps> = ({
       {...listeners}
     >
       <span className="shrink-0">{CONTEXT_ICONS[type]} </span>
-      <p className="grow text-sm">
+      <p className="grow text-sm line-clamp-1">
         {type === 'input' ? (data && data.content) || title || '' : title}
       </p>
     </div>
