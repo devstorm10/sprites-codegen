@@ -253,15 +253,14 @@ const contextSlice = createSlice({
       state.tabs = action.payload
     },
     closeTab: (state: ContextState, action: PayloadAction<string>) => {
-      const closeTabId = action.payload
-      const closeTab = state.tabs.find((item) => item.id === closeTabId)
-      // if closing tab is not default context
-      if (closeTab && closeTabId !== state.activeId) {
-        state.tabs = state.tabs.filter((tab) => tab.id !== closeTabId)
-        if (closeTab.active && state.tabs.length > 0) {
-          state.tabs.slice(-1)[0].active = true
-        }
-      }
+      const tabId = action.payload
+      if (tabId === state.activeId) return
+      state.tabs = state.tabs
+        .filter((item) => item.id !== action.payload)
+        .map((item) =>
+          item.id === state.activeId ? { ...item, active: true } : item
+        )
+      state.selectedId = state.activeId
     },
     createActiveTab: (state: ContextState, action: PayloadAction<string>) => {
       const flowId = action.payload

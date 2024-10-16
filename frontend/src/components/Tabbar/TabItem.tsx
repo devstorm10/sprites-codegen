@@ -9,7 +9,7 @@ interface TabProps {
   onClick: () => void
   onClose: () => void
 }
-const TabItem: React.FC<TabProps> = ({ active, title, onClose }) => {
+const TabItem: React.FC<TabProps> = ({ active, title, onClick, onClose }) => {
   return (
     <div
       className={clsx(
@@ -17,12 +17,12 @@ const TabItem: React.FC<TabProps> = ({ active, title, onClose }) => {
         active ? 'bg-background' : ''
       )}
       title={title}
-      onClick={onClose}
+      onClick={onClick}
     >
       <span className="text-nowrap overflow-hidden text-ellipsis text-[14px]">
         {title}
       </span>
-      <IconButton>
+      <IconButton onClick={onClose}>
         <RxCross2 />
       </IconButton>
     </div>

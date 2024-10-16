@@ -166,7 +166,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [tagId, setTagId] = useState<string>(uuid())
   const [tagColor, setTagColor] = useState<string>(randomRgb())
-  const [suggestions, setSuggestions] = useState<Tag[]>([])
+  const [suggestions, setSuggestions] = useState<Tag[]>(initialSuggestions)
   const [selected, setSelected] = useState<Tag | undefined>()
 
   useEffect(() => {
@@ -238,13 +238,18 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
     if (!tagTitle) setIsOpen(false)
   }
 
+  const handleInputFocus = (event: any) => {
+    setIsOpen(true)
+    onFocus(event)
+  }
+
   const renderInput: RenderInput = useMemo(
     () => (props) => (
       <AutoCompleteInput
         id={`tag_${tagContextId}`}
         selected={selected}
         title={tagTitle}
-        onInputFocus={onFocus}
+        onInputFocus={handleInputFocus}
         {...props}
       />
     ),

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Reorder } from 'framer-motion'
 
 import TabItem from './TabItem'
@@ -15,13 +15,13 @@ import { Tab } from '@/lib/types'
 const Tabbar = () => {
   const dispatch = useAppDispatch()
   const tabs = useAppSelector((state) => state.context.tabs)
-  const activeTab = tabs.find((item) => item.active)
+  const activeTab = useMemo(() => tabs.find((item) => item.active), [tabs])
 
   useEffect(() => {
     if (activeTab?.id) {
       dispatch(selectContext(activeTab.id))
     }
-  }, [activeTab?.id])
+  }, [activeTab])
 
   const handleTabsUpdate = (tabs: Tab[]) => {
     dispatch(updateTabs(tabs))
