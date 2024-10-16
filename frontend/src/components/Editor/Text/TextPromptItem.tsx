@@ -5,7 +5,6 @@ import {
   useMemo,
   useCallback,
   ReactNode,
-  KeyboardEvent,
 } from 'react'
 import { Mention, MentionsInput, SuggestionDataItem } from 'react-mentions'
 import { Icon } from '@iconify/react'
@@ -14,7 +13,6 @@ import uuid from 'react-uuid'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { createVariable, selectContext, updateContext } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
-import { cn } from '@/lib/utils'
 
 import defaultStyle from './defaultStyle'
 import defaultMentionStyle from './defaultMentionStyle'
@@ -31,7 +29,6 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const { id, data } = textPrompt
   const editorRef = useRef<HTMLInputElement>(null)
   const [isEditing, setEditing] = useState<boolean>(false)
-  const [focusedIndex, setFocusedIndex] = useState<number>(0)
   const [inputSuggestion, setInputSuggestion] = useState<string>('')
 
   const totalVars = useMemo(
@@ -81,26 +78,24 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
       index: number,
       _focused: boolean
     ) => {
+      const variable = totalVars[index]
       return (
         <div
-          className={cn(
-            'flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1 rounded-[12px]',
-            {
-              'bg-muted': index === focusedIndex,
-            }
-          )}
+          className={
+            'flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1 rounded-[12px]'
+          }
         >
           <div className="flex items-center gap-x-1">
             <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
             <span className="rounded-sm px-1 text-[#319CFF] font-medium">
-              {suggestion.display}
+              {variable ? variable.name : suggestion.display}
             </span>
           </div>
           <Icon icon="ph:dots-three-bold" fontSize={16} />
         </div>
       )
     },
-    [totalVars, focusedIndex, inputSuggestion]
+    [totalVars]
   )
 
   const renderSuggestionContainer = useCallback(
@@ -118,24 +113,6 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
     [totalVars]
   )
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-        event.preventDefault()
-        if (event.key === 'ArrowDown') {
-          setFocusedIndex(
-            focusedIndex === totalVars.length - 1 ? 0 : focusedIndex + 1
-          )
-        } else if (event.key === 'ArrowUp') {
-          setFocusedIndex(
-            focusedIndex === 0 ? totalVars.length - 1 : focusedIndex - 1
-          )
-        }
-      }
-    },
-    [totalVars, focusedIndex]
-  )
-
   const handleEditorKeyUp = useCallback(() => {
     if (editorRef.current) {
       const currentCursor = editorRef.current.selectionStart || 0
@@ -147,10 +124,10 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
         )
       }
     }
-  }, [])
+  }, [editorRef])
 
   const handleMentionAdd = (id: string | number, display: string) => {
-    if (id === 'new_variable') {
+    if (id === 'new_variable' && display) {
       dispatch(
         createVariable({
           id: uuid(),
@@ -211,7 +188,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
         allowSuggestionsAboveCursor={true}
         onChange={handleTextUpdate}
         onFocus={handleTextEdit}
-        onKeyDownCapture={handleKeyDown}
+        // onKeyDownCapture={handleKeyDown}
         spellCheck={false}
       >
         <Mention

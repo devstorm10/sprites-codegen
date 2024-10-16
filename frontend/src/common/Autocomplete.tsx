@@ -184,21 +184,21 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
 
   const handleChange: AutocompletePureProps<Tag>['onChange'] = useCallback(
     (_event, { value, reason }) => {
-      const newTagTitle = value || 'New tag'
+      const newTagTitle = value
       onTitleChange(value)
 
       if (reason === 'INPUT') {
         const filteredTags = initialSuggestions.filter((tag) =>
           tag.title.toLowerCase().includes(value.toLowerCase())
         )
-        const newSuggestions = filteredTags.find(
-          (item) => item.title === newTagTitle
-        )
-          ? filteredTags
-          : [
-              ...filteredTags,
-              { id: tagId, title: newTagTitle, color: tagColor },
-            ]
+        const newSuggestions =
+          filteredTags.find((item) => item.title === newTagTitle) ||
+          !newTagTitle
+            ? filteredTags
+            : [
+                ...filteredTags,
+                { id: tagId, title: newTagTitle, color: tagColor },
+              ]
         setSuggestions(newSuggestions)
         if (newSuggestions.length > 0) setIsOpen(true)
       } else if (reason === 'ENTER') {

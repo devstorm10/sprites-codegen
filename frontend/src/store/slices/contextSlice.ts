@@ -155,6 +155,7 @@ const contextSlice = createSlice({
       )
       if (contextGroup) {
         contextGroup.contexts?.push(newContext)
+        state.selectedId = newContext.id
       }
     },
     createNewTag: (state: ContextState, action: PayloadAction<string>) => {

@@ -36,5 +36,11 @@ export default (isEditing: boolean, hasContent: boolean) => ({
     boxShadow: '0 0 16px rgba(0,0,0,0.04)',
     marginTop: 24,
     padding: 3,
+    item: {
+      '&focused': {
+        backgroundColor: 'hsl(240 4.8% 95.9%)',
+        borderRadius: 12,
+      },
+    },
   },
 })
