@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, forwardRef, useMemo } from 'react'
+import { ColorResult, SketchPicker } from 'react-color'
 import {
   AutocompletePure,
   AutocompletePureProps,
@@ -7,27 +8,109 @@ import {
   RenderContainer,
 } from 'react-autocomplete-pure'
 import { Icon } from '@iconify/react'
+import uuid from 'react-uuid'
 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
 import { Card } from '@/components/ui/card'
 import { Input, InputProps } from '@/components/ui/input'
+import { TrashIcon } from '@/components/icons/TrashIcon'
+import { useAppDispatch } from '@/store/store'
+import { createTagItem, deleteTagItem, updateTagItem } from '@/store/slices'
 import { Tag } from '@/lib/types'
+import { BsPalette } from 'react-icons/bs'
 
-const renderItem: RenderItem<Tag> = (item) => (
-  <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1">
-    <div className="flex items-center gap-x-1">
-      <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
-      <span
-        className="rounded-sm px-1 font-medium"
-        style={{
-          backgroundColor: item.color,
-        }}
-      >
-        {item.title}
-      </span>
+const randomColor = () => Math.floor(Math.random() * 256)
+
+const randomRgb = () =>
+  `rgb(${randomColor()}, ${randomColor()}, ${randomColor()})`
+
+const renderItem: (
+  onTagUpdate: (id: string, color: string) => void,
+  onTagDelete: (id: string) => void
+) => RenderItem<Tag> = (onTagUpdate, onTagDelete) => (item: Tag) => {
+  const [isMenuOpen, setMenuOpen] = useState<boolean>(false)
+  const [isPickerOpen, setPickerOpen] = useState<boolean>(false)
+  const [color, setColor] = useState<string>(item.color)
+
+  const handleChangeComplete = (color: ColorResult) => {
+    onTagUpdate(item.id, color.hex)
+  }
+
+  const handleDeleteClick = () => {
+    onTagDelete(item.id)
+  }
+
+  return (
+    <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1">
+      <div className="flex items-center gap-x-1">
+        <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
+        <span
+          className="rounded-sm px-1 font-medium"
+          style={{
+            backgroundColor: item.color,
+          }}
+        >
+          {item.title}
+        </span>
+      </div>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setMenuOpen}>
+        <DropdownMenuTrigger>
+          <span
+            className="h-5 w-5 rounded hover:bg-accent hover:text-accent-foreground"
+            onClick={(event) => {
+              event.stopPropagation()
+              setMenuOpen(true)
+            }}
+          >
+            <Icon icon="ph:dots-three-bold" fontSize={16} />
+          </span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          side="right"
+          align="center"
+          onClick={(e) => e.stopPropagation()}
+          onMouseLeave={() => setMenuOpen(false)}
+        >
+          <DropdownMenuSub open={isPickerOpen} onOpenChange={setPickerOpen}>
+            <DropdownMenuSubTrigger>
+              <div className="flex items-center gap-x-1">
+                <span className="w-5 h-5 flex items-center justify-center opacity-30">
+                  <BsPalette />
+                </span>
+                <span>Color</span>
+              </div>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent onMouseLeave={() => setPickerOpen(false)}>
+              <SketchPicker
+                color={color}
+                onChange={(color) => setColor(color.hex)}
+                onChangeComplete={handleChangeComplete}
+                className="!shadow-none"
+              />
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuItem
+              onClick={handleDeleteClick}
+              className="flex items-center gap-x-1"
+            >
+              <TrashIcon />
+              <span>Delete</span>
+            </DropdownMenuItem>
+          </DropdownMenuSub>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
-    <Icon icon="ph:dots-three-bold" fontSize={16} />
-  </div>
-)
+  )
+}
 
 const renderContainer: RenderContainer = ({ list }) => (
   <Card className="py-1 absolute z-50 min-w-[200px] rounded-[12px] mt-2 shadow-[0_0_16px_rgba(0,0,0,0.04)]">
@@ -79,7 +162,10 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   onFocus,
   onTitleChange,
 }) => {
+  const dispatch = useAppDispatch()
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [tagId, setTagId] = useState<string>(uuid())
+  const [tagColor, setTagColor] = useState<string>(randomRgb())
   const [suggestions, setSuggestions] = useState<Tag[]>([])
   const [selected, setSelected] = useState<Tag | undefined>()
 
@@ -94,20 +180,28 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
 
   useEffect(() => {
     setSelected(initialSuggestions.find((item) => item.title === tagTitle))
-  }, [tagTitle])
+  }, [tagTitle, initialSuggestions])
 
   const handleChange: AutocompletePureProps<Tag>['onChange'] = useCallback(
     (_event, { value, reason }) => {
+      const newTagTitle = value || 'New tag'
       onTitleChange(value)
 
       if (reason === 'INPUT') {
         const filteredTags = initialSuggestions.filter((tag) =>
           tag.title.toLowerCase().includes(value.toLowerCase())
         )
-        setSuggestions(filteredTags)
-        setIsOpen(Boolean(filteredTags.length))
+        const newSuggestions = filteredTags.find(
+          (item) => item.title === newTagTitle
+        )
+          ? filteredTags
+          : [
+              ...filteredTags,
+              { id: tagId, title: newTagTitle, color: tagColor },
+            ]
+        setSuggestions(newSuggestions)
+        if (newSuggestions.length > 0) setIsOpen(true)
       } else if (reason === 'ENTER') {
-        setIsOpen(false)
       }
     },
     [initialSuggestions, onTitleChange]
@@ -116,14 +210,32 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   const handleSelect: AutocompletePureProps<Tag>['onSelect'] = useCallback(
     (_event, { item }) => {
       const value = getSuggestionValue(item)
+      const tagItem = initialSuggestions.find((item) => item.title === value)
+      if (!tagItem) {
+        dispatch(createTagItem(item))
+        setTagId(uuid())
+        setTagColor(randomRgb())
+      }
       onTitleChange(value)
       setIsOpen(false)
     },
-    [onTitleChange]
+    [initialSuggestions, onTitleChange]
   )
 
+  const handleTagUpdate = (id: string, color: string) => {
+    setSuggestions(
+      suggestions.map((item) => (item.id === id ? { ...item, color } : item))
+    )
+    dispatch(updateTagItem({ id, tag: { color } }))
+  }
+
+  const handleTagDelete = (id: string) => {
+    setSuggestions(suggestions.filter((item) => item.id !== id))
+    dispatch(deleteTagItem(id))
+  }
+
   const handleClickOutside = (_event: Event) => {
-    setIsOpen(false)
+    if (!tagTitle) setIsOpen(false)
   }
 
   const renderInput: RenderInput = useMemo(
@@ -147,7 +259,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       onChange={handleChange}
       onSelect={handleSelect}
       onClickOutside={handleClickOutside}
-      renderItem={renderItem}
+      renderItem={renderItem(handleTagUpdate, handleTagDelete)}
       renderInput={renderInput}
       renderContainer={renderContainer}
       getSuggestionValue={getSuggestionValue}

@@ -12,6 +12,7 @@ export interface ContextNode {
   title?: string
   data?: Record<string, any>
   contexts?: ContextNode[]
+  collapsed?: boolean
 }
 
 export interface Variable {

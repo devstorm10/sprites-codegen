@@ -12,6 +12,7 @@ import {
 import GroupContainer from '@/components/Editor/GroupContainer'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { findContextNodeById, moveContext } from '@/store/slices'
+import { motion } from 'framer-motion'
 
 const ContextViewer: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -47,7 +48,7 @@ const ContextViewer: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
+    <motion.div className="flex flex-col gap-y-4" layout>
       <DndContext
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
@@ -63,7 +64,7 @@ const ContextViewer: React.FC = () => {
           ) : null}
         </DragOverlay>
       </DndContext>
-    </div>
+    </motion.div>
   )
 }
 

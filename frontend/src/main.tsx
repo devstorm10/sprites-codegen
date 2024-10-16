@@ -8,6 +8,17 @@ import store from '@/store/store.ts'
 
 import '@/index.css'
 
+const originalConsoleError = console.error
+console.error = (message, ...args) => {
+  if (
+    typeof message === 'string' &&
+    message.includes('defaultProps will be removed')
+  ) {
+    return
+  }
+  originalConsoleError.apply(console, [message, ...args])
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>

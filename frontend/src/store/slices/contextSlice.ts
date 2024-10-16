@@ -12,18 +12,7 @@ const dummyContexts: ContextNode[] = [
   },
 ]
 
-const dummyVariables: Variable[] = [
-  {
-    id: 'default_variable',
-    name: 'relationshipStatus',
-    value: '',
-  },
-  {
-    id: 'secondary_variable',
-    name: 'commercialStatus',
-    value: '',
-  },
-]
+const dummyVariables: Variable[] = []
 
 const dummyTags: Tag[] = [
   {
@@ -152,6 +141,7 @@ const contextSlice = createSlice({
       )
       if (contextGroup) {
         contextGroup.contexts?.push(newContext)
+        state.selectedId = newContext.id
       }
     },
     createFlow: (state: ContextState) => {
@@ -179,6 +169,20 @@ const contextSlice = createSlice({
         }
         Object.assign(targetContext, newTagContext)
       }
+    },
+    createTagItem: (state: ContextState, action: PayloadAction<Tag>) => {
+      state.tags.push(action.payload)
+    },
+    updateTagItem: (
+      state: ContextState,
+      action: PayloadAction<{ id: string; tag: Partial<Tag> }>
+    ) => {
+      state.tags = state.tags.map((tag) =>
+        tag.id === action.payload.id ? { ...tag, ...action.payload.tag } : tag
+      )
+    },
+    deleteTagItem: (state: ContextState, action: PayloadAction<string>) => {
+      state.tags = state.tags.filter((tag) => tag.id === action.payload)
     },
     updateContext: (
       state: ContextState,
@@ -247,6 +251,17 @@ const contextSlice = createSlice({
     updateTabs: (state: ContextState, action: PayloadAction<Tab[]>) => {
       state.tabs = action.payload
     },
+    closeTab: (state: ContextState, action: PayloadAction<string>) => {
+      const closeTabId = action.payload
+      const closeTab = state.tabs.find((item) => item.id === closeTabId)
+      // if closing tab is not default context
+      if (closeTab && closeTabId !== state.activeId) {
+        state.tabs = state.tabs.filter((tab) => tab.id !== closeTabId)
+        if (closeTab.active && state.tabs.length > 0) {
+          state.tabs.slice(-1)[0].active = true
+        }
+      }
+    },
     createActiveTab: (state: ContextState, action: PayloadAction<string>) => {
       const flowId = action.payload
       const flowContext = findContextNodeById(state.contexts, flowId)
@@ -269,6 +284,9 @@ const contextSlice = createSlice({
         active: item.id === action.payload,
       }))
     },
+    createVariable: (state: ContextState, action: PayloadAction<Variable>) => {
+      state.variables.push(action.payload)
+    },
   },
 })
 
@@ -276,12 +294,17 @@ export const {
   createTextPrompt,
   createFlow,
   createNewTag,
+  createTagItem,
+  updateTagItem,
+  deleteTagItem,
   updateContext,
   selectContext,
   moveContext,
   updateTabs,
+  closeTab,
   createActiveTab,
   setActiveTab,
+  createVariable,
 } = contextSlice.actions
 
 export default contextSlice.reducer

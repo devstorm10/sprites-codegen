@@ -4,7 +4,12 @@ import { Reorder } from 'framer-motion'
 import TabItem from './TabItem'
 import AddTabButton from './AddTabButton'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { selectContext, setActiveTab, updateTabs } from '@/store/slices'
+import {
+  closeTab,
+  selectContext,
+  setActiveTab,
+  updateTabs,
+} from '@/store/slices'
 import { Tab } from '@/lib/types'
 
 const Tabbar = () => {
@@ -26,6 +31,10 @@ const Tabbar = () => {
     dispatch(setActiveTab(id))
   }
 
+  const handleTabClose = (id: string) => () => {
+    dispatch(closeTab(id))
+  }
+
   return (
     <div className="bg-muted flex">
       <Reorder.Group
@@ -40,6 +49,7 @@ const Tabbar = () => {
               active={tab.active}
               title={tab.title}
               onClick={handleTabItemClick(tab.id)}
+              onClose={handleTabClose(tab.id)}
             />
           </Reorder.Item>
         ))}

@@ -5,13 +5,16 @@ import {
   useMemo,
   useCallback,
   ReactNode,
+  KeyboardEvent,
 } from 'react'
 import { Mention, MentionsInput, SuggestionDataItem } from 'react-mentions'
 import { Icon } from '@iconify/react'
+import uuid from 'react-uuid'
 
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { selectContext, updateContext } from '@/store/slices'
+import { createVariable, selectContext, updateContext } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 import defaultStyle from './defaultStyle'
 import defaultMentionStyle from './defaultMentionStyle'
@@ -28,6 +31,16 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const { id, data } = textPrompt
   const editorRef = useRef<HTMLInputElement>(null)
   const [isEditing, setEditing] = useState<boolean>(false)
+  const [focusedIndex, setFocusedIndex] = useState<number>(0)
+  const [inputSuggestion, setInputSuggestion] = useState<string>('')
+
+  const totalVars = useMemo(
+    () => [
+      ...variables,
+      { id: 'new_variable', name: inputSuggestion, value: '' },
+    ],
+    [variables, inputSuggestion]
+  )
 
   const handleTextUpdate = (event: { target: { value: string } }) => {
     dispatch(
@@ -43,60 +56,129 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   }
 
   const handleTextEdit = () => {
-    setEditing(true)
-    dispatch(selectContext(id))
+    if (!isEditing) {
+      setEditing(true)
+      dispatch(selectContext(id))
+    }
   }
 
-  const varsToDisplay = useMemo(() => {
-    return variables.map((variable) => ({
-      id: variable.id,
-      display: variable.name,
-    }))
-  }, [variables])
+  const varsToDisplay = useMemo(
+    () =>
+      totalVars
+        .filter((v) => v.name)
+        .map((variable) => ({
+          id: variable.id,
+          display: variable.name,
+        })),
+    [totalVars]
+  )
 
   const renderVarSuggestion = useCallback(
     (
-      _suggestion: SuggestionDataItem,
+      suggestion: SuggestionDataItem,
       _search: string,
       _highlightedDisplay: React.ReactNode,
       index: number,
       _focused: boolean
     ) => {
-      const variable = variables[index]
       return (
-        <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1 rounded-[12px]">
+        <div
+          className={cn(
+            'flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1 rounded-[12px]',
+            {
+              'bg-muted': index === focusedIndex,
+            }
+          )}
+        >
           <div className="flex items-center gap-x-1">
             <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
             <span className="rounded-sm px-1 text-[#319CFF] font-medium">
-              {variable.name}
+              {suggestion.display}
             </span>
           </div>
           <Icon icon="ph:dots-three-bold" fontSize={16} />
         </div>
       )
     },
-    [variables]
+    [totalVars, focusedIndex, inputSuggestion]
   )
 
-  const renderSuggestionContainer = (children: ReactNode) => (
-    <div>{children}</div>
+  const renderSuggestionContainer = useCallback(
+    (children: ReactNode) => (
+      <div style={{ display: children ? 'block' : 'none' }}>{children}</div>
+    ),
+    []
   )
 
   const displayTransformHandler = useCallback(
     (id: string, display: string) => {
-      const variable = variables.find((item) => item.id === id)
+      const variable = totalVars.find((item) => item.id === id)
       return `{{${variable?.name || display}}}`
     },
-    [variables]
+    [totalVars]
   )
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault()
+        if (event.key === 'ArrowDown') {
+          setFocusedIndex(
+            focusedIndex === totalVars.length - 1 ? 0 : focusedIndex + 1
+          )
+        } else if (event.key === 'ArrowUp') {
+          setFocusedIndex(
+            focusedIndex === 0 ? totalVars.length - 1 : focusedIndex - 1
+          )
+        }
+      }
+    },
+    [totalVars, focusedIndex]
+  )
+
+  const handleEditorKeyUp = useCallback(() => {
+    if (editorRef.current) {
+      const currentCursor = editorRef.current.selectionStart || 0
+      const textUpToCursor = editorRef.current.value.substring(0, currentCursor)
+      const lastOpenBraceIndex = textUpToCursor.lastIndexOf('{{')
+      if (lastOpenBraceIndex !== -1 && lastOpenBraceIndex < currentCursor) {
+        setInputSuggestion(
+          textUpToCursor.substring(lastOpenBraceIndex + 2, currentCursor)
+        )
+      }
+    }
+  }, [])
+
+  const handleMentionAdd = (id: string | number, display: string) => {
+    if (id === 'new_variable') {
+      dispatch(
+        createVariable({
+          id: uuid(),
+          name: display,
+          value: '',
+        })
+      )
+    }
+  }
 
   useEffect(() => {
     if (id === selectedContextId) {
       setEditing(true)
-    } else {
+    } else if (isEditing) {
       setEditing(false)
     }
-  }, [id, selectedContextId])
+  }, [id, selectedContextId, isEditing])
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.addEventListener('keyup', handleEditorKeyUp)
+    }
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.removeEventListener('keyup', handleEditorKeyUp)
+      }
+    }
+  }, [editorRef])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -129,6 +211,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
         allowSuggestionsAboveCursor={true}
         onChange={handleTextUpdate}
         onFocus={handleTextEdit}
+        onKeyDownCapture={handleKeyDown}
         spellCheck={false}
       >
         <Mention
@@ -138,6 +221,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
           renderSuggestion={renderVarSuggestion}
           displayTransform={displayTransformHandler}
           style={defaultMentionStyle}
+          onAdd={handleMentionAdd}
         />
       </MentionsInput>
     </div>

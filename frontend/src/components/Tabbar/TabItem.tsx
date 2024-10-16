@@ -7,8 +7,9 @@ interface TabProps {
   active?: boolean
   title: string
   onClick: () => void
+  onClose: () => void
 }
-const TabItem: React.FC<TabProps> = ({ active, title, onClick }) => {
+const TabItem: React.FC<TabProps> = ({ active, title, onClose }) => {
   return (
     <div
       className={clsx(
@@ -16,7 +17,7 @@ const TabItem: React.FC<TabProps> = ({ active, title, onClick }) => {
         active ? 'bg-background' : ''
       )}
       title={title}
-      onClick={onClick}
+      onClick={onClose}
     >
       <span className="text-nowrap overflow-hidden text-ellipsis text-[14px]">
         {title}

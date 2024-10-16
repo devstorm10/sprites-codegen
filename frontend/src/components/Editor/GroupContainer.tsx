@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { Icon } from '@iconify/react'
+import { AnimatePresence, motion } from 'framer-motion'
 
 import TextPromptItem from './Text/TextPromptItem'
 import FlowItem from './Flow/FlowItem'
@@ -48,7 +49,7 @@ interface GroupContainerProps {
 
 const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
   const dispatch = useAppDispatch()
-  const { attributes, listeners, setNodeRef } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: context.id,
   })
   const isDragRef = useRef(false)
@@ -73,7 +74,7 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
     event.stopPropagation()
     setTimeout(() => {
       isDragRef.current && listeners?.onPointerDown(event)
-    }, 200)
+    }, 100)
   }
 
   const handleMouseMove = (event: React.MouseEvent) => {
@@ -87,7 +88,14 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
   }
 
   return (
-    <div ref={setNodeRef} className="flex items-start gap-x-1">
+    <motion.div
+      ref={setNodeRef}
+      className="flex items-start gap-x-1"
+      style={{
+        opacity: isDragging ? 0.5 : 1.0,
+      }}
+      layout
+    >
       {context.type !== 'tag' && (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger
@@ -151,7 +159,7 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
       ) : (
         <></>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -161,16 +169,30 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ context }) => {
   })
 
   return (
-    <div ref={setNodeRef} className="flex flex-col gap-y-2">
+    <motion.div ref={setNodeRef} className="flex flex-col gap-y-2" layout>
       <GroupItem context={context} />
-      {context.contexts && (
-        <div className="pl-2 flex flex-col gap-y-1">
-          {context.contexts.map((context) => (
-            <GroupContainer key={context.id} context={context} />
-          ))}
-        </div>
-      )}
-    </div>
+      <AnimatePresence>
+        {!context.collapsed && context.contexts && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{
+              opacity: 0,
+              height: 0,
+              transformOrigin: 'top',
+              transition: {
+                opacity: { duration: 0.2 },
+              },
+            }}
+            className="pl-2 flex flex-col gap-y-1"
+          >
+            {context.contexts.map((context) => (
+              <GroupContainer key={context.id} context={context} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
