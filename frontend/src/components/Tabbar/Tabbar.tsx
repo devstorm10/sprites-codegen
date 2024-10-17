@@ -21,7 +21,7 @@ const Tabbar = () => {
     if (activeTab?.id) {
       dispatch(selectContext(activeTab.id))
     }
-  }, [activeTab])
+  }, [activeTab?.id])
 
   const handleTabsUpdate = (tabs: Tab[]) => {
     dispatch(updateTabs(tabs))

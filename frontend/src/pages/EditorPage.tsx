@@ -16,7 +16,7 @@ const EditorPage = () => {
       {selectedContext?.type === 'flow' ? (
         <FlowViewer />
       ) : (
-        <div className="py-6 px-8 flex flex-col overflow-y-auto">
+        <div className="py-6 px-8 flex flex-col overflow-y-auto flex-1">
           <MainSettings />
           <div className="mt-[64px]">
             <CreateButton />

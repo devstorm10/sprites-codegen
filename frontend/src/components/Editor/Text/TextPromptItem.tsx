@@ -75,10 +75,9 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
       suggestion: SuggestionDataItem,
       _search: string,
       _highlightedDisplay: React.ReactNode,
-      index: number,
+      _index: number,
       _focused: boolean
     ) => {
-      const variable = totalVars[index]
       return (
         <div
           className={
@@ -88,14 +87,14 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
           <div className="flex items-center gap-x-1">
             <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
             <span className="rounded-sm px-1 text-[#319CFF] font-medium">
-              {variable ? variable.name : suggestion.display}
+              {suggestion.display}
             </span>
           </div>
           <Icon icon="ph:dots-three-bold" fontSize={16} />
         </div>
       )
     },
-    [totalVars]
+    []
   )
 
   const renderSuggestionContainer = useCallback(
@@ -155,7 +154,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
         editorRef.current.removeEventListener('keyup', handleEditorKeyUp)
       }
     }
-  }, [editorRef])
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -188,7 +187,6 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
         allowSuggestionsAboveCursor={true}
         onChange={handleTextUpdate}
         onFocus={handleTextEdit}
-        // onKeyDownCapture={handleKeyDown}
         spellCheck={false}
       >
         <Mention
