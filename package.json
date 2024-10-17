@@ -13,6 +13,7 @@
     "storybook": "npm run --prefix frontend storybook",
     "docker-stop": "npm run --prefix backend docker-stop",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build": "npm run build:backend",
     "start": "npm run start:backend",
     "format": "prettier --write \"backend/**/*.{js,css,ts,tsx,jsx}\" \"frontend/**/*.{js,css,ts,tsx,jsx}\"",
     "prepare": "husky"
