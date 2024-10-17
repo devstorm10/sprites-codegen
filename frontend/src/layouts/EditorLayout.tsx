@@ -13,9 +13,9 @@ const EditorLayout = () => {
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-clip">
+    <div className="flex flex-col flex-1 overflow-y-auto">
       <Titlebar toggleChatPanel={toggleChatPanel} isOpen={isOpen} />
-      <div className="flex-1 flex h-full">
+      <div className="flex-1 flex h-full overflow-y-auto">
         <Sidebar />
         <div className="flex-1">
           <Outlet />

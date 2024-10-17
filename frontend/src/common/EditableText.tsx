@@ -4,14 +4,16 @@ interface EditableTextProps {
   text: string
   onChange: (newText: string) => void
   className?: string
+  editing?: boolean
 }
 
 const EditableText: React.FC<EditableTextProps> = ({
   text,
   onChange,
   className = '',
+  editing = false,
 }) => {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(editing)
   const inputRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
