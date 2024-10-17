@@ -39,3 +39,8 @@ export interface CreateNode {
   title: string
   name: string
 }
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  message: string
+}

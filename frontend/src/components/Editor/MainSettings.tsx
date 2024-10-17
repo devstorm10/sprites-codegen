@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { ChangeEvent, useRef, useState } from 'react'
 import { FiSettings } from 'react-icons/fi'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
 
@@ -31,7 +31,7 @@ const dummyConvStarters: string[] = [
 type ChipItemProps = {
   editing?: boolean
   content: string
-  onContentChange: (value: string) => void
+  onContentChange?: (value: string) => void
 }
 
 type ConverChipItemProps = ChipItemProps & {
@@ -44,11 +44,11 @@ type AddButtonProps = {
 
 const StepChipItem: React.FC<ChipItemProps> = ({
   content,
-  onContentChange,
+  onContentChange = () => {},
   editing = false,
 }) => {
   return (
-    <Card className="py-2.5 px-4 shadow-[0_0_4px_rgba(0,0,0,0.25)] flex items-center gap-x-2.5 rounded-2xl">
+    <Card className="py-2.5 px-4 drop-shadow-[0_0_12px_0_rgba(0,0,0,0.25)] flex items-center gap-x-2.5 rounded-[20px]">
       <SparkleIcon />
       <EditableText
         text={content}
@@ -60,31 +60,23 @@ const StepChipItem: React.FC<ChipItemProps> = ({
   )
 }
 
-// const BaseChipItem: React.FC<ChipItemProps> = ({
-//   content,
-//   onContentChange,
-// }) => {
-//   return (
-//     <Card className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2 rounded-2xl text-muted">
-//       <ClipIcon />
-//       <EditableText
-//         text={content}
-//         onChange={onContentChange}
-//         className="font-bold"
-//       />
-//     </Card>
-//   )
-// }
+const BaseChipItem: React.FC<ChipItemProps> = ({ content }) => {
+  return (
+    <Card className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2 rounded-2xl">
+      <p className="font-bold">{content}</p>
+    </Card>
+  )
+}
 
 const ConvChipItem: React.FC<ConverChipItemProps> = ({
   content,
-  onContentChange,
+  onContentChange = () => {},
   onItemDelete,
   editing = false,
 }) => {
   return (
     <div className="flex gap-x-1">
-      <Card className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2 rounded-2xl text-muted">
+      <Card className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2 rounded-[20px] text-muted">
         <EditableText
           text={content}
           onChange={onContentChange}
@@ -93,7 +85,7 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
         />
       </Card>
       <Card
-        className="p-3.5 rounded-xl text-black/30 cursor-pointer hover:bg-secondary-100/10"
+        className="p-3.5 rounded-[20px] text-black/30 cursor-pointer hover:bg-secondary-100/10"
         onClick={onItemDelete}
       >
         <TrashIcon />
@@ -105,7 +97,7 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
 const AddButton: React.FC<AddButtonProps> = ({ onClick }) => {
   return (
     <Card
-      className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2.5 rounded-2xl text-sm text-[#B1B0AF] font-medium hover:bg-secondary-100/5 cursor-pointer"
+      className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2.5 rounded-[20px] text-sm text-[#B1B0AF] font-medium hover:bg-secondary-100/5 cursor-pointer"
       onClick={onClick}
     >
       <FaPlus />
@@ -115,6 +107,7 @@ const AddButton: React.FC<AddButtonProps> = ({ onClick }) => {
 }
 
 const MainSettings: React.FC = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [addingPreStepId, setAddingPreStepId] = useState<number>(-1)
   const [addingPostStepId, setAddingPostStepId] = useState<number>(-1)
@@ -139,10 +132,11 @@ const MainSettings: React.FC = () => {
     )
   }
 
-  const handleKnowledgeBaseChange = (index: number) => (value: string) => {
-    setKnowledgeBases(
-      knowledgeBases.map((step, idx) => (idx === index ? value : step))
-    )
+  const handleKnowledgeBaseChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const filename = event.target.files[0].name
+      setKnowledgeBases([...knowledgeBases, filename])
+    }
   }
 
   const handleConvItemChange = (index: number) => (value: string) => {
@@ -166,7 +160,9 @@ const MainSettings: React.FC = () => {
     setAddingPostStepId(postDialogSteps.length)
   }
 
-  const handleAddKnowledgeClick = () => {}
+  const handleAddKnowledgeClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click()
+  }
 
   const handleAddConvItemClick = () => {
     setConvStarters([...convStarters, ''])
@@ -223,12 +219,8 @@ const MainSettings: React.FC = () => {
         <Card className="py-2 px-4 shadow-none">
           <p className="text-secondary-100 font-bold">Knowledge base</p>
           <div className="mt-2.5 flex gap-2 flex-wrap">
-            {knowledgeBases.map((step, idx) => (
-              <StepChipItem
-                key={idx}
-                content={step}
-                onContentChange={handleKnowledgeBaseChange(idx)}
-              />
+            {knowledgeBases.map((knowbase, idx) => (
+              <BaseChipItem key={idx} content={knowbase} />
             ))}
             <Card
               className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2.5 rounded-2xl text-sm text-[#B1B0AF] font-medium hover:bg-secondary-100/5 cursor-pointer"
@@ -237,6 +229,12 @@ const MainSettings: React.FC = () => {
               <ClipIcon />
               <p>Add new file</p>
             </Card>
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleKnowledgeBaseChange}
+              hidden
+            />
           </div>
         </Card>
         <Card className="py-2 px-4 shadow-none flex flex-col gap-y-2.5">
