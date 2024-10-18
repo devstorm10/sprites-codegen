@@ -144,9 +144,9 @@ const contextSlice = createSlice({
         state.selectedId = newContext.id
       }
     },
-    createFlow: (state: ContextState) => {
+    createFlow: (state: ContextState, action: PayloadAction<string>) => {
       const newContext: ContextNode = {
-        id: uuid(),
+        id: action.payload || uuid(),
         type: 'flow',
         title: 'Flow',
       }

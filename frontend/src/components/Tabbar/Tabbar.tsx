@@ -44,7 +44,7 @@ const Tabbar = () => {
         onReorder={handleTabsUpdate}
       >
         {tabs.map((tab) => (
-          <Reorder.Item key={tab.title} value={tab}>
+          <Reorder.Item key={tab.id} value={tab}>
             <TabItem
               active={tab.active}
               title={tab.title}

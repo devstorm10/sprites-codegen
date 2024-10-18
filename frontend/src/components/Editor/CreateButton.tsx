@@ -1,5 +1,7 @@
 import { FaPlus } from 'react-icons/fa6'
+import uuid from 'react-uuid'
 
+import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,9 +10,8 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { useAppDispatch } from '@/store/store'
-import { createFlow, createTextPrompt } from '@/store/slices'
+import { createFlow, createFlowView, createTextPrompt } from '@/store/slices'
 import { CreateNode } from '@/lib/types'
-import { SparkleIcon } from '../icons/SparkleIcon'
 
 const createItems: CreateNode[] = [
   {
@@ -56,7 +57,9 @@ const CreateButton: React.FC = () => {
         dispatch(createTextPrompt())
         break
       case 'flow':
-        dispatch(createFlow())
+        const flowId = uuid()
+        dispatch(createFlow(flowId))
+        dispatch(createFlowView(flowId))
         break
     }
   }

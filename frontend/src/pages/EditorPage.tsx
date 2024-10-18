@@ -1,3 +1,5 @@
+import { ReactFlowProvider } from 'reactflow'
+
 import CreateButton from '@/components/Editor/CreateButton'
 import ContextViewer from '@/components/Editor/ContextViewer'
 import { useAppSelector } from '@/store/store'
@@ -14,7 +16,9 @@ const EditorPage = () => {
   return (
     <div className="h-full flex flex-col overflow-y-auto">
       {selectedContext?.type === 'flow' ? (
-        <FlowViewer />
+        <ReactFlowProvider>
+          <FlowViewer flowContext={selectedContext} />
+        </ReactFlowProvider>
       ) : (
         <div className="py-6 px-8 flex flex-col overflow-y-auto flex-1">
           <MainSettings />

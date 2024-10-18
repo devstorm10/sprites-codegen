@@ -38,16 +38,15 @@ export const getLayoutedElements = async (
       id: edge.id,
       source: edge.sources[0],
       target: edge.targets[0],
-      animated: true,
       markerEnd: {
-        type: MarkerType.ArrowClosed,
+        type: MarkerType.Arrow,
         width: 20,
         height: 20,
-        color: '#FF0072',
+        color: 'black',
       },
       style: {
-        strokeWidth: 2,
-        stroke: '#FF0072',
+        strokeWidth: 1,
+        stroke: 'black',
       },
     })) as Edge[],
   }
