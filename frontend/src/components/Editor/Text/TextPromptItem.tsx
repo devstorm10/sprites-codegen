@@ -99,7 +99,9 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
 
   const renderSuggestionContainer = useCallback(
     (children: ReactNode) => (
-      <div style={{ display: children ? 'block' : 'none' }}>{children}</div>
+      <div style={{ display: children ? 'block' : 'none' }} className="z-[100]">
+        {children}
+      </div>
     ),
     []
   )

@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { Handle, Position } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
 import EditableText from '@/common/EditableText'
@@ -14,7 +15,6 @@ import {
 import { Card } from '@/components/ui/card'
 import { CreateNode, FlowNodeData } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Handle, Position } from 'reactflow'
 
 type FlowTriggerProps = {
   data: FlowNodeData
@@ -72,7 +72,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({
           <TrashIcon />
         </div>
       </div>
-      <div className="h-0.5 border" />
+      <div className="h-0.5 border-t" />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <span className="py-3 px-4 flex items-center gap-x-2.5 rounded-[20px] text-secondary-100/50 text-sm font-medium border">

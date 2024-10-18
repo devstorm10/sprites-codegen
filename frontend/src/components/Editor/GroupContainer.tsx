@@ -88,13 +88,12 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
   }
 
   return (
-    <motion.div
+    <div
       ref={setNodeRef}
       className="flex items-start gap-x-1"
       style={{
         opacity: isDragging ? 0.5 : 1.0,
       }}
-      layout
     >
       {context.type !== 'tag' && (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -159,7 +158,7 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
       ) : (
         <></>
       )}
-    </motion.div>
+    </div>
   )
 }
 
@@ -169,7 +168,7 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ context }) => {
   })
 
   return (
-    <motion.div ref={setNodeRef} className="flex flex-col gap-y-2" layout>
+    <div ref={setNodeRef} className="flex flex-col gap-y-2">
       <GroupItem context={context} />
       <AnimatePresence>
         {!context.collapsed && context.contexts && (
@@ -192,7 +191,7 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ context }) => {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   )
 }
 
