@@ -1,17 +1,18 @@
 import { ChangeEvent, KeyboardEvent, useState } from 'react'
 import { FaAngleDoubleRight } from 'react-icons/fa'
 import { BsThreeDots } from 'react-icons/bs'
-import { AiOutlineOpenAI } from 'react-icons/ai'
 import { motion } from 'framer-motion'
 
 import Input from '@/common/Input'
 
 import ChatPanelWrapper from './ChatPanelWrapper'
+import sendMessage from './sendMessage'
 import { MicIcon } from '../icons/MicIcon'
 import { ImageIcon } from '../icons/ImageIcon'
 import { SendIcon } from '../icons/SendIcon'
 import { ChatMessage } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import Favicon from '/favicon.png'
 
 type ChatMessagesProps = {
   messages: ChatMessage[]
@@ -28,20 +29,27 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
           exit={{ opacity: 0, y: -30 }}
           transition={{ duration: 0.3 }}
           className={cn(
-            'max-w-[80%] py-2 px-4 rounded-full text-sm flex items-center',
+            'py-2 px-4 rounded-full text-sm flex',
             message.role === 'user' ? 'self-end' : 'self-start',
-            { 'bg-secondary-100/10': message.role === 'user' }
+            { 'max-w-[80%] bg-secondary-100/10': message.role === 'user' }
           )}
           layout
         >
           <span
-            className={cn('mr-2 text-lg', {
+            className={cn('shrink-0 mr-2 text-lg w-7 h-7', {
               hidden: message.role === 'user',
             })}
           >
-            <AiOutlineOpenAI />
+            <img src={Favicon} />
           </span>
-          {message.message}
+          {message.role === 'user' ? (
+            message.message
+          ) : (
+            <pre
+              className="whitespace-pre-wrap font-inter"
+              dangerouslySetInnerHTML={{ __html: message.message }}
+            />
+          )}
         </motion.div>
       ))}
     </motion.div>
@@ -51,6 +59,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
 const ChatPanel: React.FC = () => {
   const [chatValue, setChatValue] = useState<string>('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoading, setLoading] = useState<boolean>(false)
 
   const handleChatChange = (e: ChangeEvent<HTMLInputElement>) => {
     setChatValue(e.target.value)
@@ -58,15 +67,33 @@ const ChatPanel: React.FC = () => {
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      setMessages([...messages, { role: 'user', message: chatValue }])
-      setChatValue('')
-      setTimeout(() => {
-        setMessages((messages) => [
-          ...messages,
-          { role: 'assistant', message: 'How can I assist you?' },
-        ])
-      }, 500)
+      handleSubmit()
     }
+  }
+
+  const handleSubmit = () => {
+    if (!chatValue) return
+    const newMessages: ChatMessage[] = [
+      ...messages,
+      { role: 'user', message: chatValue },
+    ]
+    setMessages(newMessages)
+    setLoading(true)
+    sendMessage(chatValue)
+      .then((response: string) => {
+        const formattedResponse = response.replace(
+          /\*\*(.*?)\*\*/g,
+          '<b>$1</b>'
+        )
+        setMessages([
+          ...newMessages,
+          { role: 'assistant', message: formattedResponse },
+        ])
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+    setChatValue('')
   }
 
   return (
@@ -100,8 +127,12 @@ const ChatPanel: React.FC = () => {
               value={chatValue}
               onChange={handleChatChange}
               onKeyDown={handleKeyDown}
+              disabled={isLoading}
             />
-            <button className="w-[35px] h-[35px] flex justify-center items-center rounded-lg hover:bg-muted">
+            <button
+              className="w-[35px] h-[35px] flex justify-center items-center rounded-lg hover:bg-muted"
+              onClick={handleSubmit}
+            >
               <SendIcon />
             </button>
           </div>
