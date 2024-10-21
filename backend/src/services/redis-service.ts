@@ -10,8 +10,7 @@ class RedisService {
     console.log('Redis Port:', process.env.REDIS_PORT)
 
     if (!RedisService.instance) {
-      RedisService.instance = new Redis({
-        path: process.env.REDIS_URL,
+      RedisService.instance = new Redis(process.env.REDIS_URL as string, {
         tls: {
           rejectUnauthorized: false,
         },
