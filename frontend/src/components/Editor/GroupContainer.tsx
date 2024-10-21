@@ -87,6 +87,8 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
     isDragRef.current = false
   }
 
+  if (context.type === 'flow_node') return <></>
+
   return (
     <div
       ref={setNodeRef}

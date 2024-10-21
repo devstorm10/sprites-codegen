@@ -19,6 +19,7 @@ import {
   createActiveTab,
   setActiveTab,
   searchContextsByKeyword,
+  findParentContextNodeById,
 } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
@@ -126,8 +127,22 @@ const Contexts: React.FC = () => {
   useEffect(() => {
     if (selectedContextId) {
       const selectedContext = findContextNodeById(contexts, selectedContextId)
-      if (selectedContext && selectedContext.type === 'flow') {
-        dispatch(createActiveTab(selectedContextId))
+      if (
+        selectedContext &&
+        (selectedContext.type === 'flow' ||
+          selectedContext.type === 'flow_node')
+      ) {
+        const parentContext = findParentContextNodeById(
+          contexts,
+          selectedContextId
+        )
+        dispatch(
+          createActiveTab(
+            selectedContext.type === 'flow'
+              ? selectedContextId
+              : parentContext?.id || ''
+          )
+        )
       } else {
         dispatch(setActiveTab(defaultContextId || ''))
       }

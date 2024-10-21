@@ -25,6 +25,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const dispatch = useAppDispatch()
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
   const variables = useAppSelector((state) => state.context.variables)
+  const isPromptbar = useAppSelector((state) => state.setting.isPromptbar)
 
   const { id, data } = textPrompt
   const editorRef = useRef<HTMLInputElement>(null)
@@ -55,7 +56,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const handleTextEdit = () => {
     if (!isEditing) {
       setEditing(true)
-      dispatch(selectContext(id))
+      if (!isPromptbar) dispatch(selectContext(id))
     }
   }
 
@@ -120,9 +121,20 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
       const textUpToCursor = editorRef.current.value.substring(0, currentCursor)
       const lastOpenBraceIndex = textUpToCursor.lastIndexOf('{{')
       if (lastOpenBraceIndex !== -1 && lastOpenBraceIndex < currentCursor) {
-        setInputSuggestion(
-          textUpToCursor.substring(lastOpenBraceIndex + 2, currentCursor)
+        const suggestion = textUpToCursor.substring(
+          lastOpenBraceIndex + 2,
+          currentCursor
         )
+        if (suggestion.endsWith('}}')) {
+          dispatch(
+            createVariable({
+              id: uuid(),
+              name: suggestion.slice(0, suggestion.length - 2),
+              value: '',
+            })
+          )
+        }
+        setInputSuggestion(suggestion)
       }
     }
   }, [editorRef])
@@ -140,12 +152,13 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   }
 
   useEffect(() => {
+    if (isPromptbar) return
     if (id === selectedContextId) {
       setEditing(true)
     } else if (isEditing) {
       setEditing(false)
     }
-  }, [id, selectedContextId, isEditing])
+  }, [id, selectedContextId, isEditing, isPromptbar])
 
   useEffect(() => {
     if (editorRef.current) {
@@ -166,7 +179,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
       ) {
         if (isEditing) {
           setEditing(false)
-          dispatch(selectContext(null))
+          if (!isPromptbar) dispatch(selectContext(null))
         }
       }
     }
@@ -174,7 +187,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [editorRef, isEditing])
+  }, [editorRef, isEditing, isPromptbar])
 
   return (
     <div className="grow">

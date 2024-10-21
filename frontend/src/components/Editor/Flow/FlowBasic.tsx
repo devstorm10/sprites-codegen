@@ -1,26 +1,24 @@
 import { memo } from 'react'
-import { Handle, Position } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
-import EditableText from '@/common/EditableText'
-import { CopyIcon } from '@/components/icons/CopyIcon'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
-import { TrashIcon } from '@/components/icons/TrashIcon'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select'
+import { CreateNode } from '@/lib/types'
 import { Card } from '@/components/ui/card'
-import { CreateNode, FlowNodeData } from '@/lib/types'
-import { cn } from '@/lib/utils'
-
-type FlowTriggerProps = {
-  data: FlowNodeData
-  style?: React.CSSProperties
-  className?: string
-}
+import EditableText from '@/common/EditableText'
+// import AutoComplete from '@/common/Autocomplete'
 
 const createItems: CreateNode[] = [
   {
@@ -41,38 +39,32 @@ const createItems: CreateNode[] = [
   },
 ]
 
-const FlowTrigger: React.FC<FlowTriggerProps> = ({
-  data,
-  style = {},
-  className = '',
-}) => {
+const FlowBasic: React.FC = () => {
   const handleItemClick = (name: string) => () => {
     switch (name) {
       case 'text-prompt':
         break
       case 'action':
         break
+      case 'variable':
+        break
     }
   }
 
   return (
-    <Card
-      className={cn('p-4 flex flex-col gap-y-4 w-[250px] shadow-sm', className)}
-      style={style}
-    >
-      <div className="flex items-center gap-x-2">
-        <SparkleIcon fontSize={20} className="mr-2" />
-        <EditableText
-          text={data.title || ''}
-          onChange={() => {}}
-          className="font-bold grow"
-        />
-        <div className="flex items-center gap-x-2 text-secondary-100/50">
-          <CopyIcon />
-          <TrashIcon />
-        </div>
-      </div>
-      <div className="h-0.5 border-t" />
+    <div className="flex flex-col gap-y-2">
+      <Card className="py-3 px-4 drop-shadow-[0_0_12px_0_rgba(0,0,0,0.25)] rounded-[20px] flex items-center gap-x-2">
+        <EditableText text="Variable here" onChange={() => {}} />
+        {/* <Select>
+          <SelectTrigger className="py-1 px-4 w-[70px] rounded-[20px] !outline-none">
+            <SelectValue placeholder="==" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="equal">==</SelectItem>
+            <SelectItem value="not-equal">!=</SelectItem>
+          </SelectContent>
+        </Select> */}
+      </Card>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <span className="py-3 px-4 flex items-center gap-x-2.5 rounded-[20px] text-secondary-100/50 text-sm font-medium border">
@@ -96,12 +88,8 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <Handle type="target" position={Position.Left} />
-      <Handle type="source" position={Position.Right} />
-      <Handle type="source" position={Position.Right} />
-    </Card>
+    </div>
   )
 }
 
-export default memo(FlowTrigger)
+export default memo(FlowBasic)

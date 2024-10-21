@@ -9,9 +9,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
-import { useAppDispatch } from '@/store/store'
+import { useAppDispatch, useAppSelector } from '@/store/store'
 import { createFlow, createFlowView, createTextPrompt } from '@/store/slices'
 import { CreateNode } from '@/lib/types'
+
+interface CreateButtonProps {
+  contextId: string
+}
 
 const createItems: CreateNode[] = [
   {
@@ -48,17 +52,18 @@ const createItems: CreateNode[] = [
   },
 ]
 
-const CreateButton: React.FC = () => {
+const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
   const dispatch = useAppDispatch()
+  const isPromptbar = useAppSelector((state) => state.setting.isPromptbar)
 
   const handleItemClick = (name: string) => () => {
     switch (name) {
       case 'text-prompt':
-        dispatch(createTextPrompt())
+        dispatch(createTextPrompt(contextId))
         break
       case 'flow':
         const flowId = uuid()
-        dispatch(createFlow(flowId))
+        dispatch(createFlow({ contextId, flowId, isRedirect: !isPromptbar }))
         dispatch(createFlowView(flowId))
         break
     }

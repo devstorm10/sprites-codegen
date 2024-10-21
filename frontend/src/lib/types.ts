@@ -8,7 +8,7 @@ export interface Tab {
 
 export interface ContextNode {
   id: string
-  type: 'group' | 'tag' | 'input' | 'flow'
+  type: 'group' | 'tag' | 'input' | 'flow' | 'flow_node'
   title?: string
   data?: Record<string, any>
   contexts?: ContextNode[]
@@ -47,4 +47,5 @@ export interface ChatMessage {
 
 export interface FlowNodeData {
   title: string
+  content?: Record<string, any>
 }

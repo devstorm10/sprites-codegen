@@ -28,7 +28,6 @@ async function sendMessage(message: string) {
     const { message: responseMessage } = data
 
     // Log or handle the response data
-    console.log(responseMessage)
     return responseMessage.content
   } catch (error) {
     console.error('There was a problem with the fetch operation:', error)

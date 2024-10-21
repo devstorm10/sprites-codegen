@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { IoCaretDown, IoCaretForward } from 'react-icons/io5'
 import { motion } from 'framer-motion'
 
-import AutoComplete from '@/common/Autocomplete'
+import AutoTagComplete from '@/common/AutoTagComplete'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { selectContext, updateContext } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
@@ -53,7 +53,7 @@ const TagItem: React.FC<TagItemProps> = ({ context }) => {
       >
         {context.collapsed ? <IoCaretForward /> : <IoCaretDown />}
       </motion.span>
-      <AutoComplete
+      <AutoTagComplete
         tagContextId={context.id}
         tagTitle={context.title || ''}
         hasFocus={selectedContextId === context.id}

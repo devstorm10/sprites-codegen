@@ -9,11 +9,13 @@ import ReactFlow, {
   OnConnect,
   MarkerType,
   useViewport,
+  NodeProps,
 } from 'reactflow'
 import uuid from 'react-uuid'
 import 'reactflow/dist/style.css'
 
-import FlowTrigger from './FlowTrigger'
+import FlowNode from './FlowNode'
+import PromptBar from './PromptBar'
 
 import { Card } from '@/components/ui/card'
 import { LayoutIcon } from '@/components/icons/LayoutIcon'
@@ -24,45 +26,61 @@ import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
   addFlowEdge,
   addFlowNode,
+  createFlowNode,
+  findContextNodeById,
   showSidebar,
   updateFlowViewport,
 } from '@/store/slices'
 import { ContextNode, FlowNodeData } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 const nodeTypes = {
-  trigger: FlowTrigger,
+  basic: (props: NodeProps) => <FlowNode {...props} type="basic" />,
+  prompt: (props: NodeProps) => <FlowNode {...props} type="prompt" />,
+  condition: (props: NodeProps) => <FlowNode {...props} type="condition" />,
 }
-
 type FlowViewerProps = {
   flowContext: ContextNode
 }
 
 type ActionButtonsProps = {
   onLayoutClick: () => void
-  onTriggerClick: () => void
+  onPromptTriggerClick: () => void
+  onConditionTriggerClick: () => void
+  onSimpleTriggerClick: () => void
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
   onLayoutClick,
-  onTriggerClick,
+  onPromptTriggerClick,
+  onConditionTriggerClick,
+  onSimpleTriggerClick,
 }) => {
+  const isSidebar = useAppSelector((state) => state.setting.isSidebar)
+
   return (
     <Card className="absolute top-1/2 left-4 -translate-y-1/2 py-2 px-1 flex flex-col gap-y-0.5 z-50">
       <span
         className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
         onClick={onLayoutClick}
       >
-        <LayoutIcon />
+        <LayoutIcon className={cn({ 'scale-x-[-1]': isSidebar })} />
       </span>
-      <span className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer">
+      <span
+        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
+        onClick={onPromptTriggerClick}
+      >
         <MessageIcon />
       </span>
-      <span className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer">
+      <span
+        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
+        onClick={onSimpleTriggerClick}
+      >
         <FlowIcon className="w-5 h-5" />
       </span>
       <span
         className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
-        onClick={onTriggerClick}
+        onClick={onConditionTriggerClick}
       >
         <FlashIcon />
       </span>
@@ -73,8 +91,15 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
   const dispatch = useAppDispatch()
   const isSidebar = useAppSelector((state) => state.setting.isSidebar)
+  const isPromptbar = useAppSelector((state) => state.setting.isPromptbar)
+
   const flowItem = useAppSelector((state) =>
     state.flow.flows.find((item) => item.id === flowContext.id)
+  )
+  const selectedNodeId = useAppSelector((state) => state.context.selectedId)
+  const selectedContext = findContextNodeById(
+    flowContext.contexts || [],
+    selectedNodeId || ''
   )
 
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNodeData>([])
@@ -82,7 +107,9 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
   const { getZoom, setViewport, screenToFlowPosition, fitView } = useReactFlow()
   const viewport = useViewport()
 
-  const [isTrigger, setTrigger] = useState<boolean>(false)
+  const [trigger, setTrigger] = useState<'' | 'basic' | 'prompt' | 'condition'>(
+    ''
+  )
   const [triggerPos, setTriggerPos] = useState<{ x: number; y: number }>({
     x: -100,
     y: -100,
@@ -92,27 +119,49 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     dispatch(showSidebar(!isSidebar))
   }
 
-  const handleTriggerCreate = () => {
-    setTrigger(true)
+  const handlePromptTriggerClick = () => {
+    setTrigger('prompt')
+  }
+
+  const handleSimpleTriggerCreate = () => {
+    setTrigger('basic')
+  }
+
+  const handleConditionTriggerCreate = () => {
+    setTrigger('condition')
   }
 
   const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isTrigger) return
+    if (!trigger) return
     e.preventDefault()
 
-    const newNode = {
-      id: uuid(),
-      type: 'trigger',
-      data: { title: 'Trigger' },
-      position: screenToFlowPosition({ x: e.clientX, y: e.clientY }),
+    if (e.button === 0) {
+      const newNode = {
+        id: uuid(),
+        type: trigger,
+        data: {
+          title:
+            trigger === 'basic'
+              ? 'Trigger'
+              : trigger === 'prompt'
+                ? 'Additional Prompt'
+                : trigger === 'condition'
+                  ? 'Condition'
+                  : '',
+        },
+        position: screenToFlowPosition({ x: e.clientX, y: e.clientY }),
+      }
+      setTrigger('')
+      setNodes([...nodes, newNode])
+      dispatch(addFlowNode({ id: flowContext.id, node: newNode }))
+      dispatch(createFlowNode({ id: flowContext.id, node: newNode }))
+    } else if (e.button === 2) {
+      setTrigger('')
     }
-    setTrigger(false)
-    setNodes([...nodes, newNode])
-    dispatch(addFlowNode({ id: flowContext.id, node: newNode }))
   }
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isTrigger) return
+    if (!trigger) return
     e.preventDefault()
     const element = e.currentTarget.getBoundingClientRect()
     const mouseXPos = e.clientX - element.left
@@ -134,6 +183,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
         style: {
           strokeWidth: 1,
           stroke: 'black',
+          zIndex: 100,
         },
       }
       setEdges((eds) => addEdge(newEdge, eds))
@@ -149,12 +199,21 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     setViewport(flowItem.viewport)
     setNodes(flowNodes)
     setEdges(flowEdges)
-    // fitView()
   }, [flowItem?.id, setViewport, fitView])
 
   useEffect(() => {
     dispatch(updateFlowViewport({ id: flowContext.id, viewport }))
   }, [viewport.x, viewport.y, viewport.zoom])
+
+  useEffect(() => {
+    const handleContextMenu = (event: Event) => {
+      event.preventDefault()
+    }
+    document.addEventListener('contextmenu', handleContextMenu)
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu)
+    }
+  }, [])
 
   return (
     <div
@@ -169,7 +228,6 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
-        // fitView
       >
         <Background />
         <Controls />
@@ -177,12 +235,26 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
 
       <ActionButtons
         onLayoutClick={handleSidebarToggle}
-        onTriggerClick={handleTriggerCreate}
+        onPromptTriggerClick={handlePromptTriggerClick}
+        onSimpleTriggerClick={handleSimpleTriggerCreate}
+        onConditionTriggerClick={handleConditionTriggerCreate}
       />
 
-      {isTrigger && (
-        <FlowTrigger
-          data={{ title: 'Trigger' }}
+      {isPromptbar && selectedContext && (
+        <PromptBar context={selectedContext} />
+      )}
+
+      {trigger && (
+        <FlowNode
+          type={trigger}
+          data={{
+            title:
+              trigger === 'basic'
+                ? 'Trigger'
+                : trigger === 'condition'
+                  ? 'Condition'
+                  : '',
+          }}
           className="absolute z-40 opacity-50"
           style={{
             left: triggerPos.x,

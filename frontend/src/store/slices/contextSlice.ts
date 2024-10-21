@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import uuid from 'react-uuid'
+import { Node } from 'reactflow'
 
-import { ContextNode, Tab, Tag, Variable } from '@/lib/types'
+import { ContextNode, FlowNodeData, Tab, Tag, Variable } from '@/lib/types'
 
 const dummyContexts: ContextNode[] = [
   {
@@ -89,8 +90,11 @@ export function searchContextsByKeyword(
   const result: ContextNode[] = []
   for (const node of nodes) {
     if (
-      node.title?.includes(keyword) ||
-      (node.data && node.data.content && node.data.content.includes(keyword))
+      (node.title &&
+        node.title.toLowerCase().includes(keyword.toLowerCase())) ||
+      (node.data &&
+        node.data.content &&
+        node.data.content.toLowerCase().includes(keyword.toLowerCase()))
     ) {
       result.push({
         id: node.id,
@@ -130,32 +134,51 @@ const contextSlice = createSlice({
   name: 'context',
   initialState,
   reducers: {
-    createTextPrompt: (state: ContextState) => {
-      const newContext: ContextNode = {
-        id: uuid(),
-        type: 'input',
-        title: 'Text prompt',
-      }
-      const contextGroup = state.contexts.find(
-        (context) => context.id === state.activeId
-      )
-      if (contextGroup) {
-        contextGroup.contexts?.push(newContext)
-        state.selectedId = newContext.id
+    createTextPrompt: (state: ContextState, action: PayloadAction<string>) => {
+      const contextId = action.payload
+      const contextItem = findContextNodeById(state.contexts, contextId)
+      if (contextItem) {
+        const newContext: ContextNode = {
+          id: uuid(),
+          type: 'input',
+          title: 'Text prompt',
+        }
+        contextItem.contexts = [...(contextItem.contexts || []), newContext]
       }
     },
-    createFlow: (state: ContextState, action: PayloadAction<string>) => {
+    createFlow: (
+      state: ContextState,
+      action: PayloadAction<{
+        contextId: string
+        flowId: string
+        isRedirect?: boolean
+      }>
+    ) => {
+      const { contextId, flowId, isRedirect = false } = action.payload
+      const contextItem = findContextNodeById(state.contexts, contextId)
       const newContext: ContextNode = {
-        id: action.payload || uuid(),
+        id: flowId || uuid(),
         type: 'flow',
         title: 'Flow',
       }
-      const contextGroup = state.contexts.find(
-        (context) => context.id === state.activeId
-      )
-      if (contextGroup) {
-        contextGroup.contexts?.push(newContext)
-        state.selectedId = newContext.id
+      if (contextItem) {
+        contextItem.contexts = [...(contextItem.contexts || []), newContext]
+        if (isRedirect) state.selectedId = newContext.id
+      }
+    },
+    createFlowNode: (
+      state: ContextState,
+      action: PayloadAction<{ id: string; node: Node<FlowNodeData> }>
+    ) => {
+      const flowItem = findContextNodeById(state.contexts, action.payload.id)
+      if (flowItem) {
+        const { node } = action.payload
+        const newContext: ContextNode = {
+          id: node.id,
+          title: node.data.title,
+          type: 'flow_node',
+        }
+        flowItem.contexts = [...(flowItem.contexts || []), newContext]
       }
     },
     createNewTag: (state: ContextState, action: PayloadAction<string>) => {
@@ -221,6 +244,7 @@ const contextSlice = createSlice({
         tag: 2,
         input: 3,
         flow: 3,
+        flow_node: 4,
       }
       if (priority[sourceItem.type] > priority[targetItem.type]) {
         if (sourceParent && targetParent) {
@@ -285,7 +309,10 @@ const contextSlice = createSlice({
       }))
     },
     createVariable: (state: ContextState, action: PayloadAction<Variable>) => {
-      state.variables.push(action.payload)
+      const variable = state.variables.find(
+        (item) => item.name === action.payload.name
+      )
+      if (!variable) state.variables.push(action.payload)
     },
   },
 })
@@ -293,6 +320,7 @@ const contextSlice = createSlice({
 export const {
   createTextPrompt,
   createFlow,
+  createFlowNode,
   createNewTag,
   createTagItem,
   updateTagItem,

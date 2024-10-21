@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -9,20 +9,19 @@ import {
   defaultDropAnimation,
 } from '@dnd-kit/core'
 
+import CreateButton from './CreateButton'
 import GroupContainer from '@/components/Editor/GroupContainer'
-import { useAppDispatch, useAppSelector } from '@/store/store'
+import { useAppDispatch } from '@/store/store'
 import { findContextNodeById, moveContext } from '@/store/slices'
+import { ContextNode } from '@/lib/types'
 
-const ContextViewer: React.FC = () => {
+interface ContextViewerProps {
+  context: ContextNode
+}
+
+const ContextViewer: React.FC<ContextViewerProps> = ({ context }) => {
   const dispatch = useAppDispatch()
-  const activeContextId = useAppSelector((state) => state.context.activeId)
-  const activeContext = useAppSelector((state) =>
-    state.context.contexts.find((context) => context.id === activeContextId)
-  )
-  const totalContexts = useMemo(() => {
-    if (!activeContext || !activeContext.contexts) return []
-    return activeContext.contexts
-  }, [activeContext])
+  const totalContexts = context.contexts || []
 
   const [activeDndId, setActiveDndId] = useState<string>('')
   const activeDndContext = activeDndId
@@ -47,22 +46,25 @@ const ContextViewer: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <DndContext
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
-        onDragEnd={handleDragEnd}
-      >
-        {totalContexts.map((context) => (
-          <GroupContainer key={context.id} context={context} />
-        ))}
-        <DragOverlay dropAnimation={dropAnimation}>
-          {activeDndContext ? (
-            <GroupContainer context={activeDndContext} />
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+    <div className="mt-[64px]">
+      <CreateButton contextId={context.id} />
+      <div className="mt-9 flex flex-col gap-y-4">
+        <DndContext
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          {totalContexts.map((context) => (
+            <GroupContainer key={context.id} context={context} />
+          ))}
+          <DragOverlay dropAnimation={dropAnimation}>
+            {activeDndContext ? (
+              <GroupContainer context={activeDndContext} />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </div>
     </div>
   )
 }
