@@ -11,8 +11,7 @@ class RedisService {
 
     if (!RedisService.instance) {
       RedisService.instance = new Redis({
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT!),
+        path: process.env.REDIS_URL,
         tls: {
           rejectUnauthorized: false,
         },
