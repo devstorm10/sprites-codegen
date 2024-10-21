@@ -10,7 +10,13 @@ class RedisService {
     console.log('Redis Port:', process.env.REDIS_PORT)
 
     if (!RedisService.instance) {
-      RedisService.instance = new Redis(process.env.REDIS_URL as string)
+      RedisService.instance = new Redis({
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT!),
+        tls: {
+          rejectUnauthorized: false,
+        },
+      })
 
       // Handle Redis connection errors
       RedisService.instance.on('error', (err) => {
