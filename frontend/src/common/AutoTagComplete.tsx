@@ -26,6 +26,7 @@ import { useAppDispatch } from '@/store/store'
 import { createTagItem, deleteTagItem, updateTagItem } from '@/store/slices'
 import { Tag } from '@/lib/types'
 import { BsPalette } from 'react-icons/bs'
+import { cn } from '@/lib/utils'
 
 const randomColor = () => Math.floor(Math.random() * 256)
 
@@ -34,83 +35,97 @@ const randomRgb = () =>
 
 const renderItem: (
   onTagUpdate: (id: string, color: string) => void,
-  onTagDelete: (id: string) => void
-) => RenderItem<Tag> = (onTagUpdate, onTagDelete) => (item: Tag) => {
-  const [isMenuOpen, setMenuOpen] = useState<boolean>(false)
-  const [isPickerOpen, setPickerOpen] = useState<boolean>(false)
-  const [color, setColor] = useState<string>(item.color)
+  onTagDelete: (id: string) => void,
+  onTagFocus: (item: Tag) => void
+) => RenderItem<Tag> =
+  (onTagUpdate, onTagDelete, onTagFocus) =>
+  (item: Tag, { isHighlighted }) => {
+    const [isMenuOpen, setMenuOpen] = useState<boolean>(false)
+    const [isPickerOpen, setPickerOpen] = useState<boolean>(false)
+    const [color, setColor] = useState<string>(item.color)
 
-  const handleChangeComplete = (color: ColorResult) => {
-    onTagUpdate(item.id, color.hex)
-  }
+    const handleChangeComplete = (color: ColorResult) => {
+      onTagUpdate(item.id, color.hex)
+    }
 
-  const handleDeleteClick = () => {
-    onTagDelete(item.id)
-  }
+    const handleDeleteClick = () => {
+      onTagDelete(item.id)
+    }
 
-  return (
-    <div className="flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1">
-      <div className="flex items-center gap-x-1">
-        <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
-        <span
-          className="rounded-sm px-1 font-medium"
-          style={{
-            backgroundColor: item.color,
-          }}
-        >
-          {item.title}
-        </span>
-      </div>
-      <DropdownMenu open={isMenuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger>
+    useEffect(() => {
+      if (isHighlighted) {
+        onTagFocus(item)
+      }
+    }, [isHighlighted, item])
+
+    return (
+      <div
+        className={cn(
+          'flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1',
+          { 'bg-muted': isHighlighted }
+        )}
+      >
+        <div className="flex items-center gap-x-1">
+          <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
           <span
-            className="h-5 w-5 rounded hover:bg-accent hover:text-accent-foreground"
-            onClick={(event) => {
-              event.stopPropagation()
-              setMenuOpen(true)
+            className="rounded-sm px-1 font-medium"
+            style={{
+              backgroundColor: item.color,
             }}
           >
-            <Icon icon="ph:dots-three-bold" fontSize={16} />
+            {item.title}
           </span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          side="right"
-          align="center"
-          onClick={(e) => e.stopPropagation()}
-          onMouseLeave={() => setMenuOpen(false)}
-        >
-          <DropdownMenuSub open={isPickerOpen} onOpenChange={setPickerOpen}>
-            <DropdownMenuSubTrigger>
-              <div className="flex items-center gap-x-1">
-                <span className="w-5 h-5 flex items-center justify-center opacity-30">
-                  <BsPalette />
-                </span>
-                <span>Color</span>
-              </div>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent onMouseLeave={() => setPickerOpen(false)}>
-              <SketchPicker
-                color={color}
-                onChange={(color) => setColor(color.hex)}
-                onChangeComplete={handleChangeComplete}
-                className="!shadow-none"
-              />
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-          <DropdownMenuSub>
-            <DropdownMenuItem
-              onClick={handleDeleteClick}
-              className="flex items-center gap-x-1"
+        </div>
+        <DropdownMenu open={isMenuOpen} onOpenChange={setMenuOpen}>
+          <DropdownMenuTrigger>
+            <span
+              className="h-5 w-5 rounded hover:bg-accent hover:text-accent-foreground"
+              onClick={(event) => {
+                event.stopPropagation()
+                setMenuOpen(true)
+              }}
             >
-              <TrashIcon />
-              <span>Delete</span>
-            </DropdownMenuItem>
-          </DropdownMenuSub>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  )
-}
+              <Icon icon="ph:dots-three-bold" fontSize={16} />
+            </span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="right"
+            align="center"
+            onClick={(e) => e.stopPropagation()}
+            onMouseLeave={() => setMenuOpen(false)}
+          >
+            <DropdownMenuSub open={isPickerOpen} onOpenChange={setPickerOpen}>
+              <DropdownMenuSubTrigger>
+                <div className="flex items-center gap-x-1">
+                  <span className="w-5 h-5 flex items-center justify-center opacity-30">
+                    <BsPalette />
+                  </span>
+                  <span>Color</span>
+                </div>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent onMouseLeave={() => setPickerOpen(false)}>
+                <SketchPicker
+                  color={color}
+                  onChange={(color) => setColor(color.hex)}
+                  onChangeComplete={handleChangeComplete}
+                  className="!shadow-none"
+                />
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuItem
+                onClick={handleDeleteClick}
+                className="flex items-center gap-x-1"
+              >
+                <TrashIcon />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    )
+  }
 
 const renderContainer: RenderContainer = ({ list }) => (
   <Card className="py-1 absolute z-50 min-w-[200px] rounded-[12px] mt-2 shadow-[0_0_16px_rgba(0,0,0,0.04)]">
@@ -118,7 +133,7 @@ const renderContainer: RenderContainer = ({ list }) => (
   </Card>
 )
 
-const getSuggestionValue = (item: Tag) => item.title
+const getSuggestionValue = (item: Tag) => item?.title || ''
 
 const AutoCompleteInput = forwardRef<
   HTMLInputElement,
@@ -138,8 +153,8 @@ const AutoCompleteInput = forwardRef<
         backgroundColor:
           selected && selected.title === title ? selected.color : '#f5f5f5',
       }}
-      autoFocus
       onClick={onInputFocus}
+      autoFocus
       {...rest}
     />
   )
@@ -168,6 +183,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   const [tagColor, setTagColor] = useState<string>(randomRgb())
   const [suggestions, setSuggestions] = useState<Tag[]>(initialSuggestions)
   const [selected, setSelected] = useState<Tag | undefined>()
+  const [focusedItem, setFocusedItem] = useState<Tag>()
 
   useEffect(() => {
     if (hasFocus && tagContextId) {
@@ -184,27 +200,36 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
 
   const handleChange: AutocompletePureProps<Tag>['onChange'] = useCallback(
     (_event, { value, reason }) => {
-      const newTagTitle = value
-      onTitleChange(value)
-
+      const tagTitle = _event.currentTarget.value
       if (reason === 'INPUT') {
         const filteredTags = initialSuggestions.filter((tag) =>
           tag.title.toLowerCase().includes(value.toLowerCase())
         )
-        const newSuggestions =
-          filteredTags.find((item) => item.title === newTagTitle) ||
-          !newTagTitle
-            ? filteredTags
-            : [
-                ...filteredTags,
-                { id: tagId, title: newTagTitle, color: tagColor },
-              ]
-        setSuggestions(newSuggestions)
-        if (newSuggestions.length > 0) setIsOpen(true)
+        setSuggestions(filteredTags)
+        setIsOpen(filteredTags.length > 0)
+        onTitleChange(tagTitle)
+        setFocusedItem(
+          initialSuggestions.find((item) => item.title === tagTitle)
+        )
       } else if (reason === 'ENTER') {
+        if (focusedItem) {
+          onTitleChange(focusedItem.title)
+          setIsOpen(false)
+        } else {
+          dispatch(
+            createTagItem({
+              id: tagId,
+              color: tagColor,
+              title: tagTitle,
+            })
+          )
+          setTagId(uuid())
+          setTagColor(randomRgb())
+          setIsOpen(false)
+        }
       }
     },
-    [initialSuggestions, onTitleChange]
+    [initialSuggestions, focusedItem, onTitleChange]
   )
 
   const handleSelect: AutocompletePureProps<Tag>['onSelect'] = useCallback(
@@ -232,6 +257,10 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   const handleTagDelete = (id: string) => {
     setSuggestions(suggestions.filter((item) => item.id !== id))
     dispatch(deleteTagItem(id))
+  }
+
+  const handleTagFocus = (item: Tag) => {
+    setFocusedItem(item)
   }
 
   const handleClickOutside = (_event: Event) => {
@@ -264,7 +293,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       onChange={handleChange}
       onSelect={handleSelect}
       onClickOutside={handleClickOutside}
-      renderItem={renderItem(handleTagUpdate, handleTagDelete)}
+      renderItem={renderItem(handleTagUpdate, handleTagDelete, handleTagFocus)}
       renderInput={renderInput}
       renderContainer={renderContainer}
       getSuggestionValue={getSuggestionValue}

@@ -36,7 +36,12 @@ const ContextViewer: React.FC<ContextViewerProps> = ({ context }) => {
     setActiveDndId(active.id as string)
   }
 
-  const handleDragOver = () => {}
+  const handleDragOver = ({ active, over }: DragEndEvent) => {
+    const activeItem = findContextNodeById(totalContexts, active.id as string)
+    const overItem = findContextNodeById(totalContexts, over?.id as string)
+    if (!activeItem || !overItem || activeItem === overItem) return
+    dispatch(moveContext({ source: activeItem.id, target: overItem.id }))
+  }
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     const activeItem = findContextNodeById(totalContexts, active.id as string)

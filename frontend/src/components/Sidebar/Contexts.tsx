@@ -2,6 +2,7 @@ import { useState, MouseEvent, useEffect, useMemo } from 'react'
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   DropAnimation,
@@ -10,7 +11,10 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
+import { AnimatePresence, motion } from 'framer-motion'
+import { IoCaretDown, IoCaretForward } from 'react-icons/io5'
 
+import { TrashIcon } from '@/components/icons/TrashIcon'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
   selectContext,
@@ -20,10 +24,12 @@ import {
   setActiveTab,
   searchContextsByKeyword,
   findParentContextNodeById,
+  updateContext,
+  deleteContext,
 } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
-import clsx from 'clsx'
+import { cn } from '@/lib/utils'
 
 interface ContextItemProps {
   context: ContextNode
@@ -31,6 +37,7 @@ interface ContextItemProps {
 }
 
 interface ContextGroupProps {
+  grow?: boolean
   context: ContextNode
 }
 
@@ -39,21 +46,39 @@ interface FilteredContextsProps {
   onFilterClear: () => void
 }
 
-const ContextGroup: React.FC<ContextGroupProps> = ({ context }) => {
-  const { id, contexts } = context
+const ContextGroup: React.FC<ContextGroupProps> = ({
+  grow = false,
+  context,
+}) => {
+  const { id, collapsed, contexts } = context
   const { setNodeRef } = useDroppable({
     id,
   })
 
   return (
-    <div ref={setNodeRef}>
+    <div ref={setNodeRef} className={cn({ 'flex-1': grow })}>
       <ContextItem context={context} />
-      <div className="ml-5">
-        {contexts &&
-          contexts.map((subContext, idx) => (
-            <ContextGroup key={idx} context={subContext} />
-          ))}
-      </div>
+      <AnimatePresence>
+        {!collapsed && contexts && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{
+              opacity: 0,
+              height: 0,
+              transformOrigin: 'top',
+              transition: {
+                opacity: { duration: 0.2 },
+              },
+            }}
+            className="ml-5"
+          >
+            {contexts.map((subContext, idx) => (
+              <ContextGroup key={idx} context={subContext} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -64,6 +89,7 @@ const ContextItem: React.FC<ContextItemProps> = ({
 }) => {
   const dispatch = useAppDispatch()
   const { id, type, title, data } = context
+  const activeContextId = useAppSelector((state) => state.context.activeId)
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
   const { attributes, listeners, setNodeRef } = useDraggable({ id })
 
@@ -73,25 +99,61 @@ const ContextItem: React.FC<ContextItemProps> = ({
     onItemClick()
   }
 
+  const handleCollapseClick = (e: MouseEvent<HTMLSpanElement>) => {
+    e.stopPropagation()
+    dispatch(
+      updateContext({
+        id: context.id,
+        newContext: {
+          collapsed: !context.collapsed,
+        },
+      })
+    )
+  }
+
+  const handleContextDelete = (event: MouseEvent<HTMLSpanElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    if (context.id !== activeContextId) dispatch(deleteContext(context.id))
+  }
+
   return (
     <div
       ref={setNodeRef}
       id={id}
       key={id}
-      className={clsx(
-        'cursor-pointer flex items-center gap-2 py-2 hover:bg-muted rounded-lg mb-1 px-2 transition-all line-clamp-1',
-        {
-          'bg-primary-200': selectedContextId === id,
-        }
-      )}
+      className="flex items-center gap-2"
       onMouseDown={handleContextSelect}
       {...attributes}
       {...listeners}
     >
-      <span className="shrink-0">{CONTEXT_ICONS[type]} </span>
-      <p className="grow line-clamp-1 font-medium">
-        {type === 'input' ? (data && data.content) || title || '' : title}
-      </p>
+      {context.contexts && (
+        <motion.span
+          className="opacity-60 cursor-pointer"
+          onMouseDown={handleCollapseClick}
+        >
+          {context.collapsed ? <IoCaretForward /> : <IoCaretDown />}
+        </motion.span>
+      )}
+      <div
+        className={cn(
+          'w-full mb-1 py-2 px-2 flex items-center gap-2 hover:bg-muted transition-all rounded-lg cursor-pointer group',
+          {
+            'bg-primary-200': selectedContextId === id,
+          }
+        )}
+      >
+        <span className="shrink-0">{CONTEXT_ICONS[type]}</span>
+        <p className="grow line-clamp-1">
+          {type === 'input' ? (data && data.content) || title || '' : title}
+        </p>
+        <span
+          className="hidden group-hover:flex items-center justify-center"
+          onMouseDown={handleContextDelete}
+        >
+          <TrashIcon />
+        </span>
+      </div>
     </div>
   )
 }
@@ -115,7 +177,12 @@ const Contexts: React.FC = () => {
     setActiveDndId(active.id as string)
   }
 
-  const handleDragOver = () => {}
+  const handleDragOver = ({ active, over }: DragOverEvent) => {
+    const activeItem = findContextNodeById(contexts, active.id as string)
+    const overItem = findContextNodeById(contexts, over?.id as string)
+    if (!activeItem || !overItem || activeItem === overItem) return
+    dispatch(moveContext({ source: activeItem.id, target: overItem.id }))
+  }
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     const activeItem = findContextNodeById(contexts, active.id as string)
@@ -150,7 +217,7 @@ const Contexts: React.FC = () => {
   }, [dispatch, selectedContextId, defaultContextId])
 
   return (
-    <div className="px-3">
+    <div className="flex-1 px-3 flex flex-col">
       <DndContext
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
@@ -158,7 +225,11 @@ const Contexts: React.FC = () => {
         onDragEnd={handleDragEnd}
       >
         {contexts.map((context, idx) => (
-          <ContextGroup key={idx} context={context} />
+          <ContextGroup
+            key={idx}
+            context={context}
+            grow={idx === contexts.length - 1}
+          />
         ))}
         <DragOverlay dropAnimation={dropAnimation}>
           {activeContext ? <ContextGroup context={activeContext} /> : null}
@@ -185,15 +256,17 @@ const FilteredContexts: React.FC<FilteredContextsProps> = ({
   return (
     <div className="px-3">
       <ContextItem context={defaultContext} />
-      <div className="ml-5">
-        {filteredContexts.map((context) => (
-          <ContextItem
-            key={context.id}
-            context={context}
-            onItemClick={onFilterClear}
-          />
-        ))}
-      </div>
+      {
+        <div className="ml-5">
+          {filteredContexts.map((context) => (
+            <ContextItem
+              key={context.id}
+              context={context}
+              onItemClick={onFilterClear}
+            />
+          ))}
+        </div>
+      }
     </div>
   )
 }

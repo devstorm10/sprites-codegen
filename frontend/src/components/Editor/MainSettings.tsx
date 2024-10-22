@@ -3,12 +3,12 @@ import { FiSettings } from 'react-icons/fi'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
 
 import EditableText from '@/common/EditableText'
-import { Card } from '@/components/ui/card'
+import { TrashIcon } from '@/components/icons/TrashIcon'
+import { ClipIcon } from '@/components/icons/ClipIcon'
+import { PlusIcon } from '@/components/icons/PlusIcon'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
+import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { TrashIcon } from '../icons/TrashIcon'
-import { FaPlus } from 'react-icons/fa6'
-import { ClipIcon } from '../icons/ClipIcon'
 
 const dummyPreDialogSteps: string[] = ['Memories Retriever', 'Emotions Check']
 
@@ -48,7 +48,7 @@ const StepChipItem: React.FC<ChipItemProps> = ({
   editing = false,
 }) => {
   return (
-    <Card className="py-2.5 px-4 drop-shadow-[0_0_12px_0_rgba(0,0,0,0.25)] flex items-center gap-x-2.5 rounded-[20px]">
+    <Card className="py-2.5 px-4 flex items-center gap-x-2.5 border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-[20px]">
       <SparkleIcon />
       <EditableText
         text={content}
@@ -62,7 +62,7 @@ const StepChipItem: React.FC<ChipItemProps> = ({
 
 const BaseChipItem: React.FC<ChipItemProps> = ({ content }) => {
   return (
-    <Card className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2 rounded-2xl">
+    <Card className="py-2.5 px-4 flex items-center gap-x-2 border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-2xl">
       <p className="font-bold">{content}</p>
     </Card>
   )
@@ -76,7 +76,7 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
 }) => {
   return (
     <div className="flex gap-x-1">
-      <Card className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2 rounded-[20px] text-muted">
+      <Card className="py-2.5 px-4 flex items-center gap-x-2 text-muted border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-[20px]">
         <EditableText
           text={content}
           onChange={onContentChange}
@@ -85,7 +85,7 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
         />
       </Card>
       <Card
-        className="p-3.5 rounded-[20px] text-black/30 cursor-pointer hover:bg-secondary-100/10"
+        className="p-3.5 text-black/30 border border-[#EAEAEA] hover:bg-secondary-100/5 shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-[20px] cursor-pointer"
         onClick={onItemDelete}
       >
         <TrashIcon />
@@ -97,10 +97,10 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
 const AddButton: React.FC<AddButtonProps> = ({ onClick }) => {
   return (
     <Card
-      className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2.5 rounded-[20px] text-sm text-[#B1B0AF] font-medium hover:bg-secondary-100/5 cursor-pointer"
+      className="py-2.5 px-4 flex items-center gap-x-2.5 text-sm text-[#B1B0AF] !font-normal border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] hover:bg-secondary-100/5 rounded-[20px] cursor-pointer"
       onClick={onClick}
     >
-      <FaPlus />
+      <PlusIcon />
       <p>Add new</p>
     </Card>
   )
@@ -170,7 +170,7 @@ const MainSettings: React.FC = () => {
   }
 
   return (
-    <Card className="py-4 px-6 rounded-[16px] drop-shadow-sm">
+    <Card className="py-4 px-6 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.06)] rounded-[16px]">
       <div className="flex items-center justify-between">
         <div
           className={cn('flex items-center gap-1 font-semibold', {
@@ -223,7 +223,7 @@ const MainSettings: React.FC = () => {
               <BaseChipItem key={idx} content={knowbase} />
             ))}
             <Card
-              className="py-2.5 px-4 drop-shadow-sm flex items-center gap-x-2.5 rounded-2xl text-sm text-[#B1B0AF] font-medium hover:bg-secondary-100/5 cursor-pointer"
+              className="py-2.5 px-4 flex items-center gap-x-2.5 text-sm text-[#B1B0AF] font-normal border border-[#EAEAEA] hover:bg-secondary-100/5 shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-2xl cursor-pointer"
               onClick={handleAddKnowledgeClick}
             >
               <ClipIcon />

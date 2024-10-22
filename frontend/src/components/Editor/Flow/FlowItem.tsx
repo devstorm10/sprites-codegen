@@ -32,7 +32,7 @@ const FlowItem: React.FC<FlowProps> = ({ context }) => {
   }
 
   return (
-    <Card className="flex items-center gap-x-3 px-5 py-2 rounded-full shadow-[0_0_16px_rgba(0,0,0,0.04)]">
+    <Card className="px-5 py-2 flex items-center gap-x-3 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px]">
       <SparkleIcon fontSize={20} onClick={handleNewFlowClick} />
       <EditableText
         text={title || ''}

@@ -48,23 +48,23 @@ const Sidebar: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className="flex-1 px-[5px]">
-        <Tabs defaultValue="contexts" className="w-full">
+      <div className="flex-1 px-[5px] flex flex-col">
+        <Tabs defaultValue="contexts" className="w-full flex-1 flex flex-col">
           <TabsList className="w-full bg-background border-b rounded-none pb-0 justify-start">
             <TabsTrigger
-              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:focus:shadow-black text-[16px]"
+              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:font-medium data-[state=active]:focus:shadow-black text-[16px] font-normal"
               value="contexts"
             >
               Contexts
             </TabsTrigger>
             <TabsTrigger
-              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:focus:shadow-black text-[16px]"
+              className="outline-none rounded-none data-[state=active]:shadow-[inset_0_-1px_0_0,0_1px_0_0] data-[state=active]:shadow-current data-[state=active]:font-medium data-[state=active]:focus:shadow-black text-[16px] font-normal"
               value="components"
             >
               Components
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="contexts">
+          <TabsContent value="contexts" className="flex-1 flex flex-col">
             {searchTerm ? (
               <FilteredContexts
                 filter={searchTerm}

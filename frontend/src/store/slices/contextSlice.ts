@@ -247,7 +247,7 @@ const contextSlice = createSlice({
         flow_node: 4,
       }
       if (priority[sourceItem.type] > priority[targetItem.type]) {
-        if (sourceParent && targetParent) {
+        if (sourceParent) {
           targetItem.contexts = [...(targetItem.contexts || []), sourceItem]
           sourceParent.contexts = sourceParent.contexts?.filter(
             (context) => context.id !== source
@@ -270,6 +270,24 @@ const contextSlice = createSlice({
             const [movedItem] = sourceParent.contexts.splice(sourceIndex, 1)
             targetParent.contexts.splice(targetIndex, 0, movedItem)
           }
+        }
+      }
+    },
+    deleteContext: (state: ContextState, action: PayloadAction<string>) => {
+      const delItem = findContextNodeById(state.contexts, action.payload)
+      const parentItem = findParentContextNodeById(
+        state.contexts,
+        action.payload
+      )
+      if (delItem) {
+        if (parentItem) {
+          parentItem.contexts = parentItem.contexts?.filter(
+            (item) => item.id !== action.payload
+          )
+        } else {
+          state.contexts = state.contexts.filter(
+            (item) => item.id !== action.payload
+          )
         }
       }
     },
@@ -328,6 +346,7 @@ export const {
   updateContext,
   selectContext,
   moveContext,
+  deleteContext,
   updateTabs,
   closeTab,
   createActiveTab,

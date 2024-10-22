@@ -15,7 +15,7 @@ const Titlebar: React.FC<TitlebarProps> = ({ isOpen, toggleChatPanel }) => {
       <div className="flex items-center gap-1">
         <button
           className={clsx(
-            'text-text-100 w-[36px] h-[36px] flex items-center justify-center rounded-full hover:bg-secondary-100/80',
+            'text-text-100 pl-0.5 w-[36px] h-[36px] flex items-center justify-center rounded-full hover:bg-secondary-100/80',
             isOpen ? 'bg-primary-100' : 'bg-secondary-100'
           )}
           onClick={toggleChatPanel}

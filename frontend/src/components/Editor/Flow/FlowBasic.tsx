@@ -53,7 +53,7 @@ const FlowBasic: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-y-2">
-      <Card className="py-3 px-4 drop-shadow-[0_0_12px_0_rgba(0,0,0,0.25)] rounded-[20px] flex items-center gap-x-2">
+      <Card className="py-3 px-4 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px] flex items-center gap-x-2">
         <EditableText text="Variable here" onChange={() => {}} />
         {/* <Select>
           <SelectTrigger className="py-1 px-4 w-[70px] rounded-[20px] !outline-none">
