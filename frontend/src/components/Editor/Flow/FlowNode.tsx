@@ -41,7 +41,7 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
   return (
     <Card
       className={cn(
-        'p-4 w-[250px] flex flex-col gap-y-4 text-sm shadow-[0_3px_15px_rgba(38,50,56,0.07)]',
+        'p-4 w-[300px] flex flex-col gap-y-4 text-sm shadow-[0_3px_15px_rgba(38,50,56,0.07)]',
         {
           'border border-[#0B99FF]': selectedNodeId === id,
         },

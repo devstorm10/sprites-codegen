@@ -1,6 +1,8 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
+import AutoVarComplete from '@/common/AutoVarComplete'
+import { Card } from '@/components/ui/card'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import {
   DropdownMenu,
@@ -8,17 +10,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { useAppSelector } from '@/store/store'
 import { CreateNode } from '@/lib/types'
-import { Card } from '@/components/ui/card'
-import EditableText from '@/common/EditableText'
-// import AutoComplete from '@/common/Autocomplete'
 
 const createItems: CreateNode[] = [
   {
@@ -39,7 +40,13 @@ const createItems: CreateNode[] = [
   },
 ]
 
+const optItems: string[] = ['==', '!=', '>', '<', '>=', '<=']
+
 const FlowBasic: React.FC = () => {
+  const variables = useAppSelector((state) => state.context.variables)
+  const [varname, setVarname] = useState<string>('')
+  const [varvalue, setVarvalue] = useState<string>('')
+
   const handleItemClick = (name: string) => () => {
     switch (name) {
       case 'text-prompt':
@@ -53,17 +60,29 @@ const FlowBasic: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-y-2">
-      <Card className="py-3 px-4 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px] flex items-center gap-x-2">
-        <EditableText text="Variable here" onChange={() => {}} />
-        {/* <Select>
+      <Card className="py-3 px-4 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px] flex items-end justify-center gap-x-2">
+        <AutoVarComplete
+          varname={varname}
+          suggestions={variables}
+          onFocus={() => {}}
+          onVarChange={setVarname}
+        />
+        <Select>
           <SelectTrigger className="py-1 px-4 w-[70px] rounded-[20px] !outline-none">
             <SelectValue placeholder="==" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="equal">==</SelectItem>
-            <SelectItem value="not-equal">!=</SelectItem>
+            {optItems.map((item) => (
+              <SelectItem value={item}>{item}</SelectItem>
+            ))}
           </SelectContent>
-        </Select> */}
+        </Select>
+        <Input
+          placeholder="value"
+          value={varvalue}
+          onChange={(e) => setVarvalue(e.target.value)}
+          className="w-[75px] py-0.5 !px-0 focus-visible:ring-0 outline-none text-sm text-center font-medium leading-none rounded-[20px]"
+        />
       </Card>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

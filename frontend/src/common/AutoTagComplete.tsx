@@ -214,7 +214,6 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       } else if (reason === 'ENTER') {
         if (focusedItem) {
           onTitleChange(focusedItem.title)
-          setIsOpen(false)
         } else {
           dispatch(
             createTagItem({
@@ -225,8 +224,8 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
           )
           setTagId(uuid())
           setTagColor(randomRgb())
-          setIsOpen(false)
         }
+        setIsOpen(false)
       }
     },
     [initialSuggestions, focusedItem, onTitleChange]
