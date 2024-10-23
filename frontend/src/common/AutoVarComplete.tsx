@@ -127,7 +127,6 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
 
   const handleSelect: AutocompletePureProps<Variable>['onSelect'] = useCallback(
     (_event, { item }) => {
-      console.log(item)
       const value = getSuggestionValue(item)
       onVarChange(value)
       setIsOpen(false)

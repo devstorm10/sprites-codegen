@@ -112,6 +112,20 @@ export function searchContextsByKeyword(
   return result
 }
 
+export function isTargetChildOfSource(
+  source: ContextNode,
+  target: string
+): boolean {
+  if (source.contexts) {
+    for (const child of source.contexts) {
+      if (child.id === target || isTargetChildOfSource(child, target)) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
 interface ContextState {
   contexts: ContextNode[]
   activeId: string | null
@@ -231,14 +245,22 @@ const contextSlice = createSlice({
     },
     moveContext: (
       state: ContextState,
-      action: PayloadAction<{ source: string; target: string }>
+      action: PayloadAction<{
+        source: string
+        target: string
+      }>
     ) => {
       const { source, target } = action.payload
       const sourceItem = findContextNodeById(state.contexts, source)
       const targetItem = findContextNodeById(state.contexts, target)
       const sourceParent = findParentContextNodeById(state.contexts, source)
       const targetParent = findParentContextNodeById(state.contexts, target)
-      if (!sourceItem || !targetItem) return
+      if (
+        !sourceItem ||
+        !targetItem ||
+        isTargetChildOfSource(sourceItem, targetItem.id)
+      )
+        return
       const priority = {
         group: 1,
         tag: 2,
@@ -247,11 +269,17 @@ const contextSlice = createSlice({
         flow_node: 4,
       }
       if (priority[sourceItem.type] > priority[targetItem.type]) {
-        if (sourceParent) {
-          targetItem.contexts = [...(targetItem.contexts || []), sourceItem]
-          sourceParent.contexts = sourceParent.contexts?.filter(
-            (context) => context.id !== source
-          )
+        if (
+          sourceParent &&
+          sourceParent.type !== 'flow' &&
+          sourceParent.type !== 'flow_node'
+        ) {
+          if (!targetItem.contexts?.find((item) => item.id === sourceItem.id)) {
+            targetItem.contexts = [...(targetItem.contexts || []), sourceItem]
+            sourceParent.contexts = sourceParent.contexts?.filter(
+              (context) => context.id !== source
+            )
+          }
         }
       } else if (priority[sourceItem.type] === priority[targetItem.type]) {
         if (

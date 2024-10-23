@@ -1,22 +1,43 @@
-import { useState } from 'react'
+import React, { PropsWithChildren, useState } from 'react'
 import {
   DndContext,
-  DragEndEvent,
   DragOverlay,
   DragStartEvent,
   DropAnimation,
-  closestCorners,
+  rectIntersection,
   defaultDropAnimation,
+  DragOverEvent,
+  useDroppable,
 } from '@dnd-kit/core'
 
 import CreateButton from './CreateButton'
 import GroupContainer from '@/components/Editor/GroupContainer'
-import { useAppDispatch } from '@/store/store'
+import { useAppDispatch, useAppSelector } from '@/store/store'
 import { findContextNodeById, moveContext } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
 
 interface ContextViewerProps {
   context: ContextNode
+}
+
+interface ContextDropProps {
+  className?: string
+}
+
+const ContextDrop: React.FC<PropsWithChildren & ContextDropProps> = ({
+  children,
+  className = '',
+}) => {
+  const activeContextId = useAppSelector(
+    (state) => state.context.activeId || ''
+  )
+  const { setNodeRef } = useDroppable({ id: activeContextId })
+
+  return (
+    <div ref={setNodeRef} className={className}>
+      {children}
+    </div>
+  )
 }
 
 const ContextViewer: React.FC<ContextViewerProps> = ({ context }) => {
@@ -36,30 +57,27 @@ const ContextViewer: React.FC<ContextViewerProps> = ({ context }) => {
     setActiveDndId(active.id as string)
   }
 
-  const handleDragOver = ({ active, over }: DragEndEvent) => {
-    const activeItem = findContextNodeById(totalContexts, active.id as string)
-    const overItem = findContextNodeById(totalContexts, over?.id as string)
-    if (!activeItem || !overItem || activeItem === overItem) return
-    dispatch(moveContext({ source: activeItem.id, target: overItem.id }))
+  const handleDragOver = ({ active, over }: DragOverEvent) => {
+    const source = active.id as string
+    const target = over?.id as string
+    const sourceItem = findContextNodeById([context], source)
+    const targetItem = findContextNodeById([context], target)
+    if (!sourceItem || !targetItem || sourceItem === targetItem) return
+    dispatch(moveContext({ source: sourceItem.id, target: targetItem.id }))
   }
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    const activeItem = findContextNodeById(totalContexts, active.id as string)
-    const overItem = findContextNodeById(totalContexts, over?.id as string)
-    if (!activeItem || !overItem || activeItem === overItem) return
-    dispatch(moveContext({ source: activeItem.id, target: overItem.id }))
-  }
+  const handleDragEnd = () => {}
 
   return (
     <div className="mt-[64px]">
       <CreateButton contextId={context.id} />
-      <div className="mt-9 flex flex-col gap-y-4">
-        <DndContext
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
+      <DndContext
+        collisionDetection={rectIntersection}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <ContextDrop className="mt-9 pb-10 flex flex-col gap-y-2">
           {totalContexts.map((context) => (
             <GroupContainer key={context.id} context={context} />
           ))}
@@ -68,8 +86,8 @@ const ContextViewer: React.FC<ContextViewerProps> = ({ context }) => {
               <GroupContainer context={activeDndContext} />
             ) : null}
           </DragOverlay>
-        </DndContext>
-      </div>
+        </ContextDrop>
+      </DndContext>
     </div>
   )
 }

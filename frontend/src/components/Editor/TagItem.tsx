@@ -46,7 +46,7 @@ const TagItem: React.FC<TagItemProps> = ({ context }) => {
   }
 
   return (
-    <div className="flex gap-x-1">
+    <div className="flex gap-x-1 relative mb-1.5">
       <motion.span
         className="mt-2.5 opacity-60 cursor-pointer"
         onClick={handleCollapseClick}

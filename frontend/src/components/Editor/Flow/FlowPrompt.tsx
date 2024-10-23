@@ -37,7 +37,10 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
         {childContexts.length > 0 &&
           childContexts.map((context) =>
             context.type === 'input' ? (
-              <Card className="py-3 px-4 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px]">
+              <Card
+                key={context.id}
+                className="py-3 px-4 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px]"
+              >
                 <EditableText
                   text={
                     (context.data && context.data.content) || 'Prompt text here'

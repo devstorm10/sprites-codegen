@@ -1,15 +1,14 @@
 import { useState, MouseEvent, useEffect, useMemo } from 'react'
 import {
   DndContext,
-  DragEndEvent,
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
   DropAnimation,
-  closestCorners,
   defaultDropAnimation,
   useDraggable,
   useDroppable,
+  pointerWithin,
 } from '@dnd-kit/core'
 import { AnimatePresence, motion } from 'framer-motion'
 import { IoCaretDown, IoCaretForward } from 'react-icons/io5'
@@ -58,27 +57,30 @@ const ContextGroup: React.FC<ContextGroupProps> = ({
   return (
     <div ref={setNodeRef} className={cn({ 'flex-1': grow })}>
       <ContextItem context={context} />
-      <AnimatePresence>
-        {!collapsed && contexts && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{
-              opacity: 0,
-              height: 0,
-              transformOrigin: 'top',
-              transition: {
-                opacity: { duration: 0.2 },
-              },
-            }}
-            className="ml-5"
-          >
-            {contexts.map((subContext, idx) => (
-              <ContextGroup key={idx} context={subContext} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="flex">
+        <div className="w-5" />
+        <AnimatePresence>
+          {!collapsed && contexts && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{
+                opacity: 0,
+                height: 0,
+                transformOrigin: 'top',
+                transition: {
+                  opacity: { duration: 0.2 },
+                },
+              }}
+              className="grow"
+            >
+              {contexts.map((subContext, idx) => (
+                <ContextGroup key={idx} context={subContext} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
@@ -122,14 +124,14 @@ const ContextItem: React.FC<ContextItemProps> = ({
       ref={setNodeRef}
       id={id}
       key={id}
-      className="flex items-center gap-2"
+      className="flex items-center relative"
       onMouseDown={handleContextSelect}
       {...attributes}
       {...listeners}
     >
       {context.contexts && (
         <motion.span
-          className="opacity-60 cursor-pointer"
+          className="absolute -left-4 opacity-60 cursor-pointer"
           onMouseDown={handleCollapseClick}
         >
           {context.collapsed ? <IoCaretForward /> : <IoCaretDown />}
@@ -178,18 +180,15 @@ const Contexts: React.FC = () => {
   }
 
   const handleDragOver = ({ active, over }: DragOverEvent) => {
-    const activeItem = findContextNodeById(contexts, active.id as string)
-    const overItem = findContextNodeById(contexts, over?.id as string)
-    if (!activeItem || !overItem || activeItem === overItem) return
-    dispatch(moveContext({ source: activeItem.id, target: overItem.id }))
+    const source = active.id as string
+    const target = over?.id as string
+    const sourceItem = findContextNodeById(contexts, source)
+    const targetItem = findContextNodeById(contexts, target)
+    if (!sourceItem || !targetItem || sourceItem === targetItem) return
+    dispatch(moveContext({ source: sourceItem.id, target: targetItem.id }))
   }
 
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    const activeItem = findContextNodeById(contexts, active.id as string)
-    const overItem = findContextNodeById(contexts, over?.id as string)
-    if (!activeItem || !overItem || activeItem === overItem) return
-    dispatch(moveContext({ source: activeItem.id, target: overItem.id }))
-  }
+  const handleDragEnd = () => {}
 
   useEffect(() => {
     if (selectedContextId) {
@@ -217,9 +216,9 @@ const Contexts: React.FC = () => {
   }, [dispatch, selectedContextId, defaultContextId])
 
   return (
-    <div className="flex-1 px-3 flex flex-col">
+    <div className="flex-1 pl-5 pr-1 flex flex-col">
       <DndContext
-        collisionDetection={closestCorners}
+        collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}

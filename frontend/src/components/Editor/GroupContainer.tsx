@@ -1,12 +1,14 @@
 import { useCallback, useRef, useState } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { Icon } from '@iconify/react'
+import { LuTag } from 'react-icons/lu'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import TextPromptItem from './Text/TextPromptItem'
 import FlowItem from './Flow/FlowItem'
 import TagItem from './TagItem'
 
+import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +20,6 @@ import {
 import { useAppDispatch } from '@/store/store'
 import { createNewTag } from '@/store/slices'
 import { ContextNode, CreateNode } from '@/lib/types'
-import { SparkleIcon } from '../icons/SparkleIcon'
-import { LuTag } from 'react-icons/lu'
 
 const functionItems: CreateNode[] = [
   {
@@ -170,29 +170,34 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ context }) => {
   })
 
   return (
-    <div ref={setNodeRef} className="flex flex-col gap-y-2">
+    <div ref={setNodeRef} className="flex flex-col gap-y-1">
       <GroupItem context={context} />
-      <AnimatePresence>
-        {!context.collapsed && context.contexts && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{
-              opacity: 0,
-              height: 0,
-              transformOrigin: 'top',
-              transition: {
-                opacity: { duration: 0.2 },
-              },
-            }}
-            className="pl-2 flex flex-col gap-y-1"
-          >
-            {context.contexts.map((context) => (
-              <GroupContainer key={context.id} context={context} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="flex">
+        <div className="w-3.5" />
+        <AnimatePresence>
+          {!context.collapsed &&
+            context.type !== 'flow' &&
+            context.contexts && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{
+                  opacity: 0,
+                  height: 0,
+                  transformOrigin: 'top',
+                  transition: {
+                    opacity: { duration: 0.2 },
+                  },
+                }}
+                className="grow flex flex-col gap-y-1"
+              >
+                {context.contexts.map((context) => (
+                  <GroupContainer key={context.id} context={context} />
+                ))}
+              </motion.div>
+            )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
