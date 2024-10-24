@@ -2,6 +2,19 @@ import { FlowNodeData } from '@/lib/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Node, Edge, Viewport } from 'reactflow'
 
+export function findFlowNodeById(
+  flows: FlowItem[],
+  id: string
+): Node<FlowNodeData> | null {
+  for (const flow of flows) {
+    const node = flow.nodes.find((node) => node.id === id)
+    if (node) {
+      return node
+    }
+  }
+  return null
+}
+
 type FlowItem = {
   id: string
   viewport: Viewport
@@ -57,9 +70,49 @@ const flowSlice = createSlice({
           : flow
       )
     },
+    updateNodes: (
+      state: FlowState,
+      action: PayloadAction<{ id: string; nodes: Node<FlowNodeData>[] }>
+    ) => {
+      const flowItem = state.flows.find((item) => item.id === action.payload.id)
+      if (flowItem) {
+        flowItem.nodes = action.payload.nodes
+      }
+    },
+    updateEdges: (
+      state: FlowState,
+      action: PayloadAction<{ id: string; edges: any[] }>
+    ) => {
+      const flowItem = state.flows.find((item) => item.id === action.payload.id)
+      if (flowItem) {
+        flowItem.edges = action.payload.edges
+      }
+    },
+    updateFlowNodeData: (
+      state: FlowState,
+      action: PayloadAction<{
+        id: string
+        newData: any
+      }>
+    ) => {
+      const nodeItem = findFlowNodeById(state.flows, action.payload.id)
+      if (nodeItem) {
+        Object.assign(nodeItem, {
+          ...nodeItem,
+          data: action.payload.newData,
+        })
+      }
+    },
   },
 })
 
-export const { createFlowView, addFlowNode, addFlowEdge, updateFlowViewport } =
-  flowSlice.actions
+export const {
+  createFlowView,
+  addFlowNode,
+  addFlowEdge,
+  updateFlowViewport,
+  updateNodes,
+  updateEdges,
+  updateFlowNodeData,
+} = flowSlice.actions
 export default flowSlice.reducer

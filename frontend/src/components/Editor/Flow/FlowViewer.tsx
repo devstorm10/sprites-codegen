@@ -29,15 +29,24 @@ import {
   createFlowNode,
   findContextNodeById,
   showSidebar,
+  updateEdges,
   updateFlowViewport,
+  updateNodes,
 } from '@/store/slices'
 import { ContextNode, FlowNodeData } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const nodeTypes = {
-  basic: (props: NodeProps) => <FlowNode {...props} type="basic" />,
-  prompt: (props: NodeProps) => <FlowNode {...props} type="prompt" />,
-  condition: (props: NodeProps) => <FlowNode {...props} type="condition" />,
+  flow_node: (props: NodeProps) =>
+    props.data.type === 'basic' ? (
+      <FlowNode {...props} type="basic" />
+    ) : props.data.type === 'prompt' ? (
+      <FlowNode {...props} type="prompt" />
+    ) : props.data.type === 'condition' ? (
+      <FlowNode {...props} type="condition" />
+    ) : (
+      <></>
+    ),
 }
 type FlowViewerProps = {
   flowContext: ContextNode
@@ -138,8 +147,9 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     if (e.button === 0) {
       const newNode = {
         id: uuid(),
-        type: trigger,
+        type: 'flow_node',
         data: {
+          type: trigger,
           title:
             trigger === 'basic'
               ? 'Trigger'
@@ -148,6 +158,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
                 : trigger === 'condition'
                   ? 'Condition'
                   : '',
+          content: trigger === 'basic' ? { items: [] } : {},
         },
         position: screenToFlowPosition({ x: e.clientX, y: e.clientY }),
       }
@@ -155,6 +166,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
       setNodes([...nodes, newNode])
       dispatch(addFlowNode({ id: flowContext.id, node: newNode }))
       dispatch(createFlowNode({ id: flowContext.id, node: newNode }))
+      setTriggerPos({ x: -100, y: -100 })
     } else if (e.button === 2) {
       setTrigger('')
     }
@@ -169,7 +181,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     setTriggerPos({ x: mouseXPos, y: mouseYPos })
   }
 
-  const onConnect = useCallback<OnConnect>(
+  const handleEdgeConnect = useCallback<OnConnect>(
     (params) => {
       const newEdge = {
         ...params,
@@ -206,6 +218,15 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
   }, [viewport.x, viewport.y, viewport.zoom])
 
   useEffect(() => {
+    const intervalId = setInterval(() => {
+      dispatch(updateNodes({ id: flowContext.id, nodes }))
+      dispatch(updateEdges({ id: flowContext.id, edges }))
+    }, 500)
+
+    return () => clearInterval(intervalId)
+  }, [nodes, edges])
+
+  useEffect(() => {
     const handleContextMenu = (event: Event) => {
       event.preventDefault()
     }
@@ -224,7 +245,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onConnect={onConnect}
+        onConnect={handleEdgeConnect}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
