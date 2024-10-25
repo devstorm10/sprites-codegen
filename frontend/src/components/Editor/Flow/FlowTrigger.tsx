@@ -58,7 +58,7 @@ type ContentItemType = {
   data: string | VariableType
 }
 
-type FlowBasicProps = {
+type FlowTriggerProps = {
   id: string
   data: {
     content: {
@@ -67,7 +67,7 @@ type FlowBasicProps = {
   }
 }
 
-const FlowTrigger: React.FC<FlowBasicProps> = ({ id, data }) => {
+const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
   const { setNodes } = useReactFlow()
   const variables = useAppSelector((state) => state.context.variables)
 

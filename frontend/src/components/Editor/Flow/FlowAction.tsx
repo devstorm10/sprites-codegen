@@ -1,49 +1,115 @@
-import { memo } from 'react'
-import { Handle, Position } from 'reactflow'
+import { memo, useCallback } from 'react'
+import { useReactFlow } from 'reactflow'
 
 import EditableText from '@/common/EditableText'
-import { FlowNodeData } from '@/lib/types'
-import './FlowAction.css'
+import { Card } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
-type FlowConditionProps = {
-  data: FlowNodeData
+const typeItems = [
+  {
+    title: 'Number',
+    name: 'number',
+  },
+  {
+    title: 'String',
+    name: 'string',
+  },
+]
+
+type ActionContent = {
+  value?: string
+  inference?: string
+  vartype?: string
 }
 
-const FlowCondition: React.FC<FlowConditionProps> = ({ data }) => {
-  return (
-    <div className="flex flex-col gap-y-2">
-      <EditableText
-        text={(data.content && data.content.condition) || 'Condition text here'}
-        onChange={() => {}}
-        className="w-full whitespace-normal overflow-visible !text-wrap"
-      />
+type FlowActionProps = {
+  id: string
+  data: {
+    content: ActionContent
+  }
+}
 
-      <div className="flex flex-col gap-y-2 font-semibold">
-        <div className="py-3 px-4 rounded-[20px] border border-[#00AF46] flex items-center justify-between">
-          <p>YES</p>
-          <span className="relative">
-            <Handle
-              id="a"
-              type="source"
-              position={Position.Right}
-              className="absolute !bg-[#319CFF] border border-[#319CFF] w-2 h-2"
-            />
-          </span>
-        </div>
-        <div className="py-3 px-4 rounded-[20px] border border-[#FF0000] flex items-center justify-between">
-          <p>NO</p>
-          <span className="relative">
-            <Handle
-              id="b"
-              type="source"
-              position={Position.Right}
-              className="absolute border border-[#319CFF] !bg-white w-2 h-2"
-            />
-          </span>
-        </div>
+const FlowAction: React.FC<FlowActionProps> = ({ id, data }) => {
+  const { setNodes } = useReactFlow()
+
+  const handleDataUpdate = useCallback(
+    (data: ActionContent) => {
+      setNodes((nodes) =>
+        nodes.map((node) =>
+          node.id === id
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  content: {
+                    ...node.data.content,
+                    ...data,
+                  },
+                },
+              }
+            : node
+        )
+      )
+    },
+    [id]
+  )
+
+  return (
+    <div className="flex flex-col gap-y-4">
+      <div className="flex flex-col gap-y-1">
+        <p>Update Value</p>
+        <Card className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2">
+          <EditableText
+            text={data.content.value || ''}
+            placeholder="{{Variable Name}}"
+            onChange={(text) =>
+              handleDataUpdate({ ...data.content, value: text })
+            }
+            className="!text-wrap"
+          />
+        </Card>
+      </div>
+      <div className="flex flex-col gap-y-1">
+        <p>Inference</p>
+        <Card className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2">
+          <EditableText
+            text={data.content.inference || ''}
+            placeholder="On scale of 1-5, how satisfied does the user sound?"
+            onChange={(text) =>
+              handleDataUpdate({ ...data.content, inference: text })
+            }
+            className="!text-wrap"
+          />
+        </Card>
+      </div>
+      <div className="flex flex-col gap-y-1">
+        <p>Variable Type</p>
+        <Select
+          value={data.content.vartype || ''}
+          onValueChange={(type) =>
+            handleDataUpdate({ ...data.content, vartype: type })
+          }
+        >
+          <SelectTrigger className="py-5 px-4 rounded-[20px] !outline-none">
+            <SelectValue placeholder="Number" />
+          </SelectTrigger>
+          <SelectContent>
+            {typeItems.map((item) => (
+              <SelectItem key={item.name} value={item.name}>
+                {item.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )
 }
 
-export default memo(FlowCondition)
+export default memo(FlowAction)

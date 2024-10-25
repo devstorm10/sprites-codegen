@@ -64,7 +64,7 @@ type ContentItemType = {
   data: string | VariableType
 }
 
-type FlowBasicProps = {
+type FlowPromptProps = {
   id: string
   data: {
     content: {
@@ -73,7 +73,7 @@ type FlowBasicProps = {
   }
 }
 
-const FlowPrompt: React.FC<FlowBasicProps> = ({ id, data }) => {
+const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
   const { setNodes } = useReactFlow()
   const variables = useAppSelector((state) => state.context.variables)
 

@@ -5,6 +5,7 @@ import { NodeProps } from 'reactflow'
 import FlowTrigger from './FlowTrigger'
 import FlowPrompt from './FlowPrompt'
 import FlowAction from './FlowAction'
+import FlowInsertLine from './FlowInsertLine'
 import FlowHandlers from './FlowHandlers'
 
 import EditableText from '@/common/EditableText'
@@ -18,7 +19,6 @@ import { FAKE_NODE_ID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { selectContext } from '@/store/slices'
-import FlowInsertLine from './FlowInsertLine'
 
 type FlowNodeProps = {
   type: 'trigger' | 'prompt' | 'action' | 'insert_line'
@@ -79,7 +79,7 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
       ) : type === 'prompt' ? (
         <FlowPrompt id={id as string} data={data} />
       ) : type === 'action' ? (
-        <FlowAction data={data} />
+        <FlowAction id={id as string} data={data} />
       ) : type === 'insert_line' ? (
         <FlowInsertLine id={id as string} data={data} />
       ) : (

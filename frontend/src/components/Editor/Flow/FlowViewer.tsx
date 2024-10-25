@@ -173,7 +173,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
                   : trigger === 'insert_line'
                     ? 'Insert Line'
                     : '',
-          content: { items: [] },
+          content: trigger === 'insert_line' ? {} : { items: [] },
         },
         position: screenToFlowPosition({ x: e.clientX, y: e.clientY }),
       }
@@ -316,16 +316,18 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
           id={FAKE_NODE_ID}
           type={trigger}
           data={{
+            type: trigger,
             title:
               trigger === 'trigger'
                 ? 'Trigger'
                 : trigger === 'prompt'
-                  ? 'Prompt'
+                  ? 'Additional Prompt'
                   : trigger === 'action'
                     ? 'Action'
                     : trigger === 'insert_line'
                       ? 'Insert Line'
                       : '',
+            content: trigger === 'insert_line' ? {} : { items: [] },
           }}
           className="absolute z-40 opacity-50"
           style={{

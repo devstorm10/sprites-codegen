@@ -5,7 +5,7 @@ import { FaPlus } from 'react-icons/fa6'
 import { Card } from '@/components/ui/card'
 import EditableText from '@/common/EditableText'
 
-type FlowBasicProps = {
+type FlowInsertLineProps = {
   id: string
   data: {
     content: {
@@ -14,7 +14,7 @@ type FlowBasicProps = {
   }
 }
 
-const FlowInsertLine: React.FC<FlowBasicProps> = ({ id, data }) => {
+const FlowInsertLine: React.FC<FlowInsertLineProps> = ({ id, data }) => {
   const { setNodes } = useReactFlow()
 
   const handleLineCreate = () => {
