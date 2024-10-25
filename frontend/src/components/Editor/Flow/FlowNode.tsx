@@ -3,21 +3,22 @@ import { FaChevronRight } from 'react-icons/fa6'
 import { NodeProps } from 'reactflow'
 
 import FlowTrigger from './FlowTrigger'
-import FlowAction from './FlowAction'
 import FlowPrompt from './FlowPrompt'
+import FlowAction from './FlowAction'
 import FlowHandlers from './FlowHandlers'
 
 import EditableText from '@/common/EditableText'
 import { CopyIcon } from '@/components/icons/CopyIcon'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import { TrashIcon } from '@/components/icons/TrashIcon'
+import { LayoutIcon } from '@/components/icons/LayoutIcon'
+import { PromptIcon } from '@/components/icons/PromptIcon'
 import { Card } from '@/components/ui/card'
 import { FAKE_NODE_ID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { selectContext } from '@/store/slices'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { LayoutIcon } from '@/components/icons/LayoutIcon'
-import { PromptIcon } from '@/components/icons/PromptIcon'
+import { selectContext } from '@/store/slices'
+import FlowInsertLine from './FlowInsertLine'
 
 type FlowNodeProps = {
   type: 'trigger' | 'prompt' | 'action' | 'insert_line'
@@ -76,11 +77,11 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
       {type === 'trigger' ? (
         <FlowTrigger id={id as string} data={data} />
       ) : type === 'prompt' ? (
-        <FlowPrompt id={id as string} />
+        <FlowPrompt id={id as string} data={data} />
       ) : type === 'action' ? (
         <FlowAction data={data} />
       ) : type === 'insert_line' ? (
-        <></>
+        <FlowInsertLine id={id as string} data={data} />
       ) : (
         <></>
       )}

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { cn } from '@/lib/utils'
 
 interface EditableTextProps {
   text: string
   onChange: (newText: string) => void
+  placeholder?: string
   className?: string
   editing?: boolean
 }
@@ -10,6 +12,7 @@ interface EditableTextProps {
 const EditableText: React.FC<EditableTextProps> = ({
   text,
   onChange,
+  placeholder = '',
   className = '',
   editing = false,
 }) => {
@@ -45,8 +48,16 @@ const EditableText: React.FC<EditableTextProps> = ({
           className={`text-nowrap bg-transparent border-b border-primary-100 outline-none w-full ${className}`}
         ></div>
       ) : (
-        <div className={`text-nowrap border-b border-transparent ${className}`}>
-          {text}
+        <div
+          className={cn(
+            'text-nowrap border-b border-transparent',
+            {
+              '!text-[#B1B0AF]': !text && placeholder,
+            },
+            className
+          )}
+        >
+          {text || placeholder}
         </div>
       )}
     </div>

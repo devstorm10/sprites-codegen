@@ -173,7 +173,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
                   : trigger === 'insert_line'
                     ? 'Insert Line'
                     : '',
-          content: trigger === 'trigger' ? { items: [] } : {},
+          content: { items: [] },
         },
         position: screenToFlowPosition({ x: e.clientX, y: e.clientY }),
       }
@@ -251,9 +251,9 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
               markerEnd: {
                 type: MarkerType.Arrow,
                 strokeWidth: 1.5,
-                color: 'blue',
+                color: '#0B99FF',
               },
-              style: { ...edge.style, stroke: 'blue' },
+              style: { ...edge.style, stroke: '#0B99FF' },
             }
           : {
               ...edge,
