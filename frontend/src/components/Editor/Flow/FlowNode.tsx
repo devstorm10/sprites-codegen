@@ -18,7 +18,7 @@ import { Card } from '@/components/ui/card'
 import { FAKE_NODE_ID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { selectContext } from '@/store/slices'
+import { selectContext, showPromptbar } from '@/store/slices'
 
 type FlowNodeProps = {
   type: 'trigger' | 'prompt' | 'action' | 'insert_line'
@@ -41,6 +41,7 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
     if (id) {
       dispatch(selectContext(id))
     }
+    if (type === 'prompt') dispatch(showPromptbar(true))
   }, [id, isPromptbar, type])
 
   return (

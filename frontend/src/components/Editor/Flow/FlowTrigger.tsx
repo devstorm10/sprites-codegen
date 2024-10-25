@@ -1,8 +1,9 @@
 import { memo, useCallback } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 
-import AutoVarComplete from '@/common/AutoVarComplete'
 import FlowHandlers from './FlowHandlers'
+import AutoVarComplete from '@/common/AutoVarComplete'
+import InputText from '@/common/InputText'
 import { Card } from '@/components/ui/card'
 import {
   DropdownMenu,
@@ -18,13 +19,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import EditableText from '@/common/EditableText'
+import { TextIcon } from '@/components/icons/TextIcon'
+import { VariableIcon } from '@/components/icons/VariableIcon'
 import { CreateNode } from '@/lib/types'
 import { FAKE_NODE_ID } from '@/lib/constants'
 import { useReactFlow } from 'reactflow'
 import { useAppSelector } from '@/store/store'
-import { TextIcon } from '@/components/icons/TextIcon'
-import { VariableIcon } from '@/components/icons/VariableIcon'
 
 const createItems: CreateNode[] = [
   {
@@ -139,7 +139,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
               key={idx}
               className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2"
             >
-              <EditableText
+              <InputText
                 text={item.data as string}
                 onChange={(text) => handleDataUpdate(text, idx)}
                 className="!text-wrap"

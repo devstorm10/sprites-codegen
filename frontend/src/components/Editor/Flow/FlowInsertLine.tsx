@@ -2,8 +2,8 @@ import { memo, useCallback } from 'react'
 import { useReactFlow } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
+import InputText from '@/common/InputText'
 import { Card } from '@/components/ui/card'
-import EditableText from '@/common/EditableText'
 
 type FlowInsertLineProps = {
   id: string
@@ -67,7 +67,7 @@ const FlowInsertLine: React.FC<FlowInsertLineProps> = ({ id, data }) => {
             key={idx}
             className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2"
           >
-            <EditableText
+            <InputText
               text={line}
               placeholder="Start typing"
               onChange={(text) => handleDataUpdate(text, idx)}

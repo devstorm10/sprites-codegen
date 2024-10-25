@@ -1,8 +1,9 @@
 import { memo, useCallback } from 'react'
+import { useReactFlow } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
 import AutoVarComplete from '@/common/AutoVarComplete'
-import FlowHandlers from './FlowHandlers'
+import InputText from '@/common/InputText'
 import { Card } from '@/components/ui/card'
 import {
   DropdownMenu,
@@ -18,14 +19,20 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import EditableText from '@/common/EditableText'
-import { CreateNode } from '@/lib/types'
-import { FAKE_NODE_ID } from '@/lib/constants'
-import { useReactFlow } from 'reactflow'
-import { useAppSelector } from '@/store/store'
 import { TextIcon } from '@/components/icons/TextIcon'
 import { VariableIcon } from '@/components/icons/VariableIcon'
 import { FlowHIcon } from '@/components/icons/FlowHIcon'
+import { SparkleIcon } from '@/components/icons/SparkleIcon'
+import { ContextNode, CreateNode } from '@/lib/types'
+import { useAppDispatch, useAppSelector } from '@/store/store'
+import {
+  createFlow,
+  createFlowView,
+  createTextPrompt,
+  findContextNodeById,
+  updateContext,
+} from '@/store/slices'
+import uuid from 'react-uuid'
 
 const createItems: CreateNode[] = [
   {
@@ -61,7 +68,7 @@ type VariableType = {
 
 type ContentItemType = {
   type: 'prompt' | 'variable' | 'flow'
-  data: string | VariableType
+  data: string | VariableType | ContextNode
 }
 
 type FlowPromptProps = {
@@ -74,10 +81,21 @@ type FlowPromptProps = {
 }
 
 const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
+  const dispatch = useAppDispatch()
   const { setNodes } = useReactFlow()
   const variables = useAppSelector((state) => state.context.variables)
+  const flowNodeItem = useAppSelector((state) =>
+    findContextNodeById(state.context.contexts, id)
+  )
+  const promptItems = flowNodeItem?.contexts || []
 
   const handleItemClick = (name: string) => () => {
+    if (name === 'flow') {
+      const flowId = uuid()
+      dispatch(createFlow({ contextId: id, flowId, isRedirect: false }))
+      dispatch(createFlowView(flowId))
+    } else dispatch(createTextPrompt(id))
+
     const newData = {
       ...data,
       content: {
@@ -88,14 +106,14 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
             type: name,
             data:
               name === 'prompt'
-                ? 'This is the text prompt'
+                ? ''
                 : name === 'variable'
                   ? {
                       name: '',
                       opt: '',
                       value: '',
                     }
-                  : '',
+                  : 'Flow',
           },
         ],
       },
@@ -110,7 +128,8 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
 
   const handleDataUpdate = useCallback(
     (
-      data: string | { name: string; opt: string; value: string },
+      type: 'prompt' | 'variable' | 'flow',
+      data: string | VariableType,
       idx: number
     ) => {
       setNodes((nodes) =>
@@ -132,9 +151,69 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
             : node
         )
       )
+      if (promptItems[idx]) {
+        const targetItem = promptItems[idx]
+        dispatch(
+          updateContext({
+            id: targetItem.id,
+            newContext: {
+              ...targetItem,
+              data: {
+                content:
+                  type === 'variable'
+                    ? `{{${(data as VariableType).name}${(data as VariableType).opt}${(data as VariableType).value}}}`
+                    : data,
+              },
+            },
+          })
+        )
+      }
     },
-    [id]
+    [id, promptItems]
   )
+
+  // useEffect(() => {
+  //   setNodes((nodes) =>
+  //     nodes.map((node) => {
+  //       if (node.id !== id) return node
+  //       console.log('changed node', node)
+  //       return {
+  //         ...node,
+  //         data: {
+  //           ...node.data,
+  //           content: {
+  //             ...node.data.content,
+  //             items: (
+  //               (node.data?.content?.items as ContentItemType[]) || []
+  //             ).map((item, idx) =>
+  //               item.type === 'prompt'
+  //                 ? { ...item, data: promptItems[idx]?.data?.content || '' }
+  //                 : item.type === 'variable'
+  //                   ? {
+  //                       ...item,
+  //                       data: (() => {
+  //                         const content = promptItems[idx]?.data?.content || ''
+  //                         const match = content.match(
+  //                           /{{(.+?)(==|!=|>|<|>=|<=)(.+?)}}/
+  //                         )
+  //                         if (match) {
+  //                           return {
+  //                             name: match[1],
+  //                             opt: match[2],
+  //                             value: match[3],
+  //                           }
+  //                         }
+  //                         return { name: '', opt: '', value: '' }
+  //                       })(),
+  //                     }
+  //                   : { ...item, data: promptItems[idx]?.data?.content || '' }
+  //             ),
+  //           },
+  //         },
+  //       }
+  //     })
+  //   )
+  // }, [id, promptItems])
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -144,11 +223,12 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
           item.type === 'prompt' ? (
             <Card
               key={idx}
-              className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2"
+              className="py-3 px-4 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px] flex items-end justify-center gap-x-2"
             >
-              <EditableText
+              <InputText
                 text={item.data as string}
-                onChange={(text) => handleDataUpdate(text, idx)}
+                placeholder="This is the text prompt"
+                onChange={(text) => handleDataUpdate('prompt', text, idx)}
                 className="!text-wrap"
               />
             </Card>
@@ -163,6 +243,7 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
                 onFocus={() => {}}
                 onVarChange={(name) =>
                   handleDataUpdate(
+                    'variable',
                     { ...(item.data as VariableType), name },
                     idx
                   )
@@ -172,7 +253,11 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
               <Select
                 value={(item.data as VariableType).opt}
                 onValueChange={(opt) =>
-                  handleDataUpdate({ ...(item.data as VariableType), opt }, idx)
+                  handleDataUpdate(
+                    'variable',
+                    { ...(item.data as VariableType), opt },
+                    idx
+                  )
                 }
               >
                 <SelectTrigger className="py-1 px-4 w-[70px] rounded-[20px] !outline-none">
@@ -191,6 +276,7 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
                 value={(item.data as VariableType).value}
                 onChange={(e) =>
                   handleDataUpdate(
+                    'variable',
                     {
                       ...(item.data as VariableType),
                       value: e.target.value,
@@ -202,7 +288,14 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
               />
             </Card>
           ) : (
-            <></>
+            <Card className="px-4 py-3 flex items-center gap-x-3 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.08)] rounded-[20px]">
+              <SparkleIcon fontSize={20} />
+              <InputText
+                text={item.data as string}
+                onChange={(text) => handleDataUpdate('flow', text, idx)}
+                className="font-bold"
+              />
+            </Card>
           )
         )}
       <DropdownMenu>
@@ -228,26 +321,6 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="w-full flex gap-x-2">
-        <Card
-          id={`${id as string}_yes`}
-          className="grow py-3 rounded-[20px] shadow-card text-[#B1B0AF] font-medium text-sm text-center relative hover:z-10 hover:border-[#32CD25] hover:text-[#32CD25] group"
-        >
-          YES
-          {id !== FAKE_NODE_ID && (
-            <FlowHandlers parentId={`${id as string}_yes`} color="#32CD25" />
-          )}
-        </Card>
-        <Card
-          id={`${id as string}_no`}
-          className="grow py-3 rounded-[20px] shadow-card text-[#B1B0AF] font-medium text-sm text-center relative hover:z-10 hover:border-[#FF0000] hover:text-[#FF0000] group"
-        >
-          NO
-          {id !== FAKE_NODE_ID && (
-            <FlowHandlers parentId={`${id as string}_no`} color="#FF0000" />
-          )}
-        </Card>
-      </div>
     </div>
   )
 }

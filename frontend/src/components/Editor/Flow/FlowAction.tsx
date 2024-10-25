@@ -1,7 +1,6 @@
 import { memo, useCallback } from 'react'
 import { useReactFlow } from 'reactflow'
 
-import EditableText from '@/common/EditableText'
 import { Card } from '@/components/ui/card'
 import {
   Select,
@@ -10,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import InputText from '@/common/InputText'
 
 const typeItems = [
   {
@@ -65,7 +65,7 @@ const FlowAction: React.FC<FlowActionProps> = ({ id, data }) => {
       <div className="flex flex-col gap-y-1">
         <p>Update Value</p>
         <Card className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2">
-          <EditableText
+          <InputText
             text={data.content.value || ''}
             placeholder="{{Variable Name}}"
             onChange={(text) =>
@@ -78,7 +78,7 @@ const FlowAction: React.FC<FlowActionProps> = ({ id, data }) => {
       <div className="flex flex-col gap-y-1">
         <p>Inference</p>
         <Card className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2">
-          <EditableText
+          <InputText
             text={data.content.inference || ''}
             placeholder="On scale of 1-5, how satisfied does the user sound?"
             onChange={(text) =>
