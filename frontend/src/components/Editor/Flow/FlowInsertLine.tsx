@@ -61,6 +61,7 @@ const FlowInsertLine: React.FC<FlowInsertLineProps> = ({ id, data }) => {
   return (
     <div className="flex flex-col gap-y-4">
       {data.content &&
+        data.content.items &&
         data.content.items.map((line: string, idx: number) => (
           <Card
             key={idx}

@@ -173,7 +173,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
                   : trigger === 'insert_line'
                     ? 'Insert Line'
                     : '',
-          content: trigger === 'insert_line' ? {} : { items: [] },
+          content: trigger === 'action' ? {} : { items: [] },
         },
         position: screenToFlowPosition({ x: e.clientX, y: e.clientY }),
       }

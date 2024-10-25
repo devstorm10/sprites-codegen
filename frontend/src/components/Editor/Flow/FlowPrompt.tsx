@@ -87,7 +87,7 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id, data }) => {
           {
             type: name,
             data:
-              name === 'text-prompt'
+              name === 'prompt'
                 ? 'This is the text prompt'
                 : name === 'variable'
                   ? {
