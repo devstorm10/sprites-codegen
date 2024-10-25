@@ -95,12 +95,15 @@ const flowSlice = createSlice({
         newData: any
       }>
     ) => {
-      const nodeItem = findFlowNodeById(state.flows, action.payload.id)
-      if (nodeItem) {
-        Object.assign(nodeItem, {
-          ...nodeItem,
-          data: action.payload.newData,
-        })
+      const flowItem = state.flows.find((flow) =>
+        flow.nodes.some((node) => node.id === action.payload.id)
+      )
+      if (flowItem) {
+        flowItem.nodes = flowItem.nodes.map((node) =>
+          node.id === action.payload.id
+            ? { ...node, data: { ...node.data, ...action.payload.newData } }
+            : node
+        )
       }
     },
   },

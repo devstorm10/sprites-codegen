@@ -12,3 +12,5 @@ export const CONTEXT_ICONS = {
   flow_node: <SparkleIcon />,
   input: <RxText size={20} />,
 }
+
+export const FAKE_NODE_ID = 'fake_node'

@@ -3,7 +3,7 @@ import { Handle, Position } from 'reactflow'
 
 import EditableText from '@/common/EditableText'
 import { FlowNodeData } from '@/lib/types'
-import './FlowCondition.css'
+import './FlowAction.css'
 
 type FlowConditionProps = {
   data: FlowNodeData

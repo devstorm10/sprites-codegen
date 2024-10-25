@@ -191,6 +191,7 @@ const contextSlice = createSlice({
           id: node.id,
           title: node.data.title,
           type: 'flow_node',
+          data: node.data,
         }
         flowItem.contexts = [...(flowItem.contexts || []), newContext]
       }

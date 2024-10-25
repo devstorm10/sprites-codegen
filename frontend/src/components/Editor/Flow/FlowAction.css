@@ -1,5 +1,5 @@
 .react-flow__nodes {
-  z-index: -1 !important;
+  z-index: 0 !important;
 }
 
 .react-flow__edge-path {

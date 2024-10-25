@@ -1,21 +1,26 @@
 import React, { CSSProperties, memo, useCallback } from 'react'
-import { Handle, NodeProps, Position } from 'reactflow'
+import { FaChevronRight } from 'react-icons/fa6'
+import { NodeProps } from 'reactflow'
 
-import FlowBasic from './FlowBasic'
+import FlowTrigger from './FlowTrigger'
+import FlowAction from './FlowAction'
 import FlowPrompt from './FlowPrompt'
-import FlowCondition from './FlowCondition'
+import FlowHandlers from './FlowHandlers'
 
 import EditableText from '@/common/EditableText'
-import { Card } from '@/components/ui/card'
-import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import { CopyIcon } from '@/components/icons/CopyIcon'
+import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import { TrashIcon } from '@/components/icons/TrashIcon'
-import { selectContext, showPromptbar } from '@/store/slices'
-import { useAppDispatch, useAppSelector } from '@/store/store'
+import { Card } from '@/components/ui/card'
+import { FAKE_NODE_ID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { selectContext } from '@/store/slices'
+import { useAppDispatch, useAppSelector } from '@/store/store'
+import { LayoutIcon } from '@/components/icons/LayoutIcon'
+import { PromptIcon } from '@/components/icons/PromptIcon'
 
 type FlowNodeProps = {
-  type: 'basic' | 'prompt' | 'condition'
+  type: 'trigger' | 'prompt' | 'action' | 'insert_line'
   className?: string
   style?: CSSProperties
 }
@@ -35,13 +40,12 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
     if (id) {
       dispatch(selectContext(id))
     }
-    dispatch(showPromptbar(type === 'prompt'))
   }, [id, isPromptbar, type])
 
   return (
     <Card
       className={cn(
-        'p-4 w-[300px] flex flex-col gap-y-4 text-sm shadow-[0_3px_15px_rgba(38,50,56,0.07)]',
+        'p-4 w-[300px] flex flex-col gap-y-4 text-sm shadow-[0_3px_15px_rgba(38,50,56,0.07)] relative',
         {
           'border border-[#0B99FF]': selectedNodeId === id,
         },
@@ -51,7 +55,13 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
       onClick={handleNodeClick}
     >
       <div className="flex items-center gap-x-2">
-        <SparkleIcon fontSize={20} className="mr-2 shrink-0" />
+        {type === 'trigger' ? (
+          <LayoutIcon />
+        ) : type === 'prompt' ? (
+          <PromptIcon />
+        ) : (
+          <SparkleIcon />
+        )}
         <EditableText
           text={(data && data.title) || ''}
           onChange={() => {}}
@@ -63,19 +73,29 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
         </div>
       </div>
       <div className="h-0.5 border-t" />
-      {type === 'basic' ? (
-        <FlowBasic />
+      {type === 'trigger' ? (
+        <FlowTrigger id={id as string} data={data} />
       ) : type === 'prompt' ? (
         <FlowPrompt id={id as string} />
-      ) : type === 'condition' ? (
-        <FlowCondition data={data} />
+      ) : type === 'action' ? (
+        <FlowAction data={data} />
+      ) : type === 'insert_line' ? (
+        <></>
       ) : (
         <></>
       )}
 
-      <Handle type="target" position={Position.Left} className="top-14" />
-      {type !== 'condition' && (
-        <Handle type="source" position={Position.Right} className="top-14" />
+      {selectedNodeId === id && (
+        <div className="absolute -top-1 left-0 -translate-y-full p-1 pr-3 rounded-full border border-[#0B99FF] flex items-center gap-x-2 bg-white">
+          <span className="w-6 h-6 rounded-full flex items-center justify-center bg-[#0B99FF] text-white font-bold">
+            <FaChevronRight />
+          </span>
+          <p className="font-semibold text-[#0B99FF]">Start</p>
+        </div>
+      )}
+
+      {id !== FAKE_NODE_ID && (
+        <FlowHandlers parentId={id as string} color="#0B99FF" />
       )}
     </Card>
   )

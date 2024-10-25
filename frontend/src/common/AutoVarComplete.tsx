@@ -76,6 +76,7 @@ interface AutoCompleteProps {
   suggestions: Variable[]
   onFocus: (e: any) => void
   onVarChange: (tilte: string) => void
+  className?: string
 }
 
 const AutoComplete: React.FC<AutoCompleteProps> = ({
@@ -83,6 +84,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   suggestions: initialSuggestions,
   onFocus,
   onVarChange,
+  className = '',
 }) => {
   const dispatch = useAppDispatch()
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -171,6 +173,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       renderInput={renderInput}
       renderContainer={renderContainer}
       getSuggestionValue={getSuggestionValue}
+      className={className}
     />
   )
 }
