@@ -41,13 +41,18 @@ const functionItems: CreateNode[] = [
 
 interface GroupItemProps {
   context: ContextNode
+  isOnPromptbar?: boolean
 }
 
 interface GroupContainerProps {
   context: ContextNode
+  isOnPromptbar?: boolean
 }
 
-const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
+const GroupItem: React.FC<GroupItemProps> = ({
+  context,
+  isOnPromptbar = false,
+}) => {
   const dispatch = useAppDispatch()
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: context.id,
@@ -88,6 +93,8 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
   }
 
   if (context.type === 'flow_node') return <></>
+
+  console.log('is promptbar', isOnPromptbar)
 
   return (
     <div
@@ -146,7 +153,12 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
         </DropdownMenu>
       )}
       {context.type === 'input' || context.type === 'variable' ? (
-        <TextPromptItem textPrompt={context} {...attributes} {...listeners} />
+        <TextPromptItem
+          textPrompt={context}
+          isOnNode={isOnPromptbar}
+          {...attributes}
+          {...listeners}
+        />
       ) : context.type === 'flow' ? (
         <FlowItem
           key={context.id}
@@ -168,14 +180,17 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
   )
 }
 
-const GroupContainer: React.FC<GroupContainerProps> = ({ context }) => {
+const GroupContainer: React.FC<GroupContainerProps> = ({
+  context,
+  isOnPromptbar = false,
+}) => {
   const { setNodeRef } = useDroppable({
     id: context.id,
   })
 
   return (
     <div ref={setNodeRef} className="flex flex-col gap-y-1">
-      <GroupItem context={context} />
+      <GroupItem context={context} isOnPromptbar={isOnPromptbar} />
       <div className="flex">
         <div className="w-3.5" />
         <AnimatePresence>
@@ -196,7 +211,11 @@ const GroupContainer: React.FC<GroupContainerProps> = ({ context }) => {
                 className="grow flex flex-col gap-y-1"
               >
                 {context.contexts.map((context) => (
-                  <GroupContainer key={context.id} context={context} />
+                  <GroupContainer
+                    key={context.id}
+                    context={context}
+                    isOnPromptbar={isOnPromptbar}
+                  />
                 ))}
               </motion.div>
             )}

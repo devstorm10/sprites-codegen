@@ -131,7 +131,7 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
             key={idx}
             className="py-3 px-4 flex items-end justify-center gap-x-2"
           >
-            <TextPromptItem textPrompt={item} />
+            <TextPromptItem textPrompt={item} isOnNode={true} />
           </Card>
         ) : item.type === 'variable' ? (
           <Card

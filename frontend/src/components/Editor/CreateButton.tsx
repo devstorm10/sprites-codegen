@@ -54,7 +54,9 @@ const createItems: CreateNode[] = [
 
 const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
   const dispatch = useAppDispatch()
-  const isPromptbar = useAppSelector((state) => state.setting.isPromptbar)
+  const isPromptbar = useAppSelector(
+    (state) => state.setting.isPromptbarExpanded
+  )
 
   const handleItemClick = (name: string) => () => {
     switch (name) {

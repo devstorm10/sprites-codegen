@@ -19,13 +19,16 @@ import defaultMentionStyle from './defaultMentionStyle'
 
 interface TextPromptProps {
   textPrompt: ContextNode
+  isOnNode?: boolean
 }
 
-const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
+const TextPromptItem: React.FC<TextPromptProps> = ({
+  textPrompt,
+  isOnNode = false,
+}) => {
   const dispatch = useAppDispatch()
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
   const variables = useAppSelector((state) => state.context.variables)
-  const isPromptbar = useAppSelector((state) => state.setting.isPromptbar)
 
   const { id, data } = textPrompt
   const editorRef = useRef<HTMLInputElement>(null)
@@ -56,7 +59,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   const handleTextEdit = () => {
     if (!isEditing) {
       setEditing(true)
-      if (!isPromptbar) dispatch(selectContext(id))
+      if (!isOnNode) dispatch(selectContext(id))
     }
   }
 
@@ -152,13 +155,13 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
   }
 
   useEffect(() => {
-    if (isPromptbar) return
+    if (isOnNode) return
     if (id === selectedContextId) {
       setEditing(true)
     } else if (isEditing) {
       setEditing(false)
     }
-  }, [id, selectedContextId, isEditing, isPromptbar])
+  }, [id, selectedContextId, isEditing, isOnNode])
 
   useEffect(() => {
     if (editorRef.current) {
@@ -179,7 +182,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
       ) {
         if (isEditing) {
           setEditing(false)
-          if (!isPromptbar) dispatch(selectContext(null))
+          if (!isOnNode) dispatch(selectContext(null))
         }
       }
     }
@@ -187,13 +190,13 @@ const TextPromptItem: React.FC<TextPromptProps> = ({ textPrompt }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [editorRef, isEditing, isPromptbar])
+  }, [editorRef, isEditing, isOnNode])
 
   return (
     <div className="grow">
       <MentionsInput
         inputRef={editorRef}
-        style={defaultStyle(isEditing, !!data?.content)}
+        style={defaultStyle(isEditing, !!data?.content, isOnNode)}
         customSuggestionsContainer={renderSuggestionContainer}
         value={
           (data && data.content) ||

@@ -1,4 +1,8 @@
-export default (isEditing: boolean, hasContent: boolean) => ({
+export default (
+  isEditing: boolean,
+  hasContent: boolean,
+  isOnNode: boolean
+) => ({
   control: {
     fontSize: 16,
     fontWeight: 500,
@@ -8,7 +12,7 @@ export default (isEditing: boolean, hasContent: boolean) => ({
 
   '&multiLine': {
     control: {
-      backgroundColor: isEditing ? '#E2EDFB' : 'white',
+      backgroundColor: !isOnNode && isEditing ? '#E2EDFB' : 'white',
     },
     highlighter: {
       padding: '2px 4px',

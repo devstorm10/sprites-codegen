@@ -16,7 +16,7 @@ import { LayoutIcon } from '@/components/icons/LayoutIcon'
 import { PromptIcon } from '@/components/icons/PromptIcon'
 import { Card } from '@/components/ui/card'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { selectContext, showPromptbar } from '@/store/slices'
+import { selectContext } from '@/store/slices'
 import { FAKE_NODE_ID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -40,7 +40,6 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
     if (id) {
       dispatch(selectContext(id))
     }
-    dispatch(showPromptbar(type === 'prompt'))
   }, [id, type])
 
   return (

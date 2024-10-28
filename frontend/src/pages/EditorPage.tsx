@@ -21,7 +21,7 @@ const EditorPage = () => {
   )
 
   return (
-    <div className="h-full flex flex-col overflow-y-auto">
+    <div className="h-full flex flex-col overflow-y-auto overflow-x-clip">
       {selectedContext &&
       (selectedContext.type === 'flow' ||
         (selectedContext.type === 'flow_node' && parentContext)) ? (

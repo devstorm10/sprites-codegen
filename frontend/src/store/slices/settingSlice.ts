@@ -2,12 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 type SettingState = {
   isSidebar: boolean
-  isPromptbar: boolean
+  isPromptbarExpanded: boolean
 }
 
 const initialState: SettingState = {
   isSidebar: true,
-  isPromptbar: false,
+  isPromptbarExpanded: false,
 }
 
 const settingSlice = createSlice({
@@ -17,11 +17,11 @@ const settingSlice = createSlice({
     showSidebar: (state: SettingState, action: PayloadAction<boolean>) => {
       state.isSidebar = action.payload
     },
-    showPromptbar: (state: SettingState, action: PayloadAction<boolean>) => {
-      state.isPromptbar = action.payload
+    expandPromptbar: (state: SettingState, action: PayloadAction<boolean>) => {
+      state.isPromptbarExpanded = action.payload
     },
   },
 })
 
-export const { showSidebar, showPromptbar } = settingSlice.actions
+export const { showSidebar, expandPromptbar } = settingSlice.actions
 export default settingSlice.reducer

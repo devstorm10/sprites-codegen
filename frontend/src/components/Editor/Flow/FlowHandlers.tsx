@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { Handle, Position } from 'reactflow'
 
-import { cn } from '@/lib/utils'
 import './FlowHandlers.css'
 
 export type Anchor = 'left' | 'top' | 'right' | 'bottom'
@@ -60,7 +59,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
         />
       ))}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%+30px)] h-[calc(100%+30px)] group -z-10"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%+40px)] h-[calc(100%+40px)] group -z-10"
         onMouseEnter={handleMouseEnter}
       >
         {_anchors.map((anchor) => (
@@ -69,9 +68,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
             id={`${parentId}_handle_${anchor}`}
             type={isShowTarget ? 'target' : 'source'}
             position={ANCHOR_DATA[anchor].position}
-            className={cn(
-              'absolute w-4 h-4 border !bg-white rounded-full opacity-0 group-hover:opacity-100 !z-[100]'
-            )}
+            className="absolute w-4 h-4 border !bg-white rounded-full opacity-0 group-hover:opacity-100 !z-[100]"
             style={{
               borderColor: color,
             }}

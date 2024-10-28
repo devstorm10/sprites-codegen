@@ -18,6 +18,7 @@ import { ContextNode } from '@/lib/types'
 
 interface ContextViewerProps {
   context: ContextNode
+  isOnPromptbar?: boolean
 }
 
 interface ContextDropProps {
@@ -40,7 +41,10 @@ const ContextDrop: React.FC<PropsWithChildren & ContextDropProps> = ({
   )
 }
 
-const ContextViewer: React.FC<ContextViewerProps> = ({ context }) => {
+const ContextViewer: React.FC<ContextViewerProps> = ({
+  context,
+  isOnPromptbar = false,
+}) => {
   const dispatch = useAppDispatch()
   const totalContexts = context.contexts || []
 
@@ -79,7 +83,11 @@ const ContextViewer: React.FC<ContextViewerProps> = ({ context }) => {
       >
         <ContextDrop className="mt-9 pb-10 flex flex-col gap-y-2">
           {totalContexts.map((context) => (
-            <GroupContainer key={context.id} context={context} />
+            <GroupContainer
+              key={context.id}
+              context={context}
+              isOnPromptbar={isOnPromptbar}
+            />
           ))}
           <DragOverlay dropAnimation={dropAnimation}>
             {activeDndContext ? (

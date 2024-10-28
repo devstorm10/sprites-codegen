@@ -1,5 +1,9 @@
-.react-flow__nodes {
+.react-flow__node {
   z-index: -5 !important;
+}
+
+.react-flow__node:hover {
+  z-index: 5 !important;
 }
 
 .react-flow__edge-path {

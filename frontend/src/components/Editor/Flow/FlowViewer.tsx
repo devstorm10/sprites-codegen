@@ -29,7 +29,8 @@ import {
   addFlowEdge,
   addFlowNode,
   createFlowNode,
-  findContextNodeById,
+  deleteContext,
+  selectContext,
   updateEdges,
   updateFlowViewport,
   updateNodes,
@@ -100,15 +101,9 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 
 const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
   const dispatch = useAppDispatch()
-  const isPromptbar = useAppSelector((state) => state.setting.isPromptbar)
 
   const flowItem = useAppSelector((state) =>
     state.flow.flows.find((item) => item.id === flowContext.id)
-  )
-  const selectedNodeId = useAppSelector((state) => state.context.selectedId)
-  const selectedContext = findContextNodeById(
-    flowContext.contexts || [],
-    selectedNodeId || ''
   )
 
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNodeData>([])
@@ -237,6 +232,17 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     const intervalId = setInterval(() => {
       dispatch(updateNodes({ id: flowContext.id, nodes }))
       dispatch(updateEdges({ id: flowContext.id, edges }))
+      if (
+        flowContext.contexts?.some(
+          (context) => !nodes.find((node) => node.id === context.id)
+        )
+      ) {
+        flowContext.contexts?.forEach((context) => {
+          const nodeItem = nodes.find((node) => node.id === context.id)
+          if (!nodeItem) dispatch(deleteContext(context.id))
+        })
+        dispatch(selectContext(flowContext.id))
+      }
     }, 500)
 
     return () => clearInterval(intervalId)
@@ -307,9 +313,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
         onInsertLineClick={handleInsertLineCreate}
       />
 
-      {isPromptbar && selectedContext && (
-        <PromptBar context={selectedContext} />
-      )}
+      <PromptBar />
 
       {trigger && (
         <FlowNode

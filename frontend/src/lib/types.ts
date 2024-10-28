@@ -46,6 +46,7 @@ export interface ChatMessage {
 }
 
 export interface FlowNodeData {
+  type: 'trigger' | 'prompt' | 'action' | 'insert_line'
   title: string
   content?: Record<string, any>
 }
