@@ -1,6 +1,8 @@
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useMemo } from 'react'
 import { useReactFlow } from 'reactflow'
 
+import AutoVarComplete from '@/common/AutoVarComplete'
+import PromptInput from '@/common/PromptInput'
 import { Card } from '@/components/ui/card'
 import {
   Select,
@@ -9,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import InputText from '@/common/InputText'
+import { useAppSelector } from '@/store/store'
 
 const typeItems = [
   {
@@ -37,6 +39,15 @@ type FlowActionProps = {
 
 const FlowAction: React.FC<FlowActionProps> = ({ id, data }) => {
   const { setNodes } = useReactFlow()
+  const variables = useAppSelector((state) => state.context.variables)
+
+  const braceRemovedVar = useMemo(() => {
+    const value = data.content.value
+    if (value && value.startsWith('{{') && value.endsWith('}}')) {
+      return value.slice(2, value.length - 2)
+    }
+    return value || ''
+  }, [data.content.value])
 
   const handleDataUpdate = useCallback(
     (data: ActionContent) => {
@@ -64,21 +75,24 @@ const FlowAction: React.FC<FlowActionProps> = ({ id, data }) => {
     <div className="flex flex-col gap-y-4">
       <div className="flex flex-col gap-y-1">
         <p>Update Value</p>
-        <Card className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2">
-          <InputText
-            text={data.content.value || ''}
-            placeholder="{{Variable Name}}"
-            onChange={(text) =>
-              handleDataUpdate({ ...data.content, value: text })
+        <Card className="py-3 px-4 flex items-end gap-x-2">
+          <AutoVarComplete
+            varname={braceRemovedVar}
+            suggestions={variables}
+            onFocus={() => {}}
+            onVarChange={(variable) =>
+              handleDataUpdate({ ...data, value: `{{${variable}}}` })
             }
-            className="!text-wrap"
+            className="grow !border-none !shadow-none !outline-none !ring-0 p-0 w-full text-left h-auto"
+            inputClass="p-0"
+            containerClass="w-[75px]"
           />
         </Card>
       </div>
       <div className="flex flex-col gap-y-1">
         <p>Inference</p>
-        <Card className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2">
-          <InputText
+        <Card className="py-3 px-4 flex items-end justify-center gap-x-2">
+          <PromptInput
             text={data.content.inference || ''}
             placeholder="On scale of 1-5, how satisfied does the user sound?"
             onChange={(text) =>

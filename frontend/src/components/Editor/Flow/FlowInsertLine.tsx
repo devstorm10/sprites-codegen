@@ -2,7 +2,7 @@ import { memo, useCallback } from 'react'
 import { useReactFlow } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
-import InputText from '@/common/InputText'
+import PromptInput from '@/common/PromptInput'
 import { Card } from '@/components/ui/card'
 
 type FlowInsertLineProps = {
@@ -65,9 +65,9 @@ const FlowInsertLine: React.FC<FlowInsertLineProps> = ({ id, data }) => {
         data.content.items.map((line: string, idx: number) => (
           <Card
             key={idx}
-            className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2"
+            className="py-3 px-4 flex items-end justify-center gap-x-2"
           >
-            <InputText
+            <PromptInput
               text={line}
               placeholder="Start typing"
               onChange={(text) => handleDataUpdate(text, idx)}

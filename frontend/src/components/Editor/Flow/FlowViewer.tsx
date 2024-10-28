@@ -123,7 +123,6 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     x: -100,
     y: -100,
   })
-
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
 
   const handleNodeSelect = useCallback((_event: MouseEvent, _node: any) => {
@@ -176,6 +175,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
           content: trigger === 'action' ? {} : { items: [] },
         },
         position: screenToFlowPosition({ x: e.clientX, y: e.clientY }),
+        dragHandle: '.drag-region',
       }
       setTrigger('')
       setNodes([...nodes, newNode])

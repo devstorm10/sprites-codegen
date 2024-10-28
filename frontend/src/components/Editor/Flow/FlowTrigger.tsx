@@ -1,9 +1,10 @@
 import { memo, useCallback } from 'react'
+import { useReactFlow } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
 import FlowHandlers from './FlowHandlers'
-import AutoVarComplete from '@/common/AutoVarComplete'
-import InputText from '@/common/InputText'
+import PromptInput from '@/common/PromptInput'
+import VariableInput from '@/common/VariableInput'
 import { Card } from '@/components/ui/card'
 import {
   DropdownMenu,
@@ -18,13 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
 import { TextIcon } from '@/components/icons/TextIcon'
 import { VariableIcon } from '@/components/icons/VariableIcon'
 import { CreateNode } from '@/lib/types'
 import { FAKE_NODE_ID } from '@/lib/constants'
-import { useReactFlow } from 'reactflow'
-import { useAppSelector } from '@/store/store'
 
 const createItems: CreateNode[] = [
   {
@@ -44,8 +42,6 @@ const createItems: CreateNode[] = [
     icon: <VariableIcon />,
   },
 ]
-
-const optItems: string[] = ['==', '!=', '>', '<', '>=', '<=']
 
 type VariableType = {
   name: string
@@ -69,7 +65,6 @@ type FlowTriggerProps = {
 
 const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
   const { setNodes } = useReactFlow()
-  const variables = useAppSelector((state) => state.context.variables)
 
   const handleItemClick = (name: string) => () => {
     const newData = {
@@ -82,7 +77,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
             type: name === 'text-prompt' ? 'prompt' : 'variable',
             data:
               name === 'text-prompt'
-                ? 'This is the text prompt'
+                ? ''
                 : {
                     name: '',
                     opt: '',
@@ -137,61 +132,21 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
           item.type === 'prompt' ? (
             <Card
               key={idx}
-              className="py-3 px-4 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-2"
+              className="py-3 px-4 flex items-end justify-center gap-x-2"
             >
-              <InputText
+              <PromptInput
                 text={item.data as string}
+                placeholder="This is the prompt text"
                 onChange={(text) => handleDataUpdate(text, idx)}
                 className="!text-wrap"
               />
             </Card>
           ) : item.type === 'variable' ? (
-            <Card
-              key={idx}
-              className="py-3 px-2 border border-[#EAEAEA] shadow-card rounded-[20px] flex items-end justify-center gap-x-1"
-            >
-              <AutoVarComplete
-                varname={(item.data as VariableType).name}
-                suggestions={variables}
-                onFocus={() => {}}
-                onVarChange={(name) =>
-                  handleDataUpdate(
-                    { ...(item.data as VariableType), name },
-                    idx
-                  )
-                }
-                className="grow rounded-[20px]"
-              />
-              <Select
-                value={(item.data as VariableType).opt}
-                onValueChange={(opt) =>
-                  handleDataUpdate({ ...(item.data as VariableType), opt }, idx)
-                }
-              >
-                <SelectTrigger className="py-1 px-4 w-[70px] rounded-[20px] !outline-none">
-                  <SelectValue placeholder="==" />
-                </SelectTrigger>
-                <SelectContent>
-                  {optItems.map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {item}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                placeholder="value"
-                value={(item.data as VariableType).value}
-                onChange={(e) =>
-                  handleDataUpdate(
-                    {
-                      ...(item.data as VariableType),
-                      value: e.target.value,
-                    },
-                    idx
-                  )
-                }
-                className="grow py-0.5 !px-0 focus-visible:ring-0 outline-none text-sm text-center font-medium leading-none rounded-[20px]"
+            <Card key={idx} className="py-3 px-2">
+              <VariableInput
+                variable={item.data as VariableType}
+                onVarChange={(data) => handleDataUpdate(data, idx)}
+                className="flex gap-x-1"
               />
             </Card>
           ) : (
@@ -239,7 +194,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
       <div className="w-full flex gap-x-2">
         <Card
           id={`${id as string}_yes`}
-          className="grow py-3 rounded-[20px] shadow-card text-[#B1B0AF] font-medium text-sm text-center relative hover:z-10 hover:border-[#32CD25] hover:text-[#32CD25] group"
+          className="grow py-3 text-[#B1B0AF] font-medium text-sm text-center relative hover:z-10 hover:border-[#32CD25] hover:text-[#32CD25] group"
         >
           YES
           {id !== FAKE_NODE_ID && (
@@ -248,7 +203,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
         </Card>
         <Card
           id={`${id as string}_no`}
-          className="grow py-3 rounded-[20px] shadow-card text-[#B1B0AF] font-medium text-sm text-center relative hover:z-10 hover:border-[#FF0000] hover:text-[#FF0000] group"
+          className="grow py-3 text-[#B1B0AF] font-medium text-sm text-center relative hover:z-10 hover:border-[#FF0000] hover:text-[#FF0000] group"
         >
           NO
           {id !== FAKE_NODE_ID && (
@@ -261,3 +216,4 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
 }
 
 export default memo(FlowTrigger)
+export type { VariableType }

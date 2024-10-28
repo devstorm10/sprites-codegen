@@ -100,7 +100,11 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
       {context.type !== 'tag' && (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger
-            className={context.type === 'input' ? 'mt-[6px]' : 'mt-[14px]'}
+            className={
+              context.type === 'input' || context.type === 'variable'
+                ? 'mt-[6px]'
+                : 'mt-[14px]'
+            }
           >
             <span
               className="h-[24px] w-[15px] rounded-sm hover:bg-accent hover:text-accent-foreground"
@@ -141,7 +145,7 @@ const GroupItem: React.FC<GroupItemProps> = ({ context }) => {
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      {context.type === 'input' ? (
+      {context.type === 'input' || context.type === 'variable' ? (
         <TextPromptItem textPrompt={context} {...attributes} {...listeners} />
       ) : context.type === 'flow' ? (
         <FlowItem

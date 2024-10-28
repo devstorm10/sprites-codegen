@@ -148,13 +148,31 @@ const contextSlice = createSlice({
   name: 'context',
   initialState,
   reducers: {
-    createTextPrompt: (state: ContextState, action: PayloadAction<string>) => {
-      const contextId = action.payload
+    createTextPrompt: (
+      state: ContextState,
+      action: PayloadAction<{ contextId: string; promptId?: string }>
+    ) => {
+      const { contextId, promptId } = action.payload
+      const contextItem = findContextNodeById(state.contexts, contextId)
+      if (contextItem) {
+        const newContext: ContextNode = {
+          id: promptId || uuid(),
+          type: 'input',
+          title: 'Text prompt',
+        }
+        contextItem.contexts = [...(contextItem.contexts || []), newContext]
+      }
+    },
+    createVariablePrompt: (
+      state: ContextState,
+      action: PayloadAction<{ contextId: string }>
+    ) => {
+      const { contextId } = action.payload
       const contextItem = findContextNodeById(state.contexts, contextId)
       if (contextItem) {
         const newContext: ContextNode = {
           id: uuid(),
-          type: 'input',
+          type: 'variable',
           title: 'Text prompt',
         }
         contextItem.contexts = [...(contextItem.contexts || []), newContext]
@@ -266,6 +284,7 @@ const contextSlice = createSlice({
         group: 1,
         tag: 2,
         input: 3,
+        variable: 3,
         flow: 3,
         flow_node: 4,
       }
@@ -366,6 +385,7 @@ const contextSlice = createSlice({
 
 export const {
   createTextPrompt,
+  createVariablePrompt,
   createFlow,
   createFlowNode,
   createNewTag,

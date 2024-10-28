@@ -48,7 +48,7 @@ const StepChipItem: React.FC<ChipItemProps> = ({
   editing = false,
 }) => {
   return (
-    <Card className="py-2.5 px-4 flex items-center gap-x-2.5 border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-[20px]">
+    <Card className="py-2.5 px-4 flex items-center gap-x-2.5">
       <SparkleIcon />
       <EditableText
         text={content}
@@ -62,7 +62,7 @@ const StepChipItem: React.FC<ChipItemProps> = ({
 
 const BaseChipItem: React.FC<ChipItemProps> = ({ content }) => {
   return (
-    <Card className="py-2.5 px-4 flex items-center gap-x-2 border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-2xl">
+    <Card className="py-2.5 px-4 flex items-center gap-x-2">
       <p className="font-bold">{content}</p>
     </Card>
   )
@@ -76,7 +76,7 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
 }) => {
   return (
     <div className="flex gap-x-1">
-      <Card className="py-2.5 px-4 flex items-center gap-x-2 text-muted border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-[20px]">
+      <Card className="py-2.5 px-4 flex items-center gap-x-2 text-muted">
         <EditableText
           text={content}
           onChange={onContentChange}
@@ -85,7 +85,7 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
         />
       </Card>
       <Card
-        className="p-3.5 text-black/30 border border-[#EAEAEA] hover:bg-secondary-100/5 shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-[20px] cursor-pointer"
+        className="p-3.5 text-black/30 hover:bg-secondary-100/5 cursor-pointer"
         onClick={onItemDelete}
       >
         <TrashIcon />
@@ -97,7 +97,7 @@ const ConvChipItem: React.FC<ConverChipItemProps> = ({
 const AddButton: React.FC<AddButtonProps> = ({ onClick }) => {
   return (
     <Card
-      className="py-2.5 px-4 flex items-center gap-x-2.5 text-sm text-[#B1B0AF] !font-normal border border-[#EAEAEA] shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] hover:bg-secondary-100/5 rounded-[20px] cursor-pointer"
+      className="py-2.5 px-4 flex items-center gap-x-2.5 text-sm text-[#B1B0AF] !font-normal hover:bg-secondary-100/5 cursor-pointer"
       onClick={onClick}
     >
       <PlusIcon />
@@ -170,7 +170,7 @@ const MainSettings: React.FC = () => {
   }
 
   return (
-    <Card className="py-4 px-6 border border-[#EAEAEA] shadow-[0_0_16px_0px_rgba(0,0,0,0.06)] rounded-[16px]">
+    <Card className="py-4 px-6 rounded-[16px]">
       <div className="flex items-center justify-between">
         <div
           className={cn('flex items-center gap-1 font-semibold', {
@@ -181,7 +181,7 @@ const MainSettings: React.FC = () => {
           <p className="pl-1">Main Settings</p>
         </div>
         <span
-          className="h-[24px] w-[24px] rounded-full flex items-center justify-center border text-secondary-100/50 shadow-[0_0_16px_rgba(0,0,0,0.04)] hover:bg-secondary-100/10 text-sm cursor-pointer"
+          className="h-[24px] w-[24px] rounded-full flex items-center justify-center border text-secondary-100/50 hover:bg-secondary-100/10 text-sm cursor-pointer"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <FaChevronUp /> : <FaChevronDown />}
@@ -223,7 +223,7 @@ const MainSettings: React.FC = () => {
               <BaseChipItem key={idx} content={knowbase} />
             ))}
             <Card
-              className="py-2.5 px-4 flex items-center gap-x-2.5 text-sm text-[#B1B0AF] font-normal border border-[#EAEAEA] hover:bg-secondary-100/5 shadow-[0_0_12px_0px_rgba(0,0,0,0.05)] rounded-2xl cursor-pointer"
+              className="py-2.5 px-4 flex items-center gap-x-2.5 text-sm text-[#B1B0AF] font-normal hover:bg-secondary-100/5 cursor-pointer"
               onClick={handleAddKnowledgeClick}
             >
               <ClipIcon />

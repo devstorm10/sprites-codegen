@@ -15,10 +15,10 @@ import { TrashIcon } from '@/components/icons/TrashIcon'
 import { LayoutIcon } from '@/components/icons/LayoutIcon'
 import { PromptIcon } from '@/components/icons/PromptIcon'
 import { Card } from '@/components/ui/card'
-import { FAKE_NODE_ID } from '@/lib/constants'
-import { cn } from '@/lib/utils'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { selectContext, showPromptbar } from '@/store/slices'
+import { FAKE_NODE_ID } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 type FlowNodeProps = {
   type: 'trigger' | 'prompt' | 'action' | 'insert_line'
@@ -34,20 +34,19 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
   style = {},
 }) => {
   const dispatch = useAppDispatch()
-  const isPromptbar = useAppSelector((state) => state.setting.isPromptbar)
   const selectedNodeId = useAppSelector((state) => state.context.selectedId)
 
   const handleNodeClick = useCallback(() => {
     if (id) {
       dispatch(selectContext(id))
     }
-    if (type === 'prompt') dispatch(showPromptbar(true))
-  }, [id, isPromptbar, type])
+    dispatch(showPromptbar(type === 'prompt'))
+  }, [id, type])
 
   return (
     <Card
       className={cn(
-        'p-4 w-[300px] flex flex-col gap-y-4 text-sm shadow-[0_3px_15px_rgba(38,50,56,0.07)] relative',
+        'w-[300px] flex flex-col text-sm !shadow-[0_3px_15px_rgba(38,50,56,0.07)] relative',
         {
           'border border-[#0B99FF]': selectedNodeId === id,
         },
@@ -56,7 +55,7 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
       style={style}
       onClick={handleNodeClick}
     >
-      <div className="flex items-center gap-x-2">
+      <div className="flex items-center gap-x-2 drag-region p-4">
         {type === 'trigger' ? (
           <LayoutIcon />
         ) : type === 'prompt' ? (
@@ -74,18 +73,20 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
           <TrashIcon />
         </div>
       </div>
-      <div className="h-0.5 border-t" />
-      {type === 'trigger' ? (
-        <FlowTrigger id={id as string} data={data} />
-      ) : type === 'prompt' ? (
-        <FlowPrompt id={id as string} data={data} />
-      ) : type === 'action' ? (
-        <FlowAction id={id as string} data={data} />
-      ) : type === 'insert_line' ? (
-        <FlowInsertLine id={id as string} data={data} />
-      ) : (
-        <></>
-      )}
+      <div className="h-0.5 border-t mx-4" />
+      <div className="p-4">
+        {type === 'trigger' ? (
+          <FlowTrigger id={id as string} data={data} />
+        ) : type === 'prompt' ? (
+          <FlowPrompt id={id as string} />
+        ) : type === 'action' ? (
+          <FlowAction id={id as string} data={data} />
+        ) : type === 'insert_line' ? (
+          <FlowInsertLine id={id as string} data={data} />
+        ) : (
+          <></>
+        )}
+      </div>
 
       {selectedNodeId === id && (
         <div className="absolute -top-1 left-0 -translate-y-full p-1 pr-3 rounded-full border border-[#0B99FF] flex items-center gap-x-2 bg-white">

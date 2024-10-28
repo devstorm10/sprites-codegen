@@ -8,7 +8,7 @@ export interface Tab {
 
 export interface ContextNode {
   id: string
-  type: 'group' | 'tag' | 'input' | 'flow' | 'flow_node'
+  type: 'group' | 'tag' | 'input' | 'variable' | 'flow' | 'flow_node'
   title?: string
   data?: Record<string, any>
   contexts?: ContextNode[]

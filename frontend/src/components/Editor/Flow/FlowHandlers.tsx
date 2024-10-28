@@ -1,6 +1,8 @@
-import { cn } from '@/lib/utils'
 import React, { useCallback, useState } from 'react'
 import { Handle, Position } from 'reactflow'
+
+import { cn } from '@/lib/utils'
+import './FlowHandlers.css'
 
 export type Anchor = 'left' | 'top' | 'right' | 'bottom'
 
@@ -54,7 +56,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
           type={isShowTarget ? 'target' : 'source'}
           position={ANCHOR_DATA[anchor].position}
           id={`${parentId}_handle_${anchor}_point`}
-          className="w-2 h-2 bg-black opacity-0 z-50"
+          className="w-2 h-2 bg-black opacity-0 !z-[100]"
         />
       ))}
       <div
@@ -68,7 +70,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
             type={isShowTarget ? 'target' : 'source'}
             position={ANCHOR_DATA[anchor].position}
             className={cn(
-              'absolute w-4 h-4 border !bg-white rounded-full opacity-0 group-hover:opacity-100 z-50'
+              'absolute w-4 h-4 border !bg-white rounded-full opacity-0 group-hover:opacity-100 !z-[100]'
             )}
             style={{
               borderColor: color,

@@ -42,12 +42,6 @@ const renderItem: (
     )
   }
 
-const renderContainer: RenderContainer = ({ list }) => (
-  <Card className="py-1 absolute z-50 min-w-[200px] rounded-[12px] mt-2 shadow-[0_0_16px_rgba(0,0,0,0.04)]">
-    {list}
-  </Card>
-)
-
 const getSuggestionValue = (item: Variable) => item?.name || ''
 
 const AutoCompleteInput = forwardRef<
@@ -56,14 +50,18 @@ const AutoCompleteInput = forwardRef<
     selected: Variable | undefined
     title: string
     onInputFocus: (e: any) => void
+    inputClass?: string
   }
 >((props, ref) => {
-  const { selected, title, onInputFocus, ...rest } = props
+  const { selected, title, onInputFocus, inputClass, ...rest } = props
   return (
     <Input
       ref={ref}
       placeholder="name"
-      className="w-[75px] py-0.5 !px-0 focus-visible:ring-0 outline-none text-sm text-center font-medium leading-none rounded-[20px]"
+      className={cn(
+        'w-[75px] py-0.5 !px-0 focus-visible:!ring-0 outline-none text-sm text-center font-medium leading-none rounded-[20px] text-[#0B99FF]',
+        inputClass
+      )}
       onClick={onInputFocus}
       autoFocus
       {...rest}
@@ -77,6 +75,8 @@ interface AutoCompleteProps {
   onFocus: (e: any) => void
   onVarChange: (tilte: string) => void
   className?: string
+  inputClass?: string
+  containerClass?: string
 }
 
 const AutoComplete: React.FC<AutoCompleteProps> = ({
@@ -85,6 +85,8 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   onFocus,
   onVarChange,
   className = '',
+  inputClass = '',
+  containerClass = '',
 }) => {
   const dispatch = useAppDispatch()
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -155,10 +157,26 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
         title={varname}
         selected={selected}
         onInputFocus={handleInputFocus}
+        inputClass={inputClass}
         {...props}
       />
     ),
-    [selected, varname]
+    [selected, varname, inputClass]
+  )
+
+  const renderContainer: RenderContainer = useMemo(
+    () =>
+      ({ list }) => (
+        <Card
+          className={cn(
+            'py-1 absolute z-50 min-w-[200px] rounded-[12px] mt-2',
+            containerClass
+          )}
+        >
+          {list}
+        </Card>
+      ),
+    [containerClass]
   )
 
   return (

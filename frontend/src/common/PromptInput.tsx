@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 
-interface InputTextProps {
+interface PrmoptInputProps {
   text: string
   onChange: (newText: string) => void
   placeholder?: string
@@ -9,7 +9,7 @@ interface InputTextProps {
   editing?: boolean
 }
 
-const InputText: React.FC<InputTextProps> = ({
+const PromptInput: React.FC<PrmoptInputProps> = ({
   text,
   onChange,
   placeholder = '',
@@ -41,4 +41,4 @@ const InputText: React.FC<InputTextProps> = ({
   )
 }
 
-export default InputText
+export default PromptInput

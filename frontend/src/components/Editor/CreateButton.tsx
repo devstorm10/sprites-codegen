@@ -59,7 +59,7 @@ const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
   const handleItemClick = (name: string) => () => {
     switch (name) {
       case 'text-prompt':
-        dispatch(createTextPrompt(contextId))
+        dispatch(createTextPrompt({ contextId }))
         break
       case 'flow':
         const flowId = uuid()
