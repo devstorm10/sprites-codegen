@@ -1,7 +1,7 @@
 import config from '@/config'
 
 async function sendMessage(message: string) {
-  const url = `${config.chatAPI}'/chat/123`
+  const url = `${config.chatAPI}/chat/123`
 
   // Define the payload
   const payload = {
