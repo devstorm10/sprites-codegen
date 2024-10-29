@@ -231,6 +231,22 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     setTriggerPos({ x: mouseXPos, y: mouseYPos })
   }
 
+  const handleKeyDown = useCallback((e: any) => {
+    if (e.key.toUpperCase() === 'T') {
+      e.preventDefault()
+      handleTriggerCreate()
+    } else if (e.key.toUpperCase() === 'P') {
+      e.preventDefault()
+      handlePromptCreate()
+    } else if (e.key.toUpperCase() === 'A') {
+      e.preventDefault()
+      handleActionCreate()
+    } else if (e.key.toUpperCase() === 'I') {
+      e.preventDefault()
+      handleInsertLineCreate()
+    }
+  }, [])
+
   const handleEdgeConnect = useCallback<OnConnect>(
     (params) => {
       const newEdge = {
@@ -322,14 +338,17 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
       event.preventDefault()
     }
     document.addEventListener('contextmenu', handleContextMenu)
+    document.addEventListener('keydown', handleKeyDown)
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu)
+      document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [])
+  }, [handleKeyDown])
 
   return (
     <div
       className="w-full flex-1 relative"
+      onKeyDownCapture={(e) => console.log(e)}
       onMouseMoveCapture={handleMouseMove}
       onMouseDownCapture={handleMouseDown}
     >

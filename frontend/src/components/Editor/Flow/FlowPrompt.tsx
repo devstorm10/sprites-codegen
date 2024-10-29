@@ -13,8 +13,8 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { TextIcon } from '@/components/icons/TextIcon'
-import { VariableIcon } from '@/components/icons/VariableIcon'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
+import { FlowHIcon } from '@/components/icons/FlowHIcon'
 import { ContextNode, CreateNode } from '@/lib/types'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
@@ -40,15 +40,10 @@ const createItems: CreateNode[] = [
     ),
   },
   {
-    title: 'Variable',
-    name: 'variable',
-    icon: <VariableIcon />,
+    title: 'Flow',
+    name: 'flow',
+    icon: <FlowHIcon />,
   },
-  // {
-  //   title: 'Flow',
-  //   name: 'flow',
-  //   icon: <FlowHIcon />,
-  // },
 ]
 
 type VariableType = {
