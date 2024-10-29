@@ -59,7 +59,11 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
           <Handle
             type={isShowTarget ? 'target' : 'source'}
             position={ANCHOR_DATA[anchor].position}
-            id={`${parentId}_handle_${anchor}_point`}
+            id={
+              isDual
+                ? `${parentId}_handle_${anchor}_yes_point`
+                : `${parentId}_handle_${anchor}_point`
+            }
             className={cn('w-2 h-2 bg-black opacity-0 !z-[100]', {
               '-translate-x-1.5':
                 isDual && (anchor === 'top' || anchor === 'bottom'),
@@ -71,7 +75,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
             <Handle
               type={isShowTarget ? 'target' : 'source'}
               position={ANCHOR_DATA[anchor].position}
-              id={`${parentId}_handle_${anchor}_dual_point`}
+              id={`${parentId}_handle_${anchor}_no_point`}
               className={cn('w-2 h-2 bg-black opacity-0 !z-[100]', {
                 'translate-x-3.5':
                   isDual && (anchor === 'top' || anchor === 'bottom'),
@@ -89,7 +93,11 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
         {_anchors.map((anchor) => (
           <div key={anchor}>
             <Handle
-              id={`${parentId}_handle_${anchor}`}
+              id={
+                isDual
+                  ? `${parentId}_handle_${anchor}_yes`
+                  : `${parentId}_handle_${anchor}`
+              }
               type={isShowTarget ? 'target' : 'source'}
               position={ANCHOR_DATA[anchor].position}
               className={cn(
@@ -107,7 +115,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
             />
             {isDual && (
               <Handle
-                id={`${parentId}_handle_${anchor}_dual`}
+                id={`${parentId}_handle_${anchor}_no`}
                 type={isShowTarget ? 'target' : 'source'}
                 position={ANCHOR_DATA[anchor].position}
                 className={cn(

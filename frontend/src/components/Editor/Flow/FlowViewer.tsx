@@ -153,6 +153,13 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
   })
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
 
+  const getEdgeColor = (handle: string) =>
+    handle.includes('yes')
+      ? '#32CD25'
+      : handle.includes('no')
+        ? '#FF0000'
+        : '#000000'
+
   const handleNodeSelect = useCallback((_event: MouseEvent, _node: any) => {
     setSelectedEdgeId(null)
   }, [])
@@ -235,11 +242,11 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
         markerEnd: {
           type: MarkerType.Arrow,
           strokeWidth: 1.5,
-          color: 'black',
+          color: getEdgeColor(params.sourceHandle || ''),
         },
         style: {
           strokeWidth: 2,
-          stroke: 'black',
+          stroke: getEdgeColor(params.sourceHandle || ''),
         },
       }
       setEdges((eds) => addEdge(newEdge, eds))
@@ -299,9 +306,12 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
               markerEnd: {
                 type: MarkerType.Arrow,
                 strokeWidth: 1.5,
-                color: 'black',
+                color: getEdgeColor(edge.sourceHandle || ''),
               },
-              style: { ...edge.style, stroke: 'black' },
+              style: {
+                ...edge.style,
+                stroke: getEdgeColor(edge.sourceHandle || ''),
+              },
             }
       )
     )
