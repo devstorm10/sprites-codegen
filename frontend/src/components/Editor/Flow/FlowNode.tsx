@@ -97,7 +97,12 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
       )}
 
       {id !== FAKE_NODE_ID && (
-        <FlowHandlers parentId={id as string} color="#0B99FF" />
+        <FlowHandlers
+          parentId={id as string}
+          color={type === 'trigger' ? '#32CD25' : '#0B99FF'}
+          secondaryColor="#FF0000"
+          isDual={type === 'trigger'}
+        />
       )}
     </Card>
   )

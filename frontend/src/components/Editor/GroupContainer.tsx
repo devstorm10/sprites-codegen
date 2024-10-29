@@ -94,8 +94,6 @@ const GroupItem: React.FC<GroupItemProps> = ({
 
   if (context.type === 'flow_node') return <></>
 
-  console.log('is promptbar', isOnPromptbar)
-
   return (
     <div
       ref={setNodeRef}

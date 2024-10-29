@@ -1,4 +1,5 @@
 import React, { MouseEvent, useCallback, useEffect, useState } from 'react'
+import { Tooltip } from 'react-tooltip'
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -70,31 +71,63 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onInsertLineClick,
 }) => {
   return (
-    <Card className="absolute top-1/2 left-4 -translate-y-1/2 py-2 px-1 flex flex-col gap-y-0.5 z-50">
+    <Card className="absolute top-1/2 left-4 -translate-y-1/2 py-2 px-1 flex flex-col gap-y-0.5 z-50 !rounded-xl">
       <span
-        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
+        data-tooltip-id="trigger-tooltip"
+        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-sm cursor-pointer"
         onClick={onTriggerClick}
       >
         <LayoutIcon />
       </span>
       <span
-        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
+        data-tooltip-id="prompt-tooltip"
+        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-sm cursor-pointer"
         onClick={onAddPromptClick}
       >
         <MessageIcon />
       </span>
       <span
-        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
+        data-tooltip-id="action-tooltip"
+        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-sm cursor-pointer"
         onClick={onActionClick}
       >
         <FlowIcon className="w-5 h-5" />
       </span>
       <span
-        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-lg cursor-pointer"
+        data-tooltip-id="insert-line-tooltip"
+        className="h-8 w-8 flex items-center justify-center hover:bg-secondary-100/10 rounded-sm cursor-pointer"
         onClick={onInsertLineClick}
       >
         <FlashIcon />
       </span>
+      <Tooltip
+        id="trigger-tooltip"
+        place="right"
+        html={`<div class="flex gap-x-2"><p>Trigger<p><span class="opacity-40">T</span></div>`}
+        className="!py-1 !px-2 !rounded-lg !text-xs"
+        classNameArrow="hidden"
+      />
+      <Tooltip
+        id="prompt-tooltip"
+        place="right"
+        html={`<div class="flex gap-x-2"><p>Additional Prompt<p><span class="opacity-40">P</span></div>`}
+        className="!py-1 !px-2 !rounded-lg !text-xs"
+        classNameArrow="hidden"
+      />
+      <Tooltip
+        id="action-tooltip"
+        place="right"
+        html={`<div class="flex gap-x-2"><p>Action<p><span class="opacity-40">A</span></div>`}
+        className="!py-1 !px-2 !rounded-lg !text-xs"
+        classNameArrow="hidden"
+      />
+      <Tooltip
+        id="insert-line-tooltip"
+        place="right"
+        html={`<div class="flex gap-x-2"><p>Insert Line<p><span class="opacity-40">I</span></div>`}
+        className="!py-1 !px-2 !rounded-lg !text-xs"
+        classNameArrow="hidden"
+      />
     </Card>
   )
 }

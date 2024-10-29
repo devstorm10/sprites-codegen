@@ -2,7 +2,7 @@ import { memo, useCallback } from 'react'
 import { useReactFlow } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
-import FlowHandlers from './FlowHandlers'
+// import FlowHandlers from './FlowHandlers'
 import PromptInput from '@/common/PromptInput'
 import VariableInput from '@/common/VariableInput'
 import { Card } from '@/components/ui/card'
@@ -22,7 +22,7 @@ import {
 import { TextIcon } from '@/components/icons/TextIcon'
 import { VariableIcon } from '@/components/icons/VariableIcon'
 import { CreateNode } from '@/lib/types'
-import { FAKE_NODE_ID } from '@/lib/constants'
+// import { FAKE_NODE_ID } from '@/lib/constants'
 
 const createItems: CreateNode[] = [
   {
@@ -67,24 +67,26 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
   const { setNodes } = useReactFlow()
 
   const handleItemClick = (name: string) => () => {
+    const newItem = {
+      type: name === 'text-prompt' ? 'prompt' : 'variable',
+      data:
+        name === 'text-prompt'
+          ? ''
+          : {
+              name: '',
+              opt: '',
+              value: '',
+            },
+    }
     const newData = {
       ...data,
       content: {
         ...data.content,
         items: [
           ...data.content.items,
-          {
-            type: name === 'text-prompt' ? 'prompt' : 'variable',
-            data:
-              name === 'text-prompt'
-                ? ''
-                : {
-                    name: '',
-                    opt: '',
-                    value: '',
-                  },
-          },
-          { type: 'condition', data: 'OR' },
+          ...(data.content.items.length > 0
+            ? [{ type: 'condition', data: 'OR' }, newItem]
+            : [newItem]),
         ],
       },
     }
@@ -191,7 +193,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="w-full flex gap-x-2">
+      {/* <div className="w-full flex gap-x-2">
         <Card
           id={`${id as string}_yes`}
           className="grow py-3 text-[#B1B0AF] font-medium text-sm text-center relative hover:z-10 hover:border-[#32CD25] hover:text-[#32CD25] group"
@@ -210,7 +212,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
             <FlowHandlers parentId={`${id as string}_no`} color="#FF0000" />
           )}
         </Card>
-      </div>
+      </div> */}
     </div>
   )
 }
