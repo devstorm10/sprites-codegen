@@ -9,8 +9,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
-import { useAppDispatch, useAppSelector } from '@/store/store'
-import { createFlow, createFlowView, createTextPrompt } from '@/store/slices'
+import { useAppDispatch } from '@/store/store'
+import {
+  createActiveTab,
+  createFlow,
+  createFlowView,
+  createTextPrompt,
+} from '@/store/slices'
 import { CreateNode } from '@/lib/types'
 
 interface CreateButtonProps {
@@ -54,9 +59,6 @@ const createItems: CreateNode[] = [
 
 const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
   const dispatch = useAppDispatch()
-  const isPromptbar = useAppSelector(
-    (state) => state.setting.isPromptbarExpanded
-  )
 
   const handleItemClick = (name: string) => () => {
     switch (name) {
@@ -65,8 +67,9 @@ const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
         break
       case 'flow':
         const flowId = uuid()
-        dispatch(createFlow({ contextId, flowId, isRedirect: !isPromptbar }))
+        dispatch(createFlow({ contextId, flowId }))
         dispatch(createFlowView(flowId))
+        dispatch(createActiveTab({ id: flowId, title: 'New Flow' }))
         break
     }
   }

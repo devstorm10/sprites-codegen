@@ -262,6 +262,9 @@ const contextSlice = createSlice({
     ) => {
       state.selectedId = action.payload
     },
+    activateContext: (state: ContextState, action: PayloadAction<string>) => {
+      state.activeId = action.payload
+    },
     moveContext: (
       state: ContextState,
       action: PayloadAction<{
@@ -352,20 +355,23 @@ const contextSlice = createSlice({
         )
       state.selectedId = state.activeId
     },
-    createActiveTab: (state: ContextState, action: PayloadAction<string>) => {
-      const flowId = action.payload
-      const flowContext = findContextNodeById(state.contexts, flowId)
-      const flowTab = state.tabs.find((item) => item.id === flowId)
-      if (!flowTab) {
+    createActiveTab: (
+      state: ContextState,
+      action: PayloadAction<{ id: string; title: string }>
+    ) => {
+      const { id, title } = action.payload
+      const context = findContextNodeById(state.contexts, id)
+      const tab = state.tabs.find((item) => item.id === id)
+      if (!tab) {
         state.tabs.push({
-          id: flowId,
-          title: flowContext?.title || 'New flow',
+          id,
+          title: context?.title || title,
           active: true,
         })
       }
       state.tabs = state.tabs.map((item) => ({
         ...item,
-        active: item.id === flowId,
+        active: item.id === id,
       }))
     },
     setActiveTab: (state: ContextState, action: PayloadAction<string>) => {
@@ -395,6 +401,7 @@ export const {
   updateContext,
   selectContext,
   moveContext,
+  activateContext,
   deleteContext,
   updateTabs,
   closeTab,

@@ -1,4 +1,4 @@
-import { useState, MouseEvent, useEffect, useMemo } from 'react'
+import { useState, MouseEvent, useMemo } from 'react'
 import {
   DndContext,
   DragOverEvent,
@@ -20,11 +20,10 @@ import {
   moveContext,
   findContextNodeById,
   createActiveTab,
-  setActiveTab,
   searchContextsByKeyword,
-  findParentContextNodeById,
   updateContext,
   deleteContext,
+  activateContext,
 } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
@@ -97,7 +96,12 @@ const ContextItem: React.FC<ContextItemProps> = ({
 
   const handleContextSelect = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
-    dispatch(selectContext(id))
+    if (type === 'flow') {
+      dispatch(activateContext(id))
+      dispatch(createActiveTab({ id, title: title || 'New Flow' }))
+    } else {
+      dispatch(selectContext(id))
+    }
     onItemClick()
   }
 
@@ -162,12 +166,19 @@ const ContextItem: React.FC<ContextItemProps> = ({
 
 const Contexts: React.FC = () => {
   const dispatch = useAppDispatch()
-  const contexts = useAppSelector((state) => state.context.contexts)
-  const selectedContextId = useAppSelector((state) => state.context.selectedId)
-  const defaultContextId = useAppSelector((state) => state.context.activeId)
+  const activeContextId = useAppSelector((state) => state.context.activeId)
+  const activeContext = useAppSelector((state) =>
+    findContextNodeById(state.context.contexts, activeContextId || '')
+  )
+  const contexts = activeContext ? [activeContext] : []
+  // const selectedContextId = useAppSelector((state) => state.context.selectedId)
+  // const defaultContextId = useAppSelector((state) => state.context.activeId)
+  // const isPromptbarStretched = useAppSelector(
+  //   (state) => state.setting.isPromptbarStretched
+  // )
 
   const [activeDndId, setActiveDndId] = useState<string>('')
-  const activeContext = activeDndId
+  const activeDndContext = activeDndId
     ? findContextNodeById(contexts, activeDndId)
     : null
 
@@ -190,30 +201,42 @@ const Contexts: React.FC = () => {
 
   const handleDragEnd = () => {}
 
-  useEffect(() => {
-    if (selectedContextId) {
-      const selectedContext = findContextNodeById(contexts, selectedContextId)
-      if (
-        selectedContext &&
-        (selectedContext.type === 'flow' ||
-          selectedContext.type === 'flow_node')
-      ) {
-        const parentContext = findParentContextNodeById(
-          contexts,
-          selectedContextId
-        )
-        dispatch(
-          createActiveTab(
-            selectedContext.type === 'flow'
-              ? selectedContextId
-              : parentContext?.id || ''
-          )
-        )
-      } else {
-        dispatch(setActiveTab(defaultContextId || ''))
-      }
-    }
-  }, [dispatch, selectedContextId, defaultContextId])
+  // useEffect(() => {
+  //   if (selectedContextId) {
+  //     const selectedContext = findContextNodeById(contexts, selectedContextId)
+  //     if (selectedContext) {
+  //       if (
+  //         selectedContext.type === 'flow' ||
+  //         selectedContext.type === 'flow_node'
+  //       ) {
+  //         if (isPromptbarStretched) {
+  //           dispatch(
+  //             createActiveTab({
+  //               id: selectedContext.id,
+  //               title: 'Additional Prompt',
+  //             })
+  //           )
+  //         } else {
+  //           const parentContext = findParentContextNodeById(
+  //             contexts,
+  //             selectedContextId
+  //           )
+  //           dispatch(
+  //             createActiveTab({
+  //               id:
+  //                 selectedContext.type === 'flow'
+  //                   ? selectedContextId
+  //                   : parentContext?.id || '',
+  //               title: 'New Flow',
+  //             })
+  //           )
+  //         }
+  //       }
+  //     } else {
+  //       dispatch(setActiveTab(defaultContextId || ''))
+  //     }
+  //   }
+  // }, [dispatch, selectedContextId, defaultContextId, isPromptbarStretched])
 
   return (
     <div className="flex-1 pl-5 pr-1 flex flex-col">
@@ -231,7 +254,9 @@ const Contexts: React.FC = () => {
           />
         ))}
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeContext ? <ContextGroup context={activeContext} /> : null}
+          {activeDndContext ? (
+            <ContextGroup context={activeDndContext} />
+          ) : null}
         </DragOverlay>
       </DndContext>
     </div>

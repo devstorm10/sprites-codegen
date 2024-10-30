@@ -5,8 +5,8 @@ import TabItem from './TabItem'
 import AddTabButton from './AddTabButton'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
+  activateContext,
   closeTab,
-  selectContext,
   setActiveTab,
   updateTabs,
 } from '@/store/slices'
@@ -19,7 +19,7 @@ const Tabbar = () => {
 
   useEffect(() => {
     if (activeTab?.id) {
-      dispatch(selectContext(activeTab.id))
+      dispatch(activateContext(activeTab.id))
     }
   }, [activeTab?.id])
 

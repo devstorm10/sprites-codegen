@@ -9,9 +9,11 @@ import { TrashIcon } from '@/components/icons/TrashIcon'
 import { LayoutIcon } from '@/components/icons/LayoutIcon'
 import { PromptIcon } from '@/components/icons/PromptIcon'
 import {
+  activateContext,
   expandPromptbar,
   findContextNodeById,
   findFlowNodeById,
+  stretchPromptbar,
 } from '@/store/slices'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 
@@ -29,6 +31,11 @@ const PromptBar: React.FC = () => {
   )
 
   const xAnimation = useAnimation()
+
+  const handleLayoutExpand = () => {
+    dispatch(stretchPromptbar(true))
+    dispatch(activateContext(selectedNodeId || ''))
+  }
 
   useEffect(() => {
     xAnimation.start({ x: isExpanded ? 0 : 350 })
@@ -76,7 +83,10 @@ const PromptBar: React.FC = () => {
                 <p className="font-semibold">{selectedContext?.title || ''}</p>
               </div>
               <div className="flex items-center gap-x-1">
-                <ExpandIcon />
+                <ExpandIcon
+                  onClick={handleLayoutExpand}
+                  className="cursor-pointer"
+                />
                 <CopyIcon />
                 <TrashIcon />
               </div>
