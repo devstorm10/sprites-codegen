@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, MouseEvent } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 import uuid from 'react-uuid'
 
@@ -12,7 +12,6 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { TextIcon } from '@/components/icons/TextIcon'
-import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import { FlowHIcon } from '@/components/icons/FlowHIcon'
 import { ContextNode, CreateNode } from '@/lib/types'
 import { useAppDispatch, useAppSelector } from '@/store/store'
@@ -85,6 +84,11 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
     )
   }
 
+  const handleItemSelect = (id: string) => (e: MouseEvent<SVGElement>) => {
+    e.stopPropagation()
+    dispatch(selectContext(id))
+  }
+
   const handleItemDuplicate = (item: ContextNode) => () => {
     const flowId = uuid()
     dispatch(createFlow({ contextId: id, flowId, isRedirect: false }))
@@ -113,20 +117,16 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
           ) : (
             <>
               <div className="flex items-center gap-x-2 grow">
-                <SparkleIcon fontSize={20} />
+                <FlowHIcon fontSize={20} />
                 <EditableText
                   text={item.title || ''}
                   placeholder="Flow"
                   onChange={handleFlowChange(item)}
-                  className="!text-wrap"
+                  className="!text-wrap font-semibold"
                 />
               </div>
               <div className="flex gap-x-1">
-                <EditIcon
-                  onClick={() => {
-                    dispatch(selectContext(item.id))
-                  }}
-                />
+                <EditIcon onClick={handleItemSelect(item.id)} />
                 <CopyIcon onClick={handleItemDuplicate(item)} />
                 <TrashIcon onClick={handleItemDelete(item.id)} />
               </div>
