@@ -27,7 +27,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
   const variables = useAppSelector((state) => state.context.variables)
 
   return (
-    <div className={cn('flex', className)}>
+    <div className={cn('flex flex-col gap-y-0.5', className)}>
       <AutoVarComplete
         varname={variable.name}
         suggestions={variables}
@@ -39,12 +39,12 @@ const VariableInput: React.FC<VariableInputProps> = ({
         value={variable.opt}
         onValueChange={(opt) => onVarChange({ ...variable, opt })}
       >
-        <SelectTrigger className="py-1 px-4 w-[70px] rounded-[20px] !outline-none">
+        <SelectTrigger className="py-1 px-4 rounded-[20px] !outline-none flex items-center justify-center text-secondary-100">
           <SelectValue placeholder="==" />
         </SelectTrigger>
         <SelectContent>
           {optItems.map((item) => (
-            <SelectItem key={item} value={item}>
+            <SelectItem key={item} value={item} className="flex justify-center">
               {item}
             </SelectItem>
           ))}
@@ -54,6 +54,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
         placeholder="value"
         value={variable.value}
         onChange={(e) => onVarChange({ ...variable, value: e.target.value })}
+        onKeyDown={(e) => e.stopPropagation()}
         className="grow py-0.5 !px-0 focus-visible:ring-0 outline-none text-sm text-center font-medium leading-none rounded-[20px] text-[#0B99FF]"
       />
     </div>

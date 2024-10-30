@@ -2,7 +2,6 @@ import { memo, useCallback } from 'react'
 import { useReactFlow } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
-// import FlowHandlers from './FlowHandlers'
 import PromptInput from '@/common/PromptInput'
 import VariableInput from '@/common/VariableInput'
 import { Card } from '@/components/ui/card'
@@ -22,7 +21,8 @@ import {
 import { TextIcon } from '@/components/icons/TextIcon'
 import { VariableIcon } from '@/components/icons/VariableIcon'
 import { CreateNode } from '@/lib/types'
-// import { FAKE_NODE_ID } from '@/lib/constants'
+import { TrashIcon } from '@/components/icons/TrashIcon'
+import { cn } from '@/lib/utils'
 
 const createItems: CreateNode[] = [
   {
@@ -98,7 +98,7 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
     )
   }
 
-  const handleDataUpdate = useCallback(
+  const handleItemUpdate = useCallback(
     (
       data: string | { name: string; opt: string; value: string },
       idx: number
@@ -126,36 +126,46 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
     [id]
   )
 
+  const handleItemDelete = useCallback(
+    (idx: number) => () => {
+      setNodes((nodes) =>
+        nodes.map((node) =>
+          node.id === id
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  content: {
+                    ...node.data.content,
+                    items: node.data.content.items
+                      .map((item: any, index: number, items: any[]) =>
+                        index === idx ||
+                        (index === idx - 1 &&
+                          items[idx - 1].type === 'condition')
+                          ? null
+                          : item
+                      )
+                      .filter((item: any) => item !== null),
+                  },
+                },
+              }
+            : node
+        )
+      )
+    },
+    [id]
+  )
+
   return (
     <div className="flex flex-col gap-y-4">
       {data.content &&
         data.content.items &&
         data.content.items.map((item: ContentItemType, idx: number) =>
-          item.type === 'prompt' ? (
-            <Card
-              key={idx}
-              className="py-3 px-4 flex items-end justify-center gap-x-2"
-            >
-              <PromptInput
-                text={item.data as string}
-                placeholder="This is the prompt text"
-                onChange={(text) => handleDataUpdate(text, idx)}
-                className="!text-wrap"
-              />
-            </Card>
-          ) : item.type === 'variable' ? (
-            <Card key={idx} className="py-3 px-2">
-              <VariableInput
-                variable={item.data as VariableType}
-                onVarChange={(data) => handleDataUpdate(data, idx)}
-                className="flex gap-x-1"
-              />
-            </Card>
-          ) : (
+          item.type === 'condition' ? (
             <Select
               key={idx}
               value={item.data as string}
-              onValueChange={(condition) => handleDataUpdate(condition, idx)}
+              onValueChange={(condition) => handleItemUpdate(condition, idx)}
             >
               <SelectTrigger className="py-1 px-4 w-fit rounded-[20px] !outline-none">
                 <SelectValue placeholder="" />
@@ -168,6 +178,35 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
                 ))}
               </SelectContent>
             </Select>
+          ) : (
+            <Card
+              key={idx}
+              className={cn(
+                'py-3 flex gap-x-2.5 group',
+                item.type === 'prompt' ? 'px-4' : 'px-2'
+              )}
+            >
+              {item.type === 'prompt' ? (
+                <PromptInput
+                  text={item.data as string}
+                  placeholder="This is the prompt text"
+                  onChange={(text) => handleItemUpdate(text, idx)}
+                  className="!text-wrap"
+                />
+              ) : (
+                <VariableInput
+                  variable={item.data as VariableType}
+                  onVarChange={(data) => handleItemUpdate(data, idx)}
+                  className="flex gap-x-1 grow"
+                />
+              )}
+              <span
+                className="hidden group-hover:block"
+                onClick={handleItemDelete(idx)}
+              >
+                <TrashIcon strokeOpacity={1} />
+              </span>
+            </Card>
           )
         )}
       <DropdownMenu>

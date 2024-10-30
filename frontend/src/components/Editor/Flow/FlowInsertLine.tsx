@@ -3,6 +3,7 @@ import { useReactFlow } from 'reactflow'
 import { FaPlus } from 'react-icons/fa6'
 
 import PromptInput from '@/common/PromptInput'
+import { TrashIcon } from '@/components/icons/TrashIcon'
 import { Card } from '@/components/ui/card'
 
 type FlowInsertLineProps = {
@@ -33,7 +34,7 @@ const FlowInsertLine: React.FC<FlowInsertLineProps> = ({ id, data }) => {
     )
   }
 
-  const handleDataUpdate = useCallback(
+  const handleItemUpdate = useCallback(
     (data: string, idx: number) => {
       setNodes((nodes) =>
         nodes.map((node) =>
@@ -58,21 +59,50 @@ const FlowInsertLine: React.FC<FlowInsertLineProps> = ({ id, data }) => {
     [id]
   )
 
+  const handleItemDelete = useCallback(
+    (idx: number) => () => {
+      setNodes((nodes) =>
+        nodes.map((node) =>
+          node.id === id
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  content: {
+                    ...node.data.content,
+                    items: node.data.content.items
+                      .map((item: any, index: number) =>
+                        index === idx ? null : item
+                      )
+                      .filter((item: any) => item !== null),
+                  },
+                },
+              }
+            : node
+        )
+      )
+    },
+    [id]
+  )
+
   return (
     <div className="flex flex-col gap-y-4">
       {data.content &&
         data.content.items &&
         data.content.items.map((line: string, idx: number) => (
-          <Card
-            key={idx}
-            className="py-3 px-4 flex items-end justify-center gap-x-2"
-          >
+          <Card key={idx} className="py-3 px-4 flex gap-x-2 group">
             <PromptInput
               text={line}
               placeholder="Start typing"
-              onChange={(text) => handleDataUpdate(text, idx)}
+              onChange={(text) => handleItemUpdate(text, idx)}
               className="!text-wrap"
             />
+            <span
+              className="hidden group-hover:block"
+              onClick={handleItemDelete(idx)}
+            >
+              <TrashIcon strokeOpacity={1} />
+            </span>
           </Card>
         ))}
       <span

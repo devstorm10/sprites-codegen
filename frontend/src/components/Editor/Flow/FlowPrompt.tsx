@@ -2,7 +2,6 @@ import { memo } from 'react'
 import { FaPlus } from 'react-icons/fa6'
 import uuid from 'react-uuid'
 
-import VariableInput, { optItems } from '@/common/VariableInput'
 import EditableText from '@/common/EditableText'
 import TextPromptItem from '@/components/Editor/Text/TextPromptItem'
 import { Card } from '@/components/ui/card'
@@ -22,10 +21,14 @@ import {
   createFlowView,
   createTextPrompt,
   createVariablePrompt,
+  deleteContext,
   findContextNodeById,
+  selectContext,
   updateContext,
 } from '@/store/slices'
-import { splitByArray } from '@/lib/utils'
+import { TrashIcon } from '@/components/icons/TrashIcon'
+import { EditIcon } from '@/components/icons/EditIcon'
+import { CopyIcon } from '@/components/icons/CopyIcon'
 
 const createItems: CreateNode[] = [
   {
@@ -45,12 +48,6 @@ const createItems: CreateNode[] = [
     icon: <FlowHIcon />,
   },
 ]
-
-type VariableType = {
-  name: string
-  value: string
-  opt: string
-}
 
 type FlowPromptProps = {
   id: string
@@ -76,20 +73,6 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
     }
   }
 
-  const getVariable = (item: any) => {
-    const value = item.data?.content || ''
-    if (value.startsWith('{{') && value.endsWith('}}')) {
-      const content = value.slice(2, value.length - 2)
-      const { pattern, values } = splitByArray(content, optItems)
-      return { name: values[0], opt: pattern, value: values[1] }
-    }
-    return {
-      name: '',
-      opt: optItems[0],
-      value: '',
-    }
-  }
-
   const handleFlowChange = (context: ContextNode) => (text: string) => {
     dispatch(
       updateContext({
@@ -102,54 +85,55 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
     )
   }
 
-  const handleVarChange =
-    (context: ContextNode) => (variable: VariableType) => {
-      dispatch(
-        updateContext({
-          id: context.id,
-          newContext: {
-            ...context,
-            data: {
-              content: `{{${variable.name}${variable.opt}${variable.value}}}`,
-            },
-          },
-        })
-      )
-    }
+  const handleItemDuplicate = (item: ContextNode) => () => {
+    const flowId = uuid()
+    dispatch(createFlow({ contextId: id, flowId, isRedirect: false }))
+    dispatch(createFlowView(flowId))
+    dispatch(updateContext({ id: flowId, newContext: { ...item, id: flowId } }))
+  }
+
+  const handleItemDelete = (id: string) => () => {
+    dispatch(deleteContext(id))
+  }
 
   return (
     <div className="flex flex-col gap-y-4">
-      {promptItems.map((item: ContextNode, idx: number) =>
-        item.type === 'input' ? (
-          <Card
-            key={idx}
-            className="py-3 px-4 flex items-end justify-center gap-x-2"
-          >
-            <TextPromptItem textPrompt={item} isOnNode={true} />
-          </Card>
-        ) : item.type === 'variable' ? (
-          <Card
-            key={idx}
-            className="py-3 px-2 flex items-end justify-center gap-x-1"
-          >
-            <VariableInput
-              variable={getVariable(item)}
-              onVarChange={handleVarChange(item)}
-              className="flex gap-x-1"
-            />
-          </Card>
-        ) : (
-          <Card key={idx} className="px-4 py-3 flex items-center gap-x-3">
-            <SparkleIcon fontSize={20} />
-            <EditableText
-              text={item.title || ''}
-              placeholder="Flow"
-              onChange={handleFlowChange(item)}
-              className="!text-wrap"
-            />
-          </Card>
-        )
-      )}
+      {promptItems.map((item: ContextNode, idx: number) => (
+        <Card key={idx} className="py-3 px-4 flex gap-x-2 group">
+          {item.type === 'input' ? (
+            <>
+              <TextPromptItem textPrompt={item} isOnNode={true} />
+              <span
+                className="hidden group-hover:block"
+                onClick={handleItemDelete(item.id)}
+              >
+                <TrashIcon strokeOpacity={1} />
+              </span>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-x-2 grow">
+                <SparkleIcon fontSize={20} />
+                <EditableText
+                  text={item.title || ''}
+                  placeholder="Flow"
+                  onChange={handleFlowChange(item)}
+                  className="!text-wrap"
+                />
+              </div>
+              <div className="flex gap-x-1">
+                <EditIcon
+                  onClick={() => {
+                    dispatch(selectContext(item.id))
+                  }}
+                />
+                <CopyIcon onClick={handleItemDuplicate(item)} />
+                <TrashIcon onClick={handleItemDelete(item.id)} />
+              </div>
+            </>
+          )}
+        </Card>
+      ))}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <span className="py-3 px-4 flex items-center gap-x-2.5 rounded-[20px] text-secondary-100/50 text-sm font-medium border">

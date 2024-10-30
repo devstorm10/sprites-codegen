@@ -204,6 +204,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({
         }
         allowSuggestionsAboveCursor={true}
         onChange={handleTextUpdate}
+        onKeyDown={(e) => e.stopPropagation()}
         onFocus={handleTextEdit}
         spellCheck={false}
       >

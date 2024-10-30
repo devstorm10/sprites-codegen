@@ -9,9 +9,7 @@ import FlowInsertLine from './FlowInsertLine'
 import FlowHandlers from './FlowHandlers'
 
 import EditableText from '@/common/EditableText'
-import { CopyIcon } from '@/components/icons/CopyIcon'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
-import { TrashIcon } from '@/components/icons/TrashIcon'
 import { LayoutIcon } from '@/components/icons/LayoutIcon'
 import { PromptIcon } from '@/components/icons/PromptIcon'
 import { Card } from '@/components/ui/card'
@@ -67,10 +65,6 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
           onChange={() => {}}
           className="font-bold grow line-clamp-1 !text-wrap"
         />
-        <div className="flex items-center gap-x-2 text-secondary-100/50">
-          <CopyIcon />
-          <TrashIcon />
-        </div>
       </div>
       <div className="h-0.5 border-t mx-4" />
       <div className="p-4">

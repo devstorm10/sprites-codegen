@@ -348,7 +348,6 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
   return (
     <div
       className="w-full flex-1 relative"
-      onKeyDownCapture={(e) => console.log(e)}
       onMouseMoveCapture={handleMouseMove}
       onMouseDownCapture={handleMouseDown}
     >

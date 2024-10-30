@@ -63,6 +63,7 @@ const AutoCompleteInput = forwardRef<
         inputClass
       )}
       onClick={onInputFocus}
+      onKeyDown={(e) => e.stopPropagation()}
       autoFocus
       {...rest}
     />
@@ -187,6 +188,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       onChange={handleChange}
       onSelect={handleSelect}
       onClickOutside={handleClickOutside}
+      onKeyDown={(e) => e.stopPropagation()}
       renderItem={renderItem(handleVarUpdate)}
       renderInput={renderInput}
       renderContainer={renderContainer}
