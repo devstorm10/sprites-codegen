@@ -9,11 +9,10 @@ import { TrashIcon } from '@/components/icons/TrashIcon'
 import { LayoutIcon } from '@/components/icons/LayoutIcon'
 import { PromptIcon } from '@/components/icons/PromptIcon'
 import {
-  activateContext,
+  createActiveTab,
   expandPromptbar,
   findContextNodeById,
   findFlowNodeById,
-  stretchPromptbar,
 } from '@/store/slices'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 
@@ -33,8 +32,11 @@ const PromptBar: React.FC = () => {
   const xAnimation = useAnimation()
 
   const handleLayoutExpand = () => {
-    dispatch(stretchPromptbar(true))
-    dispatch(activateContext(selectedNodeId || ''))
+    if (selectedNodeId) {
+      dispatch(
+        createActiveTab({ id: selectedNodeId, title: 'Additional Prompt' })
+      )
+    }
   }
 
   useEffect(() => {

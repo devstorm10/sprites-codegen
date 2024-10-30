@@ -16,13 +16,13 @@ import { FlowHIcon } from '@/components/icons/FlowHIcon'
 import { ContextNode, CreateNode } from '@/lib/types'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
+  activateContext,
   createFlow,
   createFlowView,
   createTextPrompt,
   createVariablePrompt,
   deleteContext,
   findContextNodeById,
-  selectContext,
   updateContext,
 } from '@/store/slices'
 import { TrashIcon } from '@/components/icons/TrashIcon'
@@ -86,7 +86,7 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
 
   const handleItemSelect = (id: string) => (e: MouseEvent<SVGElement>) => {
     e.stopPropagation()
-    dispatch(selectContext(id))
+    dispatch(activateContext(id))
   }
 
   const handleItemDuplicate = (item: ContextNode) => () => {

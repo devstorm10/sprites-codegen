@@ -12,16 +12,17 @@ const EditorPage = () => {
   const activeContext = useAppSelector((state) =>
     findContextNodeById(state.context.contexts, activeContextId || '')
   )
-  const isPromptbarStretched = useAppSelector(
-    (state) => state.setting.isPromptbarStretched
-  )
+  // const isPromptbarStretched = useAppSelector(
+  //   (state) => state.setting.isPromptbarStretched
+  // )
 
   return (
     <div className="h-full flex flex-col overflow-y-auto overflow-x-clip">
-      {isPromptbarStretched || activeContext?.type === 'group' ? (
+      {activeContext &&
+      (activeContext.type === 'group' || activeContext.type === 'flow_node') ? (
         <div className="py-6 px-8 flex flex-col overflow-y-auto flex-1">
-          {!isPromptbarStretched && <MainSettings />}
-          {activeContext && <ContextViewer context={activeContext} />}
+          {activeContext.type === 'group' && <MainSettings />}
+          <ContextViewer context={activeContext} />
         </div>
       ) : (
         <ReactFlowProvider>

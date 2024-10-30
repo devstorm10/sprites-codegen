@@ -45,6 +45,7 @@ const EditableText: React.FC<EditableTextProps> = ({
           contentEditable
           suppressContentEditableWarning={true}
           onBlur={handleBlur}
+          onKeyDown={(e) => e.stopPropagation()}
           className={`text-nowrap bg-transparent border-b border-primary-100 outline-none w-full ${className}`}
         ></div>
       ) : (

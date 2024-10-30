@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { useAppDispatch } from '@/store/store'
-import { selectContext, updateContext } from '@/store/slices'
+import { activateContext, updateContext } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
 import EditableText from '@/common/EditableText'
 import { CopyIcon } from '@/components/icons/CopyIcon'
@@ -28,7 +28,7 @@ const FlowItem: React.FC<FlowProps> = ({ context }) => {
   }
 
   const handleNewFlowClick = () => {
-    dispatch(selectContext(id))
+    dispatch(activateContext(id))
   }
 
   return (

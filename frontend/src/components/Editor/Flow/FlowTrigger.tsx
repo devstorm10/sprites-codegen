@@ -138,13 +138,15 @@ const FlowTrigger: React.FC<FlowTriggerProps> = ({ id, data }) => {
                   content: {
                     ...node.data.content,
                     items: node.data.content.items
-                      .map((item: any, index: number, items: any[]) =>
-                        index === idx ||
-                        (index === idx - 1 &&
-                          items[idx - 1].type === 'condition')
-                          ? null
-                          : item
-                      )
+                      .map((item: any, index: number, items: any[]) => {
+                        if (index === idx) return null
+                        if (
+                          items[index]?.type === 'condition' &&
+                          ((idx === 0 && index === 1) || index === idx - 1)
+                        )
+                          return null
+                        return item
+                      })
                       .filter((item: any) => item !== null),
                   },
                 },
