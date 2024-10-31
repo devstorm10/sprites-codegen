@@ -54,6 +54,7 @@ type FlowPromptProps = {
 
 const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
   const dispatch = useAppDispatch()
+  const flowCount = useAppSelector((state) => state.flow.count)
   const flowNodeItem = useAppSelector((state) =>
     findContextNodeById(state.context.contexts, id)
   )
@@ -63,7 +64,14 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
     const promptId = uuid()
     if (name === 'flow') {
       const flowId = uuid()
-      dispatch(createFlow({ contextId: id, flowId, isRedirect: false }))
+      dispatch(
+        createFlow({
+          contextId: id,
+          flowId,
+          title: `Flow ${flowCount + 1}`,
+          isRedirect: false,
+        })
+      )
       dispatch(createFlowView(flowId))
     } else if (name === 'variable') {
       dispatch(createVariablePrompt({ contextId: id }))
@@ -91,9 +99,21 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
 
   const handleItemDuplicate = (item: ContextNode) => () => {
     const flowId = uuid()
-    dispatch(createFlow({ contextId: id, flowId, isRedirect: false }))
+    dispatch(
+      createFlow({
+        contextId: id,
+        flowId,
+        title: `${item.title} Duplicate`,
+        isRedirect: false,
+      })
+    )
     dispatch(createFlowView(flowId))
-    dispatch(updateContext({ id: flowId, newContext: { ...item, id: flowId } }))
+    dispatch(
+      updateContext({
+        id: flowId,
+        newContext: { ...item, id: flowId, title: `${item.title} Duplicate` },
+      })
+    )
   }
 
   const handleItemDelete = (id: string) => () => {

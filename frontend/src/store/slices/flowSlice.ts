@@ -24,10 +24,12 @@ type FlowItem = {
 
 type FlowState = {
   flows: FlowItem[]
+  count: number
 }
 
 const initialState: FlowState = {
   flows: [],
+  count: 0,
 }
 
 const flowSlice = createSlice({
@@ -41,6 +43,7 @@ const flowSlice = createSlice({
         edges: [],
         viewport: { x: 0, y: 0, zoom: 1 },
       })
+      state.count++
     },
     addFlowNode: (
       state: FlowState,

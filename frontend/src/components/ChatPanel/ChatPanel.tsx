@@ -66,6 +66,7 @@ const ChatPanel: React.FC = () => {
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation()
     if (e.key === 'Enter') {
       handleSubmit()
     }

@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
-import { useAppDispatch } from '@/store/store'
+import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
   createActiveTab,
   createFlow,
@@ -59,6 +59,7 @@ const createItems: CreateNode[] = [
 
 const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
   const dispatch = useAppDispatch()
+  const flowCount = useAppSelector((state) => state.flow.count)
 
   const handleItemClick = (name: string) => () => {
     switch (name) {
@@ -67,7 +68,13 @@ const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
         break
       case 'flow':
         const flowId = uuid()
-        dispatch(createFlow({ contextId, flowId }))
+        dispatch(
+          createFlow({
+            contextId,
+            flowId,
+            title: `Flow ${flowCount + 1}`,
+          })
+        )
         dispatch(createFlowView(flowId))
         dispatch(createActiveTab({ id: flowId, title: 'New Flow' }))
         break

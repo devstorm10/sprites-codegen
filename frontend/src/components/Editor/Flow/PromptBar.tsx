@@ -40,6 +40,10 @@ const PromptBar: React.FC = () => {
   }
 
   useEffect(() => {
+    xAnimation.set({ x: 350 })
+  }, [])
+
+  useEffect(() => {
     xAnimation.start({ x: isExpanded ? 0 : 350 })
   }, [isExpanded, xAnimation])
 

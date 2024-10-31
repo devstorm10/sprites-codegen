@@ -1,25 +1,41 @@
-import EditableText from '@/common/EditableText'
+import React from 'react'
 import clsx from 'clsx'
-import React, { useCallback } from 'react'
+import { useAppDispatch } from '@/store/store'
+import { createActiveTab } from '@/store/slices'
+
+interface Route {
+  id: string
+  title: string
+}
 
 interface BreadcrumbProps {
-  routes: string[]
+  routes: Route[]
 }
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ routes }) => {
-  const handleChange = useCallback(() => {}, [])
+  const dispatch = useAppDispatch()
+
+  const handleRedirect = (route: Route) => () => {
+    dispatch(
+      createActiveTab({
+        id: route.id,
+        title: route.title,
+      })
+    )
+  }
 
   return (
     <div className="flex gap-2">
       {routes.map((route, index) => (
-        <React.Fragment key={route}>
-          <EditableText
-            text={route}
+        <React.Fragment key={route.id}>
+          <span
             className={clsx(
-              'w-fit font-medium',
+              'w-fit font-medium cursor-pointer',
               index === routes.length - 1 ? '' : 'text-secondary-100/50'
             )}
-            onChange={handleChange}
-          />
+            onClick={handleRedirect(route)}
+          >
+            {route.title}
+          </span>
           {index < routes.length - 1 && (
             <span className="text-secondary-100/50 font-medium">/</span>
           )}

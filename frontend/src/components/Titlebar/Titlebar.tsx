@@ -1,17 +1,34 @@
 import clsx from 'clsx'
+
+import Breadcrumb from './Breadcrumb'
 import { ClockBackIcon } from '../icons/ClockBackIcon'
 import { PlayIcon } from '../icons/PlayIcon'
-import Breadcrumb from './Breadcrumb'
+import { useAppSelector } from '@/store/store'
+import { searchContextRoute } from '@/store/slices'
 
 interface TitlebarProps {
   toggleChatPanel: () => void
   isOpen: boolean
 }
 const Titlebar: React.FC<TitlebarProps> = ({ isOpen, toggleChatPanel }) => {
+  const activeId = useAppSelector((state) => state.context.activeId)
+  const routes = useAppSelector(
+    (state) =>
+      searchContextRoute(state.context.contexts, activeId || '', []) || []
+  )
+  const activeRoutes = routes
+    .filter(
+      (item) =>
+        item.type === 'group' ||
+        item.type === 'flow' ||
+        (item.type === 'flow_node' && item.data?.type === 'prompt')
+    )
+    .map((item) => ({ id: item.id, title: item.title || '' }))
+
   return (
     <div className="px-5 py-3 border-b border-background-300 flex justify-between items-center">
       <span></span>
-      <Breadcrumb routes={['Agent name', 'Default Context']} />
+      <Breadcrumb routes={activeRoutes} />
       <div className="flex items-center gap-1">
         <button
           className={clsx(

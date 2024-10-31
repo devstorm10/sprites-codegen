@@ -23,7 +23,7 @@ import {
   searchContextsByKeyword,
   updateContext,
   deleteContext,
-  activateContext,
+  findParentContextNodeById,
 } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
@@ -90,6 +90,9 @@ const ContextItem: React.FC<ContextItemProps> = ({
 }) => {
   const dispatch = useAppDispatch()
   const { id, type, title, data } = context
+  const parentContext = useAppSelector((state) =>
+    findParentContextNodeById(state.context.contexts, id)
+  )
   const activeContextId = useAppSelector((state) => state.context.activeId)
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
   const { attributes, listeners, setNodeRef } = useDraggable({ id })
@@ -97,8 +100,19 @@ const ContextItem: React.FC<ContextItemProps> = ({
   const handleContextSelect = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
     if (type === 'flow') {
-      dispatch(activateContext(id))
       dispatch(createActiveTab({ id, title: title || 'New Flow' }))
+    } else if (
+      type === 'flow_node' &&
+      parentContext &&
+      parentContext.type === 'flow'
+    ) {
+      dispatch(
+        createActiveTab({
+          id: parentContext.id,
+          title: parentContext.title || 'New Flow',
+        })
+      )
+      dispatch(selectContext(id))
     } else {
       dispatch(selectContext(id))
     }
@@ -171,11 +185,6 @@ const Contexts: React.FC = () => {
     findContextNodeById(state.context.contexts, activeContextId || '')
   )
   const contexts = activeContext ? [activeContext] : []
-  // const selectedContextId = useAppSelector((state) => state.context.selectedId)
-  // const defaultContextId = useAppSelector((state) => state.context.activeId)
-  // const isPromptbarStretched = useAppSelector(
-  //   (state) => state.setting.isPromptbarStretched
-  // )
 
   const [activeDndId, setActiveDndId] = useState<string>('')
   const activeDndContext = activeDndId
@@ -201,43 +210,6 @@ const Contexts: React.FC = () => {
 
   const handleDragEnd = () => {}
 
-  // useEffect(() => {
-  //   if (selectedContextId) {
-  //     const selectedContext = findContextNodeById(contexts, selectedContextId)
-  //     if (selectedContext) {
-  //       if (
-  //         selectedContext.type === 'flow' ||
-  //         selectedContext.type === 'flow_node'
-  //       ) {
-  //         if (isPromptbarStretched) {
-  //           dispatch(
-  //             createActiveTab({
-  //               id: selectedContext.id,
-  //               title: 'Additional Prompt',
-  //             })
-  //           )
-  //         } else {
-  //           const parentContext = findParentContextNodeById(
-  //             contexts,
-  //             selectedContextId
-  //           )
-  //           dispatch(
-  //             createActiveTab({
-  //               id:
-  //                 selectedContext.type === 'flow'
-  //                   ? selectedContextId
-  //                   : parentContext?.id || '',
-  //               title: 'New Flow',
-  //             })
-  //           )
-  //         }
-  //       }
-  //     } else {
-  //       dispatch(setActiveTab(defaultContextId || ''))
-  //     }
-  //   }
-  // }, [dispatch, selectedContextId, defaultContextId, isPromptbarStretched])
-
   return (
     <div className="flex-1 pl-5 pr-1 flex flex-col">
       <DndContext
@@ -246,13 +218,7 @@ const Contexts: React.FC = () => {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        {contexts.map((context, idx) => (
-          <ContextGroup
-            key={idx}
-            context={context}
-            grow={idx === contexts.length - 1}
-          />
-        ))}
+        {activeContext && <ContextGroup context={activeContext} grow={true} />}
         <DragOverlay dropAnimation={dropAnimation}>
           {activeDndContext ? (
             <ContextGroup context={activeDndContext} />
@@ -267,19 +233,19 @@ const FilteredContexts: React.FC<FilteredContextsProps> = ({
   filter,
   onFilterClear,
 }) => {
-  const defaultContextId = useAppSelector((state) => state.context.activeId)
-  const defaultContext = useAppSelector((state) =>
-    findContextNodeById(state.context.contexts, defaultContextId || '')
+  const activeContextId = useAppSelector((state) => state.context.activeId)
+  const activeContext = useAppSelector((state) =>
+    findContextNodeById(state.context.contexts, activeContextId || '')
   )
   const filteredContexts = useMemo(() => {
-    if (!defaultContext || !defaultContext.contexts) return []
-    return searchContextsByKeyword(defaultContext.contexts, filter)
-  }, [defaultContext, filter])
+    if (!activeContext || !activeContext.contexts) return []
+    return searchContextsByKeyword(activeContext.contexts, filter)
+  }, [activeContext, filter])
 
-  if (!defaultContext) return null
+  if (!activeContext) return null
   return (
     <div className="px-3">
-      <ContextItem context={defaultContext} />
+      <ContextItem context={activeContext} />
       {
         <div className="ml-5">
           {filteredContexts.map((context) => (

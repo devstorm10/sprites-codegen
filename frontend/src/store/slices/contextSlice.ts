@@ -112,6 +112,22 @@ export function searchContextsByKeyword(
   return result
 }
 
+export function searchContextRoute(
+  contexts: ContextNode[],
+  id: string,
+  routes: ContextNode[] = []
+): ContextNode[] | null {
+  for (const node of contexts) {
+    const currentRoute = [...routes, node]
+    if (node.id === id) return currentRoute
+    if (node.contexts) {
+      const result = searchContextRoute(node.contexts, id, currentRoute)
+      if (result) return result
+    }
+  }
+  return null
+}
+
 export function isTargetChildOfSource(
   source: ContextNode,
   target: string
@@ -183,15 +199,16 @@ const contextSlice = createSlice({
       action: PayloadAction<{
         contextId: string
         flowId: string
+        title: string
         isRedirect?: boolean
       }>
     ) => {
-      const { contextId, flowId, isRedirect = false } = action.payload
+      const { contextId, flowId, title, isRedirect = false } = action.payload
       const contextItem = findContextNodeById(state.contexts, contextId)
       const newContext: ContextNode = {
         id: flowId || uuid(),
         type: 'flow',
-        title: 'Flow',
+        title: title || 'New flow',
       }
       if (contextItem) {
         contextItem.contexts = [...(contextItem.contexts || []), newContext]
