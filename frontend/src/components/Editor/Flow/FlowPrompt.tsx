@@ -16,7 +16,7 @@ import { FlowHIcon } from '@/components/icons/FlowHIcon'
 import { ContextNode, CreateNode } from '@/lib/types'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
-  activateContext,
+  createActiveTab,
   createFlow,
   createFlowView,
   createTextPrompt,
@@ -54,7 +54,6 @@ type FlowPromptProps = {
 
 const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
   const dispatch = useAppDispatch()
-  const flowCount = useAppSelector((state) => state.flow.count)
   const flowNodeItem = useAppSelector((state) =>
     findContextNodeById(state.context.contexts, id)
   )
@@ -68,7 +67,6 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
         createFlow({
           contextId: id,
           flowId,
-          title: `Flow ${flowCount + 1}`,
           isRedirect: false,
         })
       )
@@ -92,10 +90,16 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
     )
   }
 
-  const handleItemSelect = (id: string) => (e: MouseEvent<SVGElement>) => {
-    e.stopPropagation()
-    dispatch(activateContext(id))
-  }
+  const handleItemSelect =
+    (item: ContextNode) => (e: MouseEvent<SVGElement>) => {
+      e.stopPropagation()
+      dispatch(
+        createActiveTab({
+          id: item.id,
+          title: item.title || 'New Flow',
+        })
+      )
+    }
 
   const handleItemDuplicate = (item: ContextNode) => () => {
     const flowId = uuid()
@@ -146,7 +150,7 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
                 />
               </div>
               <div className="flex gap-x-1">
-                <EditIcon onClick={handleItemSelect(item.id)} />
+                <EditIcon onClick={handleItemSelect(item)} />
                 <CopyIcon onClick={handleItemDuplicate(item)} />
                 <TrashIcon onClick={handleItemDelete(item.id)} />
               </div>

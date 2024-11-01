@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import uuid from 'react-uuid'
 import { Node } from 'reactflow'
+import uuid from 'react-uuid'
 
 import { ContextNode, FlowNodeData, Tab, Tag, Variable } from '@/lib/types'
 
@@ -149,6 +149,7 @@ interface ContextState {
   variables: Variable[]
   tags: Tag[]
   tabs: Tab[]
+  orders: Record<'prompt' | 'flow' | 'tag', number>
 }
 
 const initialState: ContextState = {
@@ -158,6 +159,11 @@ const initialState: ContextState = {
   variables: dummyVariables,
   tags: dummyTags,
   tabs: dummyTabs,
+  orders: {
+    prompt: 0,
+    flow: 0,
+    tag: 0,
+  },
 }
 
 const contextSlice = createSlice({
@@ -174,9 +180,10 @@ const contextSlice = createSlice({
         const newContext: ContextNode = {
           id: promptId || uuid(),
           type: 'input',
-          title: 'Text prompt',
+          title: `Text prompt ${state.orders.prompt + 1}`,
         }
         contextItem.contexts = [...(contextItem.contexts || []), newContext]
+        state.orders.prompt++
       }
     },
     createVariablePrompt: (
@@ -199,7 +206,7 @@ const contextSlice = createSlice({
       action: PayloadAction<{
         contextId: string
         flowId: string
-        title: string
+        title?: string
         isRedirect?: boolean
       }>
     ) => {
@@ -208,11 +215,12 @@ const contextSlice = createSlice({
       const newContext: ContextNode = {
         id: flowId || uuid(),
         type: 'flow',
-        title: title || 'New flow',
+        title: title || `Flow ${state.orders.flow + 1}`,
       }
       if (contextItem) {
         contextItem.contexts = [...(contextItem.contexts || []), newContext]
         if (isRedirect) state.selectedId = newContext.id
+        state.orders.flow++
       }
     },
     createFlowNode: (
@@ -237,11 +245,12 @@ const contextSlice = createSlice({
         const newTagContext: ContextNode = {
           id: uuid(),
           type: 'tag',
-          title: 'Tag',
+          title: `Tag ${state.orders.tag + 1}`,
           data: {},
           contexts: [{ ...targetContext }],
         }
         Object.assign(targetContext, newTagContext)
+        state.orders.tag++
       }
     },
     createTagItem: (state: ContextState, action: PayloadAction<Tag>) => {
@@ -364,13 +373,19 @@ const contextSlice = createSlice({
     },
     closeTab: (state: ContextState, action: PayloadAction<string>) => {
       const tabId = action.payload
-      if (tabId === state.activeId) return
-      state.tabs = state.tabs
-        .filter((item) => item.id !== action.payload)
-        .map((item) =>
-          item.id === state.activeId ? { ...item, active: true } : item
-        )
-      state.selectedId = state.activeId
+      const contextItem = findContextNodeById(state.contexts, tabId)
+      if (contextItem && contextItem.type === 'group') return
+      const tabItem = state.tabs.find((item) => item.id === tabId)
+      if (tabItem && tabItem.active) {
+        state.tabs = state.tabs
+          .filter((item) => item.id !== tabId)
+          .map((item, index, items) => ({
+            ...item,
+            active: index === items.length - 1,
+          }))
+      } else {
+        state.tabs = state.tabs.filter((item) => item.id !== tabId)
+      }
     },
     createActiveTab: (
       state: ContextState,

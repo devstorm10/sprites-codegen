@@ -38,6 +38,7 @@ import {
 } from '@/store/slices'
 import { ContextNode, FlowNodeData } from '@/lib/types'
 import { FAKE_NODE_ID } from '@/lib/constants'
+import { useFlowContext } from './FlowContext'
 
 const nodeTypes = {
   flow_node: (props: NodeProps) =>
@@ -138,6 +139,7 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
   const flowItem = useAppSelector((state) =>
     state.flow.flows.find((item) => item.id === flowContext.id)
   )
+  const { setCurrentHandle } = useFlowContext()
 
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNodeData>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<any>([])
@@ -170,6 +172,17 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
     },
     [selectedEdgeId]
   )
+
+  const handleConnectStart = useCallback(
+    (_event: any, params: any) => {
+      setCurrentHandle(params.handleId) // Store the handle ID when connection starts
+    },
+    [setCurrentHandle]
+  )
+
+  const handleConnectStop = useCallback(() => {
+    setCurrentHandle(null) // Clear the handle ID when connection stops
+  }, [setCurrentHandle])
 
   const handleTriggerCreate = () => {
     setTrigger('trigger')
@@ -355,6 +368,8 @@ const FlowViewer: React.FC<FlowViewerProps> = ({ flowContext }) => {
         nodes={nodes}
         edges={edges}
         onConnect={handleEdgeConnect}
+        onConnectStart={handleConnectStart}
+        onConnectEnd={handleConnectStop}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeSelect}

@@ -3,6 +3,7 @@ import { ReactFlowProvider } from 'reactflow'
 import ContextViewer from '@/components/Editor/ContextViewer'
 import FlowViewer from '@/components/Editor/Flow/FlowViewer'
 import MainSettings from '@/components/Editor/MainSettings'
+import { FlowProvider } from '@/components/Editor/Flow/FlowContext'
 import { useAppSelector } from '@/store/store'
 import { findContextNodeById } from '@/store/slices'
 import { ContextNode } from '@/lib/types'
@@ -26,7 +27,9 @@ const EditorPage = () => {
         </div>
       ) : (
         <ReactFlowProvider>
-          <FlowViewer flowContext={activeContext as ContextNode} />
+          <FlowProvider>
+            <FlowViewer flowContext={activeContext as ContextNode} />
+          </FlowProvider>
         </ReactFlowProvider>
       )}
     </div>

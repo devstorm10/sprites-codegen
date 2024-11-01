@@ -15,6 +15,7 @@ import { Tab } from '@/lib/types'
 const Tabbar = () => {
   const dispatch = useAppDispatch()
   const tabs = useAppSelector((state) => state.context.tabs)
+  console.log(tabs)
   const activeTab = useMemo(() => tabs.find((item) => item.active), [tabs])
 
   useEffect(() => {
