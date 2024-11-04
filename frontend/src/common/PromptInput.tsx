@@ -32,7 +32,7 @@ const PromptInput: React.FC<PrmoptInputProps> = ({
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={(e) => e.stopPropagation()}
       className={cn(
-        'flex items-center flex-1 outline-none z-50',
+        'flex items-center flex-1 outline-none',
         {
           '!text-[#B1B0AF]': !text && placeholder,
         },

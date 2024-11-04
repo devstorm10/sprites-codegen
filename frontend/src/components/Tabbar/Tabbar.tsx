@@ -1,35 +1,33 @@
 import { useEffect, useMemo } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Reorder } from 'framer-motion'
 
 import TabItem from './TabItem'
 import AddTabButton from './AddTabButton'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import {
-  activateContext,
-  closeTab,
-  setActiveTab,
-  updateTabs,
-} from '@/store/slices'
+import { activateContext, closeTab, updateTabs } from '@/store/slices'
 import { Tab } from '@/lib/types'
+import { getAgentUrl } from '@/lib/utils'
 
 const Tabbar = () => {
+  const { project_id } = useParams()
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const tabs = useAppSelector((state) => state.context.tabs)
-  console.log(tabs)
   const activeTab = useMemo(() => tabs.find((item) => item.active), [tabs])
 
   useEffect(() => {
     if (activeTab?.id) {
       dispatch(activateContext(activeTab.id))
     }
-  }, [activeTab?.id])
+  }, [activeTab?.id, dispatch])
 
   const handleTabsUpdate = (tabs: Tab[]) => {
     dispatch(updateTabs(tabs))
   }
 
   const handleTabItemClick = (id: string) => () => {
-    dispatch(setActiveTab(id))
+    navigate(getAgentUrl(project_id || '', id))
   }
 
   const handleTabClose = (id: string) => () => {

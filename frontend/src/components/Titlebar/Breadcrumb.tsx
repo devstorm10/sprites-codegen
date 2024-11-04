@@ -1,7 +1,8 @@
 import React from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import clsx from 'clsx'
-import { useAppDispatch } from '@/store/store'
-import { createActiveTab } from '@/store/slices'
+
+import { getAgentUrl } from '@/lib/utils'
 
 interface Route {
   id: string
@@ -12,15 +13,11 @@ interface BreadcrumbProps {
   routes: Route[]
 }
 const Breadcrumb: React.FC<BreadcrumbProps> = ({ routes }) => {
-  const dispatch = useAppDispatch()
+  const { project_id } = useParams()
+  const navigate = useNavigate()
 
   const handleRedirect = (route: Route) => () => {
-    dispatch(
-      createActiveTab({
-        id: route.id,
-        title: route.title,
-      })
-    )
+    navigate(getAgentUrl(project_id || '', route.id))
   }
 
   return (

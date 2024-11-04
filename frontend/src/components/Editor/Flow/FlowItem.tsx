@@ -1,18 +1,23 @@
+import { useNavigate, useParams } from 'react-router-dom'
+
 import { Card } from '@/components/ui/card'
-import { useAppDispatch } from '@/store/store'
-import { createActiveTab, updateContext } from '@/store/slices'
-import { ContextNode } from '@/lib/types'
 import EditableText from '@/common/EditableText'
 import { CopyIcon } from '@/components/icons/CopyIcon'
 import { TrashIcon } from '@/components/icons/TrashIcon'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import { EditIcon } from '@/components/icons/EditIcon'
+import { useAppDispatch } from '@/store/store'
+import { updateContext } from '@/store/slices'
+import { ContextNode } from '@/lib/types'
+import { getAgentUrl } from '@/lib/utils'
 
 type FlowProps = {
   context: ContextNode
 }
 
 const FlowItem: React.FC<FlowProps> = ({ context }) => {
+  const { project_id } = useParams()
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
   const { id, title } = context
@@ -29,12 +34,7 @@ const FlowItem: React.FC<FlowProps> = ({ context }) => {
   }
 
   const handleNewFlowClick = () => {
-    dispatch(
-      createActiveTab({
-        id,
-        title: title || 'New Flow',
-      })
-    )
+    navigate(getAgentUrl(project_id || '', id))
   }
 
   return (

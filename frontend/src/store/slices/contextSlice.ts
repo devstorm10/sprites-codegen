@@ -330,7 +330,7 @@ const contextSlice = createSlice({
             )
           }
         }
-      } else if (priority[sourceItem.type] === priority[targetItem.type]) {
+      } else {
         if (
           sourceParent &&
           targetParent &&
@@ -375,16 +375,21 @@ const contextSlice = createSlice({
       const tabId = action.payload
       const contextItem = findContextNodeById(state.contexts, tabId)
       if (contextItem && contextItem.type === 'group') return
+
       const tabItem = state.tabs.find((item) => item.id === tabId)
+      state.tabs = state.tabs.filter((item) => item.id !== tabId)
+
       if (tabItem && tabItem.active) {
-        state.tabs = state.tabs
-          .filter((item) => item.id !== tabId)
-          .map((item, index, items) => ({
-            ...item,
-            active: index === items.length - 1,
-          }))
+        if (state.tabs.length > 0) {
+          // Set the first tab as active if the active tab was closed
+          state.tabs[0].active = true
+        }
       } else {
-        state.tabs = state.tabs.filter((item) => item.id !== tabId)
+        // Ensure only one tab is active
+        const activeTabExists = state.tabs.some((item) => item.active)
+        if (!activeTabExists && state.tabs.length > 0) {
+          state.tabs[0].active = true
+        }
       }
     },
     createActiveTab: (
@@ -395,11 +400,14 @@ const contextSlice = createSlice({
       const context = findContextNodeById(state.contexts, id)
       const tab = state.tabs.find((item) => item.id === id)
       if (!tab) {
-        state.tabs.push({
-          id,
-          title: context?.title || title,
-          active: true,
-        })
+        state.tabs = [
+          ...state.tabs,
+          {
+            id,
+            title: context?.title || title,
+            active: true,
+          },
+        ]
       }
       state.tabs = state.tabs.map((item) => ({
         ...item,

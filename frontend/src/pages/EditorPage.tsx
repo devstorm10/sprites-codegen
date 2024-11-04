@@ -13,9 +13,6 @@ const EditorPage = () => {
   const activeContext = useAppSelector((state) =>
     findContextNodeById(state.context.contexts, activeContextId || '')
   )
-  // const isPromptbarStretched = useAppSelector(
-  //   (state) => state.setting.isPromptbarStretched
-  // )
 
   return (
     <div className="h-full flex flex-col overflow-y-auto overflow-x-clip">

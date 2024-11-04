@@ -1,4 +1,5 @@
 import { memo, MouseEvent } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { FaPlus } from 'react-icons/fa6'
 import uuid from 'react-uuid'
 
@@ -16,7 +17,6 @@ import { FlowHIcon } from '@/components/icons/FlowHIcon'
 import { ContextNode, CreateNode } from '@/lib/types'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import {
-  createActiveTab,
   createFlow,
   createFlowView,
   createTextPrompt,
@@ -28,6 +28,7 @@ import {
 import { TrashIcon } from '@/components/icons/TrashIcon'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { CopyIcon } from '@/components/icons/CopyIcon'
+import { getAgentUrl } from '@/lib/utils'
 
 const createItems: CreateNode[] = [
   {
@@ -53,6 +54,8 @@ type FlowPromptProps = {
 }
 
 const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
+  const { project_id } = useParams()
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const flowNodeItem = useAppSelector((state) =>
     findContextNodeById(state.context.contexts, id)
@@ -93,12 +96,8 @@ const FlowPrompt: React.FC<FlowPromptProps> = ({ id }) => {
   const handleItemSelect =
     (item: ContextNode) => (e: MouseEvent<SVGElement>) => {
       e.stopPropagation()
-      dispatch(
-        createActiveTab({
-          id: item.id,
-          title: item.title || 'New Flow',
-        })
-      )
+
+      navigate(getAgentUrl(project_id || '', item.id))
     }
 
   const handleItemDuplicate = (item: ContextNode) => () => {

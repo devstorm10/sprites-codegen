@@ -1,6 +1,13 @@
-import React, { CSSProperties, memo, useCallback } from 'react'
-import { FaChevronRight } from 'react-icons/fa6'
+import React, {
+  CSSProperties,
+  memo,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { NodeProps } from 'reactflow'
+import { FaChevronRight } from 'react-icons/fa6'
 
 import FlowTrigger from './FlowTrigger'
 import FlowPrompt from './FlowPrompt'
@@ -8,13 +15,18 @@ import FlowAction from './FlowAction'
 import FlowInsertLine from './FlowInsertLine'
 import FlowHandlers from './FlowHandlers'
 
-import EditableText from '@/common/EditableText'
+import EditPortal, { PortalPosition } from '@/common/EditPortal'
+import { EditIcon } from '@/components/icons/EditIcon'
 import { SparkleIcon } from '@/components/icons/SparkleIcon'
 import { LayoutIcon } from '@/components/icons/LayoutIcon'
 import { PromptIcon } from '@/components/icons/PromptIcon'
 import { Card } from '@/components/ui/card'
 import { useAppDispatch, useAppSelector } from '@/store/store'
-import { selectContext } from '@/store/slices'
+import {
+  findContextNodeById,
+  selectContext,
+  updateContext,
+} from '@/store/slices'
 import { FAKE_NODE_ID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -33,12 +45,57 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
 }) => {
   const dispatch = useAppDispatch()
   const selectedNodeId = useAppSelector((state) => state.context.selectedId)
+  const context = useAppSelector((state) =>
+    findContextNodeById(state.context.contexts, id || '')
+  )
+  const titleRef = useRef<HTMLParagraphElement>(null)
+
+  const [isEditing, setEditing] = useState<boolean>(false)
+  const [title, setTitle] = useState<string>(context?.title || '')
+  const [inputPosition, setInputPosition] = useState<PortalPosition | null>(
+    null
+  )
 
   const handleNodeClick = useCallback(() => {
     if (id) {
       dispatch(selectContext(id))
     }
   }, [id, type])
+
+  const handleTitleChange = useCallback(
+    (text: string) => {
+      if (id && context) {
+        dispatch(
+          updateContext({
+            id,
+            newContext: {
+              ...context,
+              title: text,
+            },
+          })
+        )
+      }
+    },
+    [id, context]
+  )
+
+  const handleTitleSave = () => {
+    handleTitleChange(title)
+    setEditing(false)
+  }
+
+  useLayoutEffect(() => {
+    if (titleRef.current) {
+      const rect = titleRef.current.getBoundingClientRect()
+
+      setInputPosition({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      })
+    }
+  }, [isEditing])
 
   return (
     <Card
@@ -60,11 +117,21 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
         ) : (
           <SparkleIcon />
         )}
-        <EditableText
-          text={(data && data.title) || ''}
-          onChange={() => {}}
-          className="font-bold grow line-clamp-1 !text-wrap"
-        />
+        <div ref={titleRef} className="flex-1 flex">
+          <div className="font-bold flex-1 line-clamp-1 !text-wrap">
+            <p className="leading-[20px]">{(context && context.title) || ''}</p>
+          </div>
+          <div className="flex items-center gap-x-2">
+            {!isEditing && (
+              <span
+                className="w-4 h-4 flex items-center justify-center"
+                onClick={() => setEditing(true)}
+              >
+                <EditIcon />
+              </span>
+            )}
+          </div>
+        </div>
       </div>
       <div className="h-0.5 border-t mx-4" />
       <div className="p-4">
@@ -92,6 +159,16 @@ const FlowNode: React.FC<Partial<NodeProps> & FlowNodeProps> = ({
 
       {id !== FAKE_NODE_ID && (
         <FlowHandlers parentId={id as string} isDual={type === 'trigger'} />
+      )}
+
+      {isEditing && inputPosition && (
+        <EditPortal
+          text={title}
+          position={inputPosition}
+          handleSave={handleTitleSave}
+          handleCancel={() => setEditing(false)}
+          handleTextChange={setTitle}
+        />
       )}
     </Card>
   )

@@ -26,6 +26,10 @@ const EditableText: React.FC<EditableTextProps> = ({
     }
   }, [isEditing, text])
 
+  useEffect(() => {
+    setIsEditing(editing)
+  }, [editing])
+
   const handleDoubleClick = () => {
     setIsEditing(true)
   }

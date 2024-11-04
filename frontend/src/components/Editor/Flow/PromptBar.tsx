@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion, useAnimation } from 'framer-motion'
 
 import ContextViewer from '../ContextViewer'
@@ -9,14 +10,16 @@ import { TrashIcon } from '@/components/icons/TrashIcon'
 import { LayoutIcon } from '@/components/icons/LayoutIcon'
 import { PromptIcon } from '@/components/icons/PromptIcon'
 import {
-  createActiveTab,
   expandPromptbar,
   findContextNodeById,
   findFlowNodeById,
 } from '@/store/slices'
 import { useAppDispatch, useAppSelector } from '@/store/store'
+import { getAgentUrl } from '@/lib/utils'
 
 const PromptBar: React.FC = () => {
+  const { project_id } = useParams()
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const isExpanded = useAppSelector(
     (state) => state.setting.isPromptbarExpanded
@@ -33,9 +36,7 @@ const PromptBar: React.FC = () => {
 
   const handleLayoutExpand = () => {
     if (selectedNodeId) {
-      dispatch(
-        createActiveTab({ id: selectedNodeId, title: 'Additional Prompt' })
-      )
+      navigate(getAgentUrl(project_id || '', selectedNodeId))
     }
   }
 

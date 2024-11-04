@@ -1,4 +1,12 @@
-import { useState, useCallback, useEffect, forwardRef, useMemo } from 'react'
+import {
+  useState,
+  useCallback,
+  useEffect,
+  forwardRef,
+  useMemo,
+  KeyboardEvent,
+  MouseEvent,
+} from 'react'
 import {
   AutocompletePure,
   AutocompletePureProps,
@@ -16,11 +24,21 @@ import { createVariable } from '@/store/slices'
 import { Variable } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
+interface ExpandVar extends Variable {
+  isBrand?: boolean
+}
+
 const renderItem: (
-  handleVarUpdate: (item: Variable) => void
-) => RenderItem<Variable> =
-  (handleVarUpdate) =>
-  (item: Variable, { isHighlighted }) => {
+  handleVarUpdate: (item: Variable) => void,
+  handleVarCreate: (item: Variable) => void
+) => RenderItem<ExpandVar> =
+  (handleVarUpdate, handleVarCreate) =>
+  (item: ExpandVar, { isHighlighted }) => {
+    const handleCreateClick = (e: MouseEvent) => {
+      e.stopPropagation()
+      handleVarCreate({ id: item.id, name: item.name, value: item.value })
+    }
+
     useEffect(() => {
       if (isHighlighted) {
         handleVarUpdate(item)
@@ -30,13 +48,27 @@ const renderItem: (
     return (
       <div
         className={cn(
-          'flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1',
+          'flex items-center justify-between cursor-pointer hover:bg-muted pr-2 p-1 w-full',
           { 'bg-muted': isHighlighted }
         )}
       >
-        <div className="flex items-center gap-x-1">
-          <Icon icon="ph:dots-six-vertical-light" fontSize={16} />
-          <span className="rounded-sm px-1 font-medium">{item.name}</span>
+        <div className="flex items-center gap-x-1 w-full">
+          <div className="flex-1 flex gap-x-1 overflow-hidden">
+            <Icon
+              icon="ph:dots-six-vertical-light"
+              fontSize={16}
+              className="shrink-0"
+            />
+            <span className="rounded-sm px-1 font-medium">{item.name}</span>
+          </div>
+          {item.isBrand && (
+            <span
+              className="text-[10px] rounded-lg bg-secondary-100/30 hover:bg-secondary-100/50 leading-4 px-1"
+              onClick={handleCreateClick}
+            >
+              Create Var
+            </span>
+          )}
         </div>
       </div>
     )
@@ -47,7 +79,7 @@ const getSuggestionValue = (item: Variable) => item?.name || ''
 const AutoCompleteInput = forwardRef<
   HTMLInputElement,
   InputProps & {
-    selected: Variable | undefined
+    selected: ExpandVar | undefined
     title: string
     onInputFocus: (e: any) => void
     inputClass?: string
@@ -59,11 +91,10 @@ const AutoCompleteInput = forwardRef<
       ref={ref}
       placeholder="name"
       className={cn(
-        'w-[75px] py-0.5 !px-0 focus-visible:!ring-0 outline-none text-sm text-center font-medium leading-none rounded-[20px] text-[#0B99FF]',
+        'w-[75px] py-0.5 !px-0 focus-visible:!ring-0 outline-none text-sm text-center font-medium leading-none rounded-[20px] text-[#0B99FF] z-50',
         inputClass
       )}
       onClick={onInputFocus}
-      onKeyDown={(e) => e.stopPropagation()}
       autoFocus
       {...rest}
     />
@@ -91,9 +122,10 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
 }) => {
   const dispatch = useAppDispatch()
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [suggestions, setSuggestions] = useState<Variable[]>(initialSuggestions)
-  const [selected, setSelected] = useState<Variable | undefined>()
-  const [focusedItem, setFocusedItem] = useState<Variable>()
+  const [suggestions, setSuggestions] =
+    useState<ExpandVar[]>(initialSuggestions)
+  const [selected, setSelected] = useState<ExpandVar | undefined>()
+  const [focusedItem, setFocusedItem] = useState<ExpandVar>()
 
   useEffect(() => {
     setSelected(initialSuggestions.find((item) => item.name === varname))
@@ -106,12 +138,24 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
         const filteredVars = initialSuggestions.filter((item) =>
           item.name.toLowerCase().includes(newVarname.toLowerCase())
         )
-        setIsOpen(filteredVars.length > 0)
-        setSuggestions(filteredVars)
+        setSuggestions([
+          ...filteredVars,
+          ...(value
+            ? [
+                {
+                  id: uuid(),
+                  name: value,
+                  value: '',
+                  isBrand: true,
+                },
+              ]
+            : []),
+        ])
         setFocusedItem(
           initialSuggestions.find((item) => item.name === newVarname)
         )
         onVarChange(value)
+        setIsOpen(!!value)
       } else if (reason === 'ENTER') {
         if (focusedItem) {
           onVarChange(focusedItem.name)
@@ -139,6 +183,12 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
     [initialSuggestions, onVarChange]
   )
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (!['Enter', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+      event.stopPropagation()
+    }
+  }
+
   const handleClickOutside = (_event: Event) => {
     if (!varname) setIsOpen(false)
   }
@@ -150,6 +200,11 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
 
   const handleVarUpdate = (item: Variable) => {
     setFocusedItem(item)
+  }
+
+  const handleVarCreate = (item: Variable) => {
+    dispatch(createVariable(item))
+    setIsOpen(false)
   }
 
   const renderInput: RenderInput = useMemo(
@@ -170,7 +225,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       ({ list }) => (
         <Card
           className={cn(
-            'py-1 absolute z-50 min-w-[200px] rounded-[12px] mt-2',
+            'py-1 absolute z-50 min-w-[200px] rounded-[12px] mt-2 overflow-hidden',
             containerClass
           )}
         >
@@ -187,9 +242,9 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
       items={suggestions}
       onChange={handleChange}
       onSelect={handleSelect}
+      onKeyDownCapture={handleKeyDown}
       onClickOutside={handleClickOutside}
-      onKeyDown={(e) => e.stopPropagation()}
-      renderItem={renderItem(handleVarUpdate)}
+      renderItem={renderItem(handleVarUpdate, handleVarCreate)}
       renderInput={renderInput}
       renderContainer={renderContainer}
       getSuggestionValue={getSuggestionValue}

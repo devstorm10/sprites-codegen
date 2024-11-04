@@ -1,4 +1,4 @@
-import { useState, MouseEvent, useMemo } from 'react'
+import { useState, MouseEvent, useMemo, useRef, useLayoutEffect } from 'react'
 import {
   DndContext,
   DragOverEvent,
@@ -19,15 +19,18 @@ import {
   selectContext,
   moveContext,
   findContextNodeById,
-  createActiveTab,
   searchContextsByKeyword,
   updateContext,
   deleteContext,
   findParentContextNodeById,
+  closeTab,
 } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, getAgentUrl } from '@/lib/utils'
+import { useNavigate, useParams } from 'react-router-dom'
+import EditPortal, { PortalPosition } from '@/common/EditPortal'
+import { EditIcon } from '../icons/EditIcon'
 
 interface ContextItemProps {
   context: ContextNode
@@ -88,30 +91,63 @@ const ContextItem: React.FC<ContextItemProps> = ({
   context,
   onItemClick = () => {},
 }) => {
-  const dispatch = useAppDispatch()
   const { id, type, title, data } = context
+
+  const { project_id } = useParams()
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const parentContext = useAppSelector((state) =>
     findParentContextNodeById(state.context.contexts, id)
   )
   const activeContextId = useAppSelector((state) => state.context.activeId)
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
   const { attributes, listeners, setNodeRef } = useDraggable({ id })
+  const isDragRef = useRef(false)
+
+  const [isEditing, setEditing] = useState<boolean>(false)
+  const [editingTitle, setEditingTitle] = useState<string>(title || '')
+  const [inputPosition, setInputPosition] = useState<PortalPosition | null>(
+    null
+  )
+  const titleRef = useRef<HTMLDivElement>(null)
+
+  let clickTimeout: NodeJS.Timeout | null = null
+
+  const handlePointerDown = (event: React.PointerEvent) => {
+    event.stopPropagation()
+    clickTimeout = setTimeout(() => {
+      isDragRef.current && listeners?.onPointerDown(event)
+    }, 100)
+  }
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (event.buttons === 1) {
+      isDragRef.current = true
+    }
+  }
+
+  const handlePointerUp = (e: MouseEvent<HTMLDivElement>) => {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout)
+      clickTimeout = null
+    }
+    if (isDragRef.current === false) {
+      handleContextSelect(e)
+    } else if (isDragRef.current === true) {
+      isDragRef.current = false
+    }
+  }
 
   const handleContextSelect = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
     if (type === 'flow') {
-      dispatch(createActiveTab({ id, title: title || 'New Flow' }))
+      navigate(getAgentUrl(project_id || '', id))
     } else if (
       type === 'flow_node' &&
       parentContext &&
       parentContext.type === 'flow'
     ) {
-      dispatch(
-        createActiveTab({
-          id: parentContext.id,
-          title: parentContext.title || 'New Flow',
-        })
-      )
+      navigate(getAgentUrl(project_id || '', parentContext.id))
       dispatch(selectContext(id))
     } else {
       dispatch(selectContext(id))
@@ -134,47 +170,98 @@ const ContextItem: React.FC<ContextItemProps> = ({
   const handleContextDelete = (event: MouseEvent<HTMLSpanElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    if (context.id !== activeContextId) dispatch(deleteContext(context.id))
+    if (context.id !== activeContextId) {
+      dispatch(deleteContext(context.id))
+      dispatch(closeTab(context.id))
+    }
   }
 
+  const handleTitleSave = () => {
+    dispatch(
+      updateContext({
+        id,
+        newContext: {
+          ...context,
+          title: editingTitle,
+        },
+      })
+    )
+    setEditing(false)
+  }
+
+  useLayoutEffect(() => {
+    if (titleRef.current) {
+      const rect = titleRef.current.getBoundingClientRect()
+
+      setInputPosition({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      })
+    }
+  }, [isEditing])
+
   return (
-    <div
-      ref={setNodeRef}
-      id={id}
-      key={id}
-      className="flex items-center relative"
-      onMouseDown={handleContextSelect}
-      {...attributes}
-      {...listeners}
-    >
-      {context.contexts && (
-        <motion.span
-          className="absolute -left-4 opacity-60 cursor-pointer"
-          onMouseDown={handleCollapseClick}
-        >
-          {context.collapsed ? <IoCaretForward /> : <IoCaretDown />}
-        </motion.span>
-      )}
+    <>
       <div
-        className={cn(
-          'w-full mb-1 py-2 px-2 flex items-center gap-2 hover:bg-muted transition-all rounded-lg cursor-pointer group',
-          {
-            'bg-primary-200': selectedContextId === id,
-          }
-        )}
+        ref={setNodeRef}
+        id={id}
+        key={id}
+        className="flex items-center relative"
+        {...attributes}
+        onPointerDown={handlePointerDown}
+        onMouseMove={handleMouseMove}
+        onPointerUp={handlePointerUp}
       >
-        <span className="shrink-0">{CONTEXT_ICONS[type]}</span>
-        <p className="grow line-clamp-1">
-          {type === 'input' ? (data && data.content) || title || '' : title}
-        </p>
-        <span
-          className="hidden group-hover:flex items-center justify-center"
-          onMouseDown={handleContextDelete}
+        {context.contexts && (
+          <motion.span
+            className="absolute -left-4 opacity-60 cursor-pointer"
+            onMouseDown={handleCollapseClick}
+          >
+            {context.collapsed ? <IoCaretForward /> : <IoCaretDown />}
+          </motion.span>
+        )}
+        <div
+          className={cn(
+            'w-full mb-1 py-2 px-2 flex items-center gap-2 hover:bg-muted transition-all rounded-lg cursor-pointer group',
+            {
+              'bg-primary-200': selectedContextId === id,
+            }
+          )}
         >
-          <TrashIcon />
-        </span>
+          <span className="shrink-0">{CONTEXT_ICONS[type]}</span>
+          <div ref={titleRef} className="flex-1 flex items-center gap-x-2">
+            <p className="grow line-clamp-1">
+              {type === 'input' ? (data && data.content) || title || '' : title}
+            </p>
+            <div className="flex gap-x-2">
+              <span
+                className="hidden group-hover:flex items-center justify-center"
+                onMouseDown={() => setEditing(true)}
+              >
+                <EditIcon />
+              </span>
+              <span
+                className="hidden group-hover:flex items-center justify-center"
+                onMouseDown={handleContextDelete}
+              >
+                <TrashIcon />
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+      {isEditing && inputPosition && (
+        <EditPortal
+          text={editingTitle}
+          position={inputPosition}
+          handleSave={handleTitleSave}
+          handleCancel={() => setEditing(false)}
+          handleTextChange={setEditingTitle}
+        />
+      )}
+    </>
   )
 }
 

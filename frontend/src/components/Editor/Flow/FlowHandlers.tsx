@@ -4,6 +4,7 @@ import { Handle, Position } from 'reactflow'
 import { useFlowContext } from './FlowContext'
 import { cn } from '@/lib/utils'
 import './FlowHandlers.css'
+import { Tooltip } from 'react-tooltip'
 
 export type Anchor = 'left' | 'top' | 'right' | 'bottom'
 
@@ -98,6 +99,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
           </div>
         ) : (
           <Handle
+            key={anchor}
             id={`${parentId}_handle_${anchor}_point`}
             type={isShowTarget[anchor] ? 'target' : 'source'}
             position={ANCHOR_DATA[anchor].position}
@@ -152,6 +154,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
                 >
                   <Handle
                     id={`${parentId}_handle_${anchor}_yes`}
+                    data-tooltip-id={`${parentId}_handler_${anchor}_yes_tooltip"`}
                     type="source"
                     position={ANCHOR_DATA[anchor].position}
                     className={cn(
@@ -171,6 +174,7 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
                   />
                   <Handle
                     id={`${parentId}_handle_${anchor}_no`}
+                    data-tooltip-id={`${parentId}_handler_${anchor}_no_tooltip"`}
                     type="source"
                     position={ANCHOR_DATA[anchor].position}
                     className={cn(
@@ -186,11 +190,26 @@ const FlowHandlers: React.FC<FlowHandlerWrapperProps> = ({
                       borderColor: dualColor.negative,
                     }}
                   />
+                  <Tooltip
+                    id={`${parentId}_handler_${anchor}_yes_tooltip"`}
+                    place={anchor}
+                    content="Add “YES” Condition"
+                    className="!py-1 !px-2 !rounded-lg !text-xs"
+                    classNameArrow="hidden"
+                  />
+                  <Tooltip
+                    id={`${parentId}_handler_${anchor}_no_tooltip"`}
+                    place={anchor}
+                    content="Add “NO” Condition"
+                    className="!py-1 !px-2 !rounded-lg !text-xs"
+                    classNameArrow="hidden"
+                  />
                 </div>
               )}
             </div>
           ) : (
             <div
+              key={anchor}
               className={cn(
                 'absolute group',
                 {

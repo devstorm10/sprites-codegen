@@ -9,8 +9,13 @@ function App() {
     <Routes>
       <Route path="/" element={<AppLayout />}>
         <Route element={<EditorLayout />}>
-          <Route index element={<Navigate to="/edit" replace />} />
-          <Route path="edit" element={<EditorPage />} />
+          <Route
+            index
+            element={
+              <Navigate to="/edit/default_project/default_context" replace />
+            }
+          />
+          <Route path="edit/:project_id/:agent_id" element={<EditorPage />} />
         </Route>
       </Route>
     </Routes>

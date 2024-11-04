@@ -10,13 +10,10 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { useAppDispatch } from '@/store/store'
-import {
-  createActiveTab,
-  createFlow,
-  createFlowView,
-  createTextPrompt,
-} from '@/store/slices'
+import { createFlow, createFlowView, createTextPrompt } from '@/store/slices'
 import { CreateNode } from '@/lib/types'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getAgentUrl } from '@/lib/utils'
 
 interface CreateButtonProps {
   contextId: string
@@ -58,6 +55,8 @@ const createItems: CreateNode[] = [
 ]
 
 const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
+  const { project_id } = useParams()
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
   const handleItemClick = (name: string) => () => {
@@ -74,7 +73,8 @@ const CreateButton: React.FC<CreateButtonProps> = ({ contextId }) => {
           })
         )
         dispatch(createFlowView(flowId))
-        dispatch(createActiveTab({ id: flowId, title: 'New Flow' }))
+        navigate(getAgentUrl(project_id || '', flowId))
+
         break
     }
   }
