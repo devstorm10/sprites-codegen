@@ -42,6 +42,7 @@ export interface NodeContext extends BaseContext {
     mode: 'trigger' | 'prompt' | 'action' | 'insert_line' // The mode of the node, defining its role within the flow
     x: number // X-coordinate position of the node
     y: number // Y-coordinate position of the node
+    // TODO: Need to define OR/AND relationship between Trigger/Action items (prob best to split the trigger/action nodes out into separate nodes to better define and/or VariableContexts between them)
     items: (TextPromptContext | VariableContext | FlowContext)[] // Items associated with the node, which can be various context types
   }
 }
@@ -79,6 +80,12 @@ export interface TagContext extends BaseContext {
   }
 }
 
+export interface Variable {
+  name: string // case-sensitive, to preserve user-defined variable names
+  type: 'string' | 'number' // string/number are the only known types for now
+  value: string // value will be cast to the type, as needed
+}
+
 /**
  * The Agent interface represents an entity within the system,
  * identified by a unique ID and name, and associated with various contexts.
@@ -86,5 +93,8 @@ export interface TagContext extends BaseContext {
 export interface Agent {
   id: string // Unique identifier for the agent
   name: string // Name of the agent
+  variables: { [id: string]: Variable } // Where `id` is the variable name
+  preContexts: FlowContext
   contexts: (TextPromptContext | FlowContext | TagContext)[] // An array of contexts associated with the agent, defining its capabilities and characteristics
+  postContexts: FlowContext
 }
