@@ -93,7 +93,7 @@ export interface Variable {
 export interface Agent {
   id: string // Unique identifier for the agent
   name: string // Name of the agent
-  variables: { [id: string]: Variable } // Where `id` is the variable name
+  variables: Record<string, Variable>
   preContexts: any // TODO: define new Context that are Pre-Flow specific.
   contexts: (TextPromptContext | FlowContext | TagContext)[] // An array of contexts associated with the agent, defining its capabilities and characteristics
   postContexts: any // TODO: define new Context that are Post-Flow specific.
