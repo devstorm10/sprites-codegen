@@ -83,7 +83,7 @@ export interface TagContext extends BaseContext {
 export interface Variable {
   name: string // case-sensitive, to preserve user-defined variable names
   type: 'string' | 'number' // string/number are the only known types for now
-  value: string // value will be cast to the type, as needed
+  value?: string // value will be cast to the type, as needed
 }
 
 /**
