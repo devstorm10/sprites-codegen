@@ -5,6 +5,7 @@ import {
   useMemo,
   useCallback,
   ReactNode,
+  KeyboardEvent,
 } from 'react'
 import { Mention, MentionsInput, SuggestionDataItem } from 'react-mentions'
 import { Icon } from '@iconify/react'
@@ -154,6 +155,12 @@ const TextPromptItem: React.FC<TextPromptProps> = ({
     }
   }
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') {
+      e.stopPropagation()
+    }
+  }
+
   useEffect(() => {
     if (isOnNode) return
     if (id === selectedContextId) {
@@ -193,7 +200,7 @@ const TextPromptItem: React.FC<TextPromptProps> = ({
   }, [editorRef, isEditing, isOnNode])
 
   return (
-    <div className="grow">
+    <div className="grow" onKeyDownCapture={handleKeyDown}>
       <MentionsInput
         inputRef={editorRef}
         style={defaultStyle(isEditing, !!data?.content, isOnNode)}
@@ -204,7 +211,6 @@ const TextPromptItem: React.FC<TextPromptProps> = ({
         }
         allowSuggestionsAboveCursor={true}
         onChange={handleTextUpdate}
-        onKeyDown={(e) => e.stopPropagation()}
         onFocus={handleTextEdit}
         spellCheck={false}
       >
