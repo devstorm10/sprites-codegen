@@ -24,6 +24,7 @@ import {
   deleteContext,
   findParentContextNodeById,
   closeTab,
+  searchContextRoute,
 } from '@/store/slices'
 import { CONTEXT_ICONS } from '@/lib/constants'
 import { ContextNode } from '@/lib/types'
@@ -101,6 +102,14 @@ const ContextItem: React.FC<ContextItemProps> = ({
   )
   const activeContextId = useAppSelector((state) => state.context.activeId)
   const selectedContextId = useAppSelector((state) => state.context.selectedId)
+  const routes =
+    useAppSelector((state) => searchContextRoute(state.context.contexts, id)) ||
+    []
+  const activeRoutes = useMemo(() => {
+    return routes
+      .filter((item) => item.type === 'group' || item.type === 'flow')
+      .map((item) => ({ id: item.id, title: item.title || '' }))
+  }, [routes])
   const { attributes, listeners, setNodeRef } = useDraggable({ id })
   const isDragRef = useRef(false)
 
@@ -150,7 +159,11 @@ const ContextItem: React.FC<ContextItemProps> = ({
       navigate(getAgentUrl(project_id || '', parentContext.id))
       dispatch(selectContext(id))
     } else {
-      dispatch(selectContext(id))
+      const firstAgent = activeRoutes.reverse()[0]
+      if (firstAgent) {
+        navigate(getAgentUrl(project_id || '', firstAgent.id))
+        dispatch(selectContext(id))
+      }
     }
     onItemClick()
   }

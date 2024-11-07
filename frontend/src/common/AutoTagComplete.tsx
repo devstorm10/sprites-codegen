@@ -267,7 +267,7 @@ const AutoComplete: React.FC<AutoCompleteProps> = ({
   }
 
   const handleInputFocus = (event: any) => {
-    setIsOpen(true)
+    setIsOpen(suggestions.length > 0)
     onFocus(event)
   }
 
