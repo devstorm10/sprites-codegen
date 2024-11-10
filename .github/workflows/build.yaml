@@ -1,0 +1,16 @@
+name: "Check the Build"
+
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          # use node version Heroku buildpack uses
+          node-version: '18.20.4'
+      # TODO(adam): update to run tests, lint, etc.
+      - run: npm install --workspaces && npm run build:all
