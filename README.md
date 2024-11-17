@@ -1,5 +1,7 @@
 # Sprites Monorepo
 
+[![Build is Healthy](https://github.com/campfire-ai/sprites/actions/workflows/build.yaml/badge.svg)](https://github.com/campfire-ai/sprites/actions/workflows/build.yaml)
+
 ## Overview
 
 Welcome to the Sprites Monorepo! 
