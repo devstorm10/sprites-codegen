@@ -2,7 +2,8 @@
 
 ## Overview
 
-Welcome to the Sprites Monorepo! This repository contains both the frontend and backend components of the Sprites project. It is structured to facilitate efficient development and deployment of the application.
+Welcome to the Sprites Monorepo! 
+This repository contains both the frontend and backend components of the Sprites project. It is structured to facilitate efficient development and deployment of the application.
 
 ## Project Structure
 
