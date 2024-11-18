@@ -9,7 +9,8 @@ on:
       - synchronize
       - reopened
 jobs:
-  build:
+
+  backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,16 +20,26 @@ jobs:
         with:
           # use node version Heroku buildpack uses
           node-version: '18.20.4'
-
       - name: Install dependencies
-        run: npm install --workspaces && npm run build:all
-
-      - name: Build frontend
-        run: npm run build --prefix frontend
-      - name: Run Frontend tests
-        run: echo "TODO, add frontend tests"
-
+        run: npm install --workspaces
       - name: Build backend
         run: npm run build --prefix backend
-      - name: Run Backend tests
+      - name: Run backend tests
         run: npm run test --prefix backend
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Installing Node
+        uses: actions/setup-node@v4
+        with:
+          # use node version Heroku buildpack uses
+          node-version: '18.20.4'
+      - name: Install dependencies
+        run: npm install --workspaces
+      - name: Build frontend
+        run: npm run build --prefix frontend
+      - name: Run frontend tests
+        run: echo "TODO, add frontend tests"
